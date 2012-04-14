@@ -1,3 +1,6 @@
 .class
 /gen
 /bin
+/libs
+local.properties
+proguard-project.txt
