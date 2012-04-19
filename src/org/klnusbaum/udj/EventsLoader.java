@@ -132,6 +132,7 @@ public class EventsLoader extends
     }
     catch(IOException e){
       Log.e(TAG, "IO exception");
+      Log.d(TAG, e.getMessage());
     }
     catch(AuthenticatorException e){
       Log.e(TAG, "Authenticator exception");
