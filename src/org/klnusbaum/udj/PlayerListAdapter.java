@@ -31,29 +31,29 @@ import android.util.Log;
 
 import java.util.List;
 
-import org.klnusbaum.udj.containers.Event;
+import org.klnusbaum.udj.containers.Player;
 
-public class EventListAdapter implements ListAdapter{
+public class PlayerListAdapter implements ListAdapter{
 
   public static final String TAG = "EventListAdapter";
-  private List<Event> events;
+  private List<Player> players;
   private Context context;
   private View.OnClickListener addClickListener;
   public static final int EVENT_ENTRY_VIEW_TYPE = 0;
 
-  public EventListAdapter(Context context){
-    this.events = null;
+  public PlayerListAdapter(Context context){
+    this.players = null;
     this.addClickListener = null;
     this.context = context;
   }
 
-  public EventListAdapter(
+  public PlayerListAdapter(
     Context context, 
-    List<Event> events,
+    List<Player> players,
     View.OnClickListener addClickListener
   )
   {
-    this.events = events;
+    this.players = players;
     this.context = context;
     this.addClickListener = addClickListener;
   }
@@ -67,29 +67,29 @@ public class EventListAdapter implements ListAdapter{
   }
 
   public int getCount(){
-    if(events != null){
-      return events.size();
+    if(players != null){
+      return players.size();
     }
     return 0;
   }
 
   public Object getItem(int position){
-    if(events != null){
-      return events.get(position);
+    if(players != null){
+      return players.get(position);
     }
     return null;
   }
 
-  public Event getEvent(int position){
-    if(events != null){
-      return events.get(position);
+  public Player getEvent(int position){
+    if(players != null){
+      return players.get(position);
     }
     return null;
   }
 
   public long getItemId(int position){
-    if(events != null){
-      return events.get(position).getEventId();
+    if(players != null){
+      return players.get(position).getPlayerId();
     }
     return 0; 
   }
@@ -100,7 +100,7 @@ public class EventListAdapter implements ListAdapter{
 
   public View getView(int position, View convertView, ViewGroup parent){
     //TODO should probably enforce view type
-    Event event = getEvent(position);
+    Player player = getEvent(position);
     View toReturn = convertView;
     if(toReturn == null){
       //toReturn = View.inflate(context, R.layout.library_list_item, null);
@@ -112,9 +112,9 @@ public class EventListAdapter implements ListAdapter{
     TextView eventName = (TextView)toReturn.findViewById(R.id.event_item_name);
     TextView hostName = 
       (TextView)toReturn.findViewById(R.id.event_host_name);
-    eventName.setText(event.getName());
-    hostName.setText(event.getHostName());
-    if(event.getHasPassword()){
+    eventName.setText(player.getName());
+    hostName.setText(player.getHostName());
+    if(player.getHasPassword()){
       Log.d(TAG, "Unhidding lock");
       ImageView lock = (ImageView)toReturn.findViewById(R.id.lock_icon);
       lock.setVisibility(0);
@@ -131,8 +131,8 @@ public class EventListAdapter implements ListAdapter{
   }
 
   public boolean isEmpty(){
-    if(events != null){
-      return events.isEmpty();
+    if(players != null){
+      return players.isEmpty();
     }
     return true;
   }

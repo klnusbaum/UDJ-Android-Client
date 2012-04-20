@@ -39,85 +39,85 @@ import org.apache.http.auth.AuthenticationException;
 import org.json.JSONException;
 
 import org.klnusbaum.udj.network.ServerConnection;
-import org.klnusbaum.udj.containers.Event;
+import org.klnusbaum.udj.containers.Player;
 
-public class EventsLoader extends 
-  AsyncTaskLoader<EventsLoader.EventsLoaderResult>
+public class PlayersLoader extends 
+  AsyncTaskLoader<PlayersLoader.PlayersLoaderResult>
 {
-  public enum EventLoaderError{
+  public enum PlayerLoaderError{
     NO_ERROR, NO_CONNECTION, SERVER_ERROR, NO_LOCATION, 
     AUTHENTICATION_ERROR, NO_ACCOUNT};
 
-  public static class EventsLoaderResult{
-    private List<Event> events;
-    private EventLoaderError error; 
-    public EventsLoaderResult(List<Event> events, EventLoaderError error){
-      this.events = events;
+  public static class PlayersLoaderResult{
+    private List<Player> players;
+    private PlayerLoaderError error; 
+    public PlayersLoaderResult(List<Player> players, PlayerLoaderError error){
+      this.players = players;
       this.error = error;
     }
 
-    public EventLoaderError getError(){ 
+    public PlayerLoaderError getError(){ 
       return error;
     }
 
-    public List<Event> getEvents(){
-      return events;
+    public List<Player> getPlayers(){
+      return players;
     }
   }
 
-  private static final String TAG = "EVETNS_LOADER";
+  private static final String TAG = "PLAYERS_LOADER";
 
   private AccountManager am;
   private Account account;
   private Location location;
   private String searchQuery;
-  private List<Event> events;
+  private List<Player> players;
   private boolean locationSearch;
 
     
-  public EventsLoader(Context context, Account account, Location location){
+  public PlayersLoader(Context context, Account account, Location location){
     super(context);
     am = AccountManager.get(context);
     this.account = account;
     this.location = location;
-    this.events = null;
+    this.players = null;
     this.searchQuery = null;
     locationSearch = true;
   }
 
-  public EventsLoader(Context context, Account account, String query){
+  public PlayersLoader(Context context, Account account, String query){
     super(context);
     am = AccountManager.get(context);
     this.account = account;
     this.location = null;
-    this.events = null;
+    this.players = null;
     this.searchQuery = query;
     locationSearch = false;
   }
 
   @Override
   protected void onStartLoading(){
-    if(takeContentChanged() || events==null){
+    if(takeContentChanged() || players==null){
       forceLoad();
     }
   }
  
-  public EventsLoaderResult loadInBackground(){
+  public PlayersLoaderResult loadInBackground(){
     if(account == null){
-      return new EventsLoaderResult(null, EventLoaderError.NO_ACCOUNT);
+      return new PlayersLoaderResult(null, PlayerLoaderError.NO_ACCOUNT);
     }
     else if(location == null && locationSearch){
-      return new EventsLoaderResult(null, EventLoaderError.NO_LOCATION);
+      return new PlayersLoaderResult(null, PlayerLoaderError.NO_LOCATION);
     }
     else if(!Utils.isNetworkAvailable(getContext())){
-      return new EventsLoaderResult(null, EventLoaderError.NO_CONNECTION);
+      return new PlayersLoaderResult(null, PlayerLoaderError.NO_CONNECTION);
     }
     else{
       return doSearch(true);
     }
   }
 
-  private EventsLoaderResult doSearch(boolean attemptReauth){
+  private PlayersLoaderResult doSearch(boolean attemptReauth){
     String authToken = "";
     try{
       authToken = am.blockingGetAuthToken(account, "", true); 
@@ -158,23 +158,23 @@ public class EventsLoader extends
         Log.e(TAG, "Hard auth fail");
       }
     }
-    return new EventsLoaderResult(
-      null, EventLoaderError.AUTHENTICATION_ERROR);
+    return new PlayersLoaderResult(
+      null, PlayerLoaderError.AUTHENTICATION_ERROR);
   }
         
-  private EventsLoaderResult doLocationSearch(String authToken)
+  private PlayersLoaderResult doLocationSearch(String authToken)
     throws AuthenticationException, JSONException, IOException
   {
-    List<Event> events = 
-      ServerConnection.getNearbyEvents(location, authToken);
-    return new EventsLoaderResult(events, EventLoaderError.NO_ERROR);
+    List<Player> players = 
+      ServerConnection.getNearbyPlayers(location, authToken);
+    return new PlayersLoaderResult(players, PlayerLoaderError.NO_ERROR);
   }
 
-  private EventsLoaderResult doNameSearch(String authToken)
+  private PlayersLoaderResult doNameSearch(String authToken)
     throws AuthenticationException, JSONException, IOException
   {
-    List<Event> events = 
-      ServerConnection.searchForEvents(searchQuery, authToken);
-    return new EventsLoaderResult(events, EventLoaderError.NO_ERROR);
+    List<Player> players = 
+      ServerConnection.searchForPlayers(searchQuery, authToken);
+    return new PlayersLoaderResult(players, PlayerLoaderError.NO_ERROR);
   }
 }

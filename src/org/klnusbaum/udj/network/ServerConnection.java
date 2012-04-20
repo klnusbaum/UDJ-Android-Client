@@ -77,7 +77,7 @@ import org.json.JSONException;
 
 
 import org.klnusbaum.udj.containers.LibraryEntry;
-import org.klnusbaum.udj.containers.Event;
+import org.klnusbaum.udj.containers.Player;
 import org.klnusbaum.udj.UDJEventProvider;
 import org.klnusbaum.udj.exceptions.EventOverException;
 import org.klnusbaum.udj.exceptions.AlreadyInEventException;
@@ -94,7 +94,7 @@ public class ServerConnection{
 
   private static final String PARAM_PASSWORD = "password";
 
-  private static final String PARAME_EVENT_NAME = "name";
+  private static final String PARAM_PLAYER_NAME = "name";
   /**
    * This port number is a memorial to Keith Nusbaum, my father. I loved him
    * deeply and he was taken from this world far too soon. Never-the-less 
@@ -108,13 +108,11 @@ public class ServerConnection{
    * h = 7  % 10 = 7
    * Port 4897, the Keith Nusbaum Memorial Port
    */
-  private static final int SERVER_PORT = 4897;
+  private static final int SERVER_PORT = 4898;
 
   private static final String NETWORK_PROTOCOL = "https";
 
-  private static final String SERVER_HOST = "udjevents.com";
-
-  private static final String API_VERSION = "0.2";
+  private static final String SERVER_HOST = "udjplayer.com";
 
 
   private static final String TICKET_HASH_HEADER = "X-Udj-Ticket-Hash";
@@ -159,7 +157,7 @@ public class ServerConnection{
   }
 
   public static AuthResult authenticate(String username, String password)
-    throws AuthenticationException, IOException, APIVersionException
+    throws AuthenticationException, IOException, APIVersionException, JSONException
   {
     URI AUTH_URI = null;
     try{
@@ -177,7 +175,6 @@ public class ServerConnection{
     entity = new UrlEncodedFormEntity(params);
     final HttpPost post = new HttpPost(AUTH_URI);
     post.addHeader(entity.getContentType());
-    post.addHeader(API_VERSION_HEADER, API_VERSION);
     post.setEntity(entity);
     final HttpResponse resp = getHttpClient().execute(post);
     Log.d(TAG, "Auth Status code was " + resp.getStatusLine().getStatusCode());
@@ -189,16 +186,11 @@ public class ServerConnection{
     else if(resp.getStatusLine().getStatusCode() == HttpStatus.SC_UNAUTHORIZED){
       throw new AuthenticationException();
     }
-    else if(!resp.containsHeader(TICKET_HASH_HEADER)){
-      for(Header h: resp.getAllHeaders()){
-        Log.d(TAG, "Response had header " + h.getName());
-      }
-      throw new IOException("No ticket hash header was found in resposne");
-    }
     else{
+      JSONObject authResponse = new JSONObject(response);
       return new AuthResult(
-        resp.getHeaders(TICKET_HASH_HEADER)[0].getValue(),
-        Long.valueOf(resp.getHeaders(USER_ID_HEADER)[0].getValue()));
+        authResponse.getString("ticket_hash"),
+        authResponse.getLong("user_id"));
     }
   }
 
@@ -382,7 +374,7 @@ public class ServerConnection{
     basicResponseErrorCheck(resp, response);
   }
 
-  public static List<Event> getNearbyEvents(
+  public static List<Player> getNearbyPlayers(
     Location location, String ticketHash)
     throws
     JSONException, ParseException, IOException, AuthenticationException
@@ -391,10 +383,10 @@ public class ServerConnection{
     try{
       URI eventsQuery = new URI(
         NETWORK_PROTOCOL, null, SERVER_HOST, SERVER_PORT, 
-        "/udj/events/" + location.getLatitude() + "/" + location.getLongitude(),
+        "/udj/players/" + location.getLatitude() + "/" + location.getLongitude(),
         null, null);
       JSONArray events = new JSONArray(doSimpleGet(eventsQuery, ticketHash));
-      return Event.fromJSONArray(events);
+      return Player.fromJSONArray(events);
     }
     catch(URISyntaxException e){
       return null;
@@ -402,7 +394,7 @@ public class ServerConnection{
     }
   }
 
-  public static List<Event> searchForEvents(
+  public static List<Player> searchForPlayers(
     String query, String ticketHash)
     throws
     JSONException, ParseException, IOException, AuthenticationException
@@ -410,10 +402,10 @@ public class ServerConnection{
     try{
       URI eventsQuery = new URI(
         NETWORK_PROTOCOL, null, SERVER_HOST, SERVER_PORT, 
-        "/udj/events",
-        PARAME_EVENT_NAME+"="+query, null);
+        "/udj/players/",
+        PARAM_PLAYER_NAME+"="+query, null);
       JSONArray events = new JSONArray(doSimpleGet(eventsQuery, ticketHash));
-      return Event.fromJSONArray(events);
+      return Player.fromJSONArray(events);
     }
     catch(URISyntaxException e){
       return null;

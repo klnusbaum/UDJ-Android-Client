@@ -40,11 +40,11 @@ import android.view.MenuInflater;
 /**
  * Class used for displaying the contents of the Playlist.
  */
-public class EventSelectorActivity extends FragmentActivity{
+public class PlayerSelectorActivity extends FragmentActivity{
 
   private Account account;
   private AccountManager am;
-  private EventListFragment list;
+  private PlayerListFragment list;
 
   @Override
   public void onCreate(Bundle savedInstanceState){
@@ -52,20 +52,20 @@ public class EventSelectorActivity extends FragmentActivity{
 
     FragmentManager fm = getSupportFragmentManager();
     if(fm.findFragmentById(android.R.id.content) == null){
-      EventListFragment list = new EventListFragment();
+      PlayerListFragment list = new PlayerListFragment();
       fm.beginTransaction().add(android.R.id.content, list).commit();
     }
   }
 
-  private EventListFragment getEventList(){
+  private PlayerListFragment getEventList(){
     return
-      ((EventListFragment)getSupportFragmentManager().findFragmentById(android.R.id.content));
+      ((PlayerListFragment)getSupportFragmentManager().findFragmentById(android.R.id.content));
   }
 
   protected void onNewIntent(Intent intent){
     if(Intent.ACTION_SEARCH.equals(intent.getAction())){
-      EventListFragment list = getEventList();
-      list.setEventSearch(new EventListFragment.NameEventSearch(
+      PlayerListFragment list = getEventList();
+      list.setEventSearch(new PlayerListFragment.NameEventSearch(
         intent.getStringExtra(SearchManager.QUERY)));
     }
     else{
@@ -82,7 +82,7 @@ public class EventSelectorActivity extends FragmentActivity{
   public boolean onOptionsItemSelected(MenuItem item){
     switch (item.getItemId()) {
     case R.id.menu_refresh:
-    EventListFragment list= getEventList();
+    PlayerListFragment list= getEventList();
     list.setListShown(false);
       list.refreshList();
       

@@ -42,6 +42,7 @@ import org.apache.http.auth.AuthenticationException;
 
 import java.io.IOException;
 
+import org.json.JSONException;
 import org.klnusbaum.udj.R;
 import org.klnusbaum.udj.Utils;
 import org.klnusbaum.udj.Constants;
@@ -360,8 +361,14 @@ public class AuthActivity extends AccountAuthenticatorActivity{
                 return new ServerAuthResult(AuthError.API_VERSION_ERROR);
             } catch (IOException ex) {
                 Log.d(TAG, "Unknonw server error");
+                Log.e(TAG, ex.getMessage());
+                return new ServerAuthResult(AuthError.SERVER_ERROR);
+            } catch (JSONException ex) {
+                Log.d(TAG, "Unknonw server error");
+                Log.e(TAG, ex.getMessage());
                 return new ServerAuthResult(AuthError.SERVER_ERROR);
             }
+            
         }
 
         @Override

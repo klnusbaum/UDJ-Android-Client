@@ -55,7 +55,6 @@ import android.support.v4.content.Loader;
 import java.util.HashMap;
 
 import org.klnusbaum.udj.auth.AuthActivity;
-import org.klnusbaum.udj.actionbar.ActionBarActivity;
 import org.klnusbaum.udj.Constants;
 import org.klnusbaum.udj.network.PlaylistSyncService;
 import org.klnusbaum.udj.network.EventCommService;

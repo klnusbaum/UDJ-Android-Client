@@ -32,6 +32,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 
+import org.json.JSONException;
 import org.klnusbaum.udj.R;
 import org.klnusbaum.udj.Constants;
 import org.klnusbaum.udj.network.ServerConnection;
@@ -105,6 +106,9 @@ public class Authenticator extends AbstractAccountAuthenticator{
       }
       catch(IOException e){
         //TODO actually do something with this exception 
+      }
+      catch(JSONException e){
+          //TODO actually do something with this exception 
       }
       catch(APIVersionException e){
         final Intent intent = new Intent(context, NeedUpdateActivity.class);

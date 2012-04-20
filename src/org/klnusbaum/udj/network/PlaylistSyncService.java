@@ -56,7 +56,7 @@ import org.apache.http.ParseException;
 import org.klnusbaum.udj.Constants;
 import org.klnusbaum.udj.UDJEventProvider;
 import org.klnusbaum.udj.EventActivity;
-import org.klnusbaum.udj.EventSelectorActivity;
+import org.klnusbaum.udj.PlayerSelectorActivity;
 import org.klnusbaum.udj.R;
 import org.klnusbaum.udj.exceptions.EventOverException;
 import org.klnusbaum.udj.Utils;

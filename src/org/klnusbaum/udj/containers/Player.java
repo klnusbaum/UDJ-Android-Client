@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import android.util.Log;
 import android.os.Bundle;
 
-public class Event{
+public class Player{
   public static final String ID_PARAM ="id";
   public static final String NAME_PARAM="name";
   public static final String HOST_NAME_PARAM="host_username";
@@ -39,7 +39,7 @@ public class Event{
   public static final String LONGITUDE_PARAM="longitude";
   public static final String HAS_PASSWORD_PARAM="has_password";
 
-  private long eventId;
+  private long playerId;
   private String name;
   private String hostName;
   private long hostId;
@@ -48,8 +48,8 @@ public class Event{
   private boolean hasPassword;
 
 
-  public Event(
-    long eventId, 
+  public Player(
+    long playerId, 
     String name, 
     String hostName,
     long hostId, 
@@ -57,7 +57,7 @@ public class Event{
     double longitude,
     boolean hasPassword)
   {
-    this.eventId = eventId;
+    this.playerId = playerId;
     this.name = name;
     this.hostName = hostName;
     this.hostId = hostId;
@@ -66,8 +66,8 @@ public class Event{
     this.hasPassword = hasPassword;
   }
 
-  public long getEventId(){
-    return eventId;
+  public long getPlayerId(){
+    return playerId;
   }
 
   public String getName(){
@@ -94,10 +94,10 @@ public class Event{
     return hasPassword;
   }
 
-  public static Event valueOf(JSONObject jObj)
+  public static Player valueOf(JSONObject jObj)
     throws JSONException 
   {
-    return new Event(
+    return new Player(
       jObj.getLong(ID_PARAM),
       jObj.getString(NAME_PARAM),
       jObj.getString(HOST_NAME_PARAM),
@@ -107,43 +107,43 @@ public class Event{
       jObj.getBoolean(HAS_PASSWORD_PARAM));
   }
 
-  public static JSONObject getJSONObject(Event event)
+  public static JSONObject getJSONObject(Player player)
     throws JSONException
   {
     JSONObject toReturn = new JSONObject();
-    toReturn.put(ID_PARAM, event.getEventId());
-    toReturn.put(NAME_PARAM, event.getName());
-    toReturn.put(HOST_NAME_PARAM, event.getHostName());
-    toReturn.put(HOST_ID_PARAM, event.getHostId());
-    toReturn.put(LATITUDE_PARAM, event.getLatitude());
-    toReturn.put(LONGITUDE_PARAM, event.getLongitude());
-    toReturn.put(HAS_PASSWORD_PARAM, event.getHasPassword());
+    toReturn.put(ID_PARAM, player.getPlayerId());
+    toReturn.put(NAME_PARAM, player.getName());
+    toReturn.put(HOST_NAME_PARAM, player.getHostName());
+    toReturn.put(HOST_ID_PARAM, player.getHostId());
+    toReturn.put(LATITUDE_PARAM, player.getLatitude());
+    toReturn.put(LONGITUDE_PARAM, player.getLongitude());
+    toReturn.put(HAS_PASSWORD_PARAM, player.getHasPassword());
     return toReturn;
   }
 
-  public static JSONArray getJSONArray(List<Event> events)
+  public static JSONArray getJSONArray(List<Player> players)
     throws JSONException
   {
     JSONArray toReturn = new JSONArray();
-    for(Event event: events){
-      toReturn.put(getJSONObject(event));
+    for(Player player: players){
+      toReturn.put(getJSONObject(player));
     }
     return toReturn;
   }
 
-  public static ArrayList<Event> fromJSONArray(JSONArray array)
+  public static ArrayList<Player> fromJSONArray(JSONArray array)
     throws JSONException
   {
-    ArrayList<Event> toReturn = new ArrayList<Event>();
+    ArrayList<Player> toReturn = new ArrayList<Player>();
     for(int i=0; i < array.length(); ++i){
-      toReturn.add(Event.valueOf(array.getJSONObject(i)));
+      toReturn.add(Player.valueOf(array.getJSONObject(i)));
     }
     return toReturn;
   }
 
   public Bundle bundleUp(){
     Bundle toReturn = new Bundle();
-    toReturn.putLong(ID_PARAM, getEventId());
+    toReturn.putLong(ID_PARAM, getPlayerId());
     toReturn.putString(NAME_PARAM, getName());
     toReturn.putString(HOST_NAME_PARAM, getHostName());
     toReturn.putLong(HOST_ID_PARAM, getHostId());
@@ -153,8 +153,8 @@ public class Event{
     return toReturn;
   }
 
-  public static Event unbundle(Bundle toUnbundle){
-    return new Event(
+  public static Player unbundle(Bundle toUnbundle){
+    return new Player(
       toUnbundle.getLong(ID_PARAM),
       toUnbundle.getString(NAME_PARAM),
       toUnbundle.getString(HOST_NAME_PARAM),

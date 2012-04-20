@@ -22,7 +22,7 @@ import java.util.List;
 
 import org.klnusbaum.udj.PullToRefresh.RefreshableListFragment;
 import org.klnusbaum.udj.auth.AuthActivity;
-import org.klnusbaum.udj.containers.Event;
+import org.klnusbaum.udj.containers.Player;
 import org.klnusbaum.udj.network.EventCommService;
 import org.klnusbaum.udj.network.EventCommService.EventJoinError;
 
@@ -63,13 +63,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import org.klnusbaum.udj.network.EventCommService;
-import org.klnusbaum.udj.containers.Event;
+import org.klnusbaum.udj.containers.Player;
 import org.klnusbaum.udj.auth.AuthActivity;
 import org.klnusbaum.udj.network.EventCommService.EventJoinError;
 
 
-public class EventListFragment extends RefreshableListFragment implements 
-  LoaderManager.LoaderCallbacks<EventsLoader.EventsLoaderResult>,
+public class PlayerListFragment extends RefreshableListFragment implements 
+  LoaderManager.LoaderCallbacks<PlayersLoader.PlayersLoaderResult>,
   LocationListener
 {
 
@@ -147,7 +147,7 @@ public class EventListFragment extends RefreshableListFragment implements
   }
 
 
-  private EventListAdapter eventAdapter;
+  private PlayerListAdapter eventAdapter;
   private LocationManager lm;
   private Location lastKnown = null;
   private Account account = null;
@@ -201,7 +201,7 @@ public class EventListFragment extends RefreshableListFragment implements
       }
     }
     setEmptyText(getActivity().getString(R.string.no_event_items));
-    eventAdapter = new EventListAdapter(getActivity());
+    eventAdapter = new PlayerListAdapter(getActivity());
     setListAdapter(eventAdapter);
     setListShown(false);
   }
@@ -349,7 +349,7 @@ public class EventListFragment extends RefreshableListFragment implements
 
   @Override
   public void onListItemClick(ListView l, View v, int position, long id){
-    Event toJoin = (Event)eventAdapter.getItem(position);
+    Player toJoin = (Player)eventAdapter.getItem(position);
     if(toJoin.getHasPassword()){
       getPasswordForEvent(toJoin);
     }
@@ -358,7 +358,7 @@ public class EventListFragment extends RefreshableListFragment implements
     }
   }
 
-  public void getPasswordForEvent(Event toJoin){
+  public void getPasswordForEvent(Player toJoin){
     Bundle eventBundle = toJoin.bundleUp();
     EventPasswordFragment passwordFragment = new EventPasswordFragment();
     passwordFragment.registerPasswordEnteredListener(this);
@@ -366,11 +366,11 @@ public class EventListFragment extends RefreshableListFragment implements
     passwordFragment.show(getActivity().getSupportFragmentManager(), PASSWORD_TAG);
   }
 
-  public void joinEvent(Event toJoin){
+  public void joinEvent(Player toJoin){
     joinEvent(toJoin, "");
   }
 
-  public void joinEvent(Event toJoin, String password){
+  public void joinEvent(Player toJoin, String password){
     Log.d(TAG, "Joining Event");
     am.setUserData(
       account,
@@ -384,7 +384,7 @@ public class EventListFragment extends RefreshableListFragment implements
       EventCommService.class);
     joinEventIntent.putExtra(
       Constants.EVENT_ID_EXTRA,
-      toJoin.getEventId());
+      toJoin.getPlayerId());
     joinEventIntent.putExtra(
       Constants.EVENT_NAME_EXTRA,
       toJoin.getName());
@@ -405,19 +405,19 @@ public class EventListFragment extends RefreshableListFragment implements
     getActivity().startService(joinEventIntent);
   }
 
-  public Loader<EventsLoader.EventsLoaderResult> onCreateLoader(
+  public Loader<PlayersLoader.PlayersLoaderResult> onCreateLoader(
     int id, Bundle args)
   {
     int eventSearchType = args.getInt(EVENT_SEARCH_TYPE_EXTRA, 
       -1);
     if(eventSearchType == LocationEventSearch.SEARCH_TYPE){
-      return new EventsLoader(
+      return new PlayersLoader(
         getActivity(), 
         account,
         (Location)args.getParcelable(LOCATION_EXTRA));
     }
     else if(eventSearchType == NameEventSearch.SEARCH_TYPE){
-      return new EventsLoader(
+      return new PlayersLoader(
         getActivity(), 
         account,
         args.getString(EVENT_SEARCH_QUERY));
@@ -427,14 +427,14 @@ public class EventListFragment extends RefreshableListFragment implements
     }
   }
 
-  public void onLoadFinished(Loader<EventsLoader.EventsLoaderResult> loader, 
-    EventsLoader.EventsLoaderResult data)
+  public void onLoadFinished(Loader<PlayersLoader.PlayersLoaderResult> loader, 
+    PlayersLoader.PlayersLoaderResult data)
   {
     refreshDone();
     switch(data.getError()){
     case NO_ERROR:
       eventAdapter = 
-        new EventListAdapter(getActivity(), data.getEvents(), null);
+        new PlayerListAdapter(getActivity(), data.getPlayers(), null);
       setListAdapter(eventAdapter);
       break;
     case NO_LOCATION:
@@ -459,7 +459,7 @@ public class EventListFragment extends RefreshableListFragment implements
     }
   }
 
-  public void onLoaderReset(Loader<EventsLoader.EventsLoaderResult> loader){
+  public void onLoaderReset(Loader<PlayersLoader.PlayersLoaderResult> loader){
     setListAdapter(null);
   }
 
@@ -540,7 +540,7 @@ public class EventListFragment extends RefreshableListFragment implements
         message = getString(R.string.auth_join_fail_message); 
         break;
       case EVENT_OVER_ERROR:
-        ((EventSelectorActivity)getActivity()).refreshList();
+        ((PlayerSelectorActivity)getActivity()).refreshList();
         message = getString(R.string.event_over_join_fail_message); 
         break;
       case NO_NETWORK_ERROR:
@@ -564,14 +564,14 @@ public class EventListFragment extends RefreshableListFragment implements
 
   public static class EventPasswordFragment extends DialogFragment{
 
-    Event toJoin;
+    Player toJoin;
     EditText passwordEdit;
     Button okButton;
-    EventListFragment eventListFragment = null;
+    PlayerListFragment playerListFragment = null;
 
     public void onCreate(Bundle icicle){
       super.onCreate(icicle);
-      toJoin = Event.unbundle(getArguments());
+      toJoin = Player.unbundle(getArguments());
     }
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle icicle){
@@ -589,16 +589,16 @@ public class EventListFragment extends RefreshableListFragment implements
 
     public void passwordEntered(){
       //TODO handle if they didn't type anything in
-      eventListFragment.joinEvent(toJoin, passwordEdit.getText().toString());
+      playerListFragment.joinEvent(toJoin, passwordEdit.getText().toString());
       dismiss();
     }
 
-    public void registerPasswordEnteredListener(EventListFragment eventListFragment){
-      this.eventListFragment = eventListFragment;
+    public void registerPasswordEnteredListener(PlayerListFragment playerListFragment){
+      this.playerListFragment = playerListFragment;
     }
 
     public void unregisterPasswordEnteredListener(){
-      this.eventListFragment = null;
+      this.playerListFragment = null;
     }
   }
 }
