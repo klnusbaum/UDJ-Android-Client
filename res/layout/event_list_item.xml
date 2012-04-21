@@ -42,7 +42,7 @@
     android:textStyle="bold"
     android:singleLine="true"
     android:ellipsize="marquee"
-    android:text="@string/event_host_label"
+    android:text="@string/player_owner_label"
     android:layout_below="@id/event_item_name"
     android:padding="2dp"
   />

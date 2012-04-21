@@ -33,16 +33,16 @@ import android.os.Bundle;
 public class Player{
   public static final String ID_PARAM ="id";
   public static final String NAME_PARAM="name";
-  public static final String HOST_NAME_PARAM="host_username";
-  public static final String HOST_ID_PARAM="host_id";
+  public static final String OWNER_NAME_PARAM="owner_username";
+  public static final String OWNER_ID_PARAM="owner_id";
   public static final String LATITUDE_PARAM="latitude";
   public static final String LONGITUDE_PARAM="longitude";
   public static final String HAS_PASSWORD_PARAM="has_password";
 
   private long playerId;
   private String name;
-  private String hostName;
-  private long hostId;
+  private String ownerName;
+  private long ownerId;
   private double latitude;
   private double longitude;
   private boolean hasPassword;
@@ -51,16 +51,16 @@ public class Player{
   public Player(
     long playerId, 
     String name, 
-    String hostName,
-    long hostId, 
+    String ownerName,
+    long ownerId, 
     double latitude, 
     double longitude,
     boolean hasPassword)
   {
     this.playerId = playerId;
     this.name = name;
-    this.hostName = hostName;
-    this.hostId = hostId;
+    this.ownerName = ownerName;
+    this.ownerId = ownerId;
     this.latitude = latitude;
     this.longitude = longitude;
     this.hasPassword = hasPassword;
@@ -74,12 +74,12 @@ public class Player{
     return name;
   }
 
-  public String getHostName(){
-    return hostName;
+  public String getOwnerName(){
+    return ownerName;
   }
 
-  public long getHostId(){
-    return hostId;
+  public long getOwnerId(){
+    return ownerId;
   }
 
   public double getLatitude(){
@@ -100,8 +100,8 @@ public class Player{
     return new Player(
       jObj.getLong(ID_PARAM),
       jObj.getString(NAME_PARAM),
-      jObj.getString(HOST_NAME_PARAM),
-      jObj.getLong(HOST_ID_PARAM),
+      jObj.getString(OWNER_NAME_PARAM),
+      jObj.getLong(OWNER_ID_PARAM),
       jObj.optDouble(LATITUDE_PARAM, -100.0),
       jObj.optDouble(LONGITUDE_PARAM, -100.0),
       jObj.getBoolean(HAS_PASSWORD_PARAM));
@@ -113,8 +113,8 @@ public class Player{
     JSONObject toReturn = new JSONObject();
     toReturn.put(ID_PARAM, player.getPlayerId());
     toReturn.put(NAME_PARAM, player.getName());
-    toReturn.put(HOST_NAME_PARAM, player.getHostName());
-    toReturn.put(HOST_ID_PARAM, player.getHostId());
+    toReturn.put(OWNER_NAME_PARAM, player.getOwnerName());
+    toReturn.put(OWNER_ID_PARAM, player.getOwnerId());
     toReturn.put(LATITUDE_PARAM, player.getLatitude());
     toReturn.put(LONGITUDE_PARAM, player.getLongitude());
     toReturn.put(HAS_PASSWORD_PARAM, player.getHasPassword());
@@ -145,8 +145,8 @@ public class Player{
     Bundle toReturn = new Bundle();
     toReturn.putLong(ID_PARAM, getPlayerId());
     toReturn.putString(NAME_PARAM, getName());
-    toReturn.putString(HOST_NAME_PARAM, getHostName());
-    toReturn.putLong(HOST_ID_PARAM, getHostId());
+    toReturn.putString(OWNER_NAME_PARAM, getOwnerName());
+    toReturn.putLong(OWNER_ID_PARAM, getOwnerId());
     toReturn.putDouble(LATITUDE_PARAM, getLatitude());
     toReturn.putDouble(LONGITUDE_PARAM, getLongitude());
     toReturn.putBoolean(HAS_PASSWORD_PARAM, getHasPassword());
@@ -157,8 +157,8 @@ public class Player{
     return new Player(
       toUnbundle.getLong(ID_PARAM),
       toUnbundle.getString(NAME_PARAM),
-      toUnbundle.getString(HOST_NAME_PARAM),
-      toUnbundle.getLong(HOST_ID_PARAM),
+      toUnbundle.getString(OWNER_NAME_PARAM),
+      toUnbundle.getLong(OWNER_ID_PARAM),
       toUnbundle.getDouble(LATITUDE_PARAM),
       toUnbundle.getDouble(LONGITUDE_PARAM),
       toUnbundle.getBoolean(HAS_PASSWORD_PARAM));

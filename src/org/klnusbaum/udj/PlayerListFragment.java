@@ -390,10 +390,10 @@ public class PlayerListFragment extends RefreshableListFragment implements
       toJoin.getName());
     joinEventIntent.putExtra(
       Constants.EVENT_HOSTNAME_EXTRA,
-      toJoin.getHostName());
+      toJoin.getOwnerName());
     joinEventIntent.putExtra(
       Constants.EVENT_HOST_ID_EXTRA,
-      toJoin.getHostId());
+      toJoin.getOwnerId());
     joinEventIntent.putExtra(
       Constants.EVENT_LAT_EXTRA,
       toJoin.getLatitude());

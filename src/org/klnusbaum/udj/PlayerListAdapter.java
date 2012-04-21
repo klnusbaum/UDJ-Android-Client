@@ -113,7 +113,7 @@ public class PlayerListAdapter implements ListAdapter{
     TextView hostName = 
       (TextView)toReturn.findViewById(R.id.event_host_name);
     eventName.setText(player.getName());
-    hostName.setText(player.getHostName());
+    hostName.setText(player.getOwnerName());
     if(player.getHasPassword()){
       Log.d(TAG, "Unhidding lock");
       ImageView lock = (ImageView)toReturn.findViewById(R.id.lock_icon);
