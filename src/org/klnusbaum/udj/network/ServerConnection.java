@@ -78,10 +78,11 @@ import org.json.JSONException;
 
 import org.klnusbaum.udj.containers.LibraryEntry;
 import org.klnusbaum.udj.containers.Player;
-import org.klnusbaum.udj.UDJEventProvider;
-import org.klnusbaum.udj.exceptions.EventOverException;
-import org.klnusbaum.udj.exceptions.AlreadyInEventException;
+import org.klnusbaum.udj.UDJPlayerProvider;
+import org.klnusbaum.udj.exceptions.PlayerAuthException;
+import org.klnusbaum.udj.exceptions.PlayerInactiveException;
 import org.klnusbaum.udj.exceptions.APIVersionException;
+import org.klnusbaum.udj.exceptions.PlayerPasswordException;
 
 
 /**
@@ -116,10 +117,11 @@ public class ServerConnection{
 
 
   private static final String TICKET_HASH_HEADER = "X-Udj-Ticket-Hash";
-  private static final String USER_ID_HEADER = "X-Udj-User-Id";
-  private static final String GONE_RESOURCE_HEADER = "X-Udj-Gone-Resource";
-  private static final String API_VERSION_HEADER = "X-Udj-Api-Version";
-  private static final String EVENT_PASSWORD_HEADER = "X-Udj-Event-Password";
+  private static final String MISSING_RESOURCE_HEADER = "X-Udj-Missing-Resource";
+  private static final String MISSING_RESOURCE_REASON_HEADER = "X-Udj-Missing-Reason";
+  private static final String WWW_AUTH_HEADER = "WWW-Authenticate";
+
+  private static final String PLAYER_PASSWORD_HEADER = "X-Udj-Player-Password";
 
 
   private static final int REGISTRATION_TIMEOUT = 30 * 1000; // ms
@@ -213,21 +215,29 @@ public class ServerConnection{
     }
   }
 
-  private static void eventOverErrorCheck(HttpResponse resp)
-    throws EventOverException
+  private static void playerInactiveErrorCheck(HttpResponse resp)
+    throws PlayerInactiveException
   {
-    Log.d(TAG, "Headers: ");
-    for(Header h : resp.getAllHeaders()){
-      Log.d(TAG, h.getName() + ": " + h.getValue());
-    }
-    if(resp.getStatusLine().getStatusCode() == HttpStatus.SC_GONE
-      && resp.containsHeader(GONE_RESOURCE_HEADER)
-      && resp.getFirstHeader(GONE_RESOURCE_HEADER).getValue().equals("event"))
+    if(resp.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND
+      && resp.containsHeader(MISSING_RESOURCE_HEADER)
+      && resp.getFirstHeader(MISSING_RESOURCE_HEADER).getValue().equals("player")
+      && resp.containsHeader(MISSING_RESOURCE_REASON_HEADER)
+      && resp.getFirstHeader(MISSING_RESOURCE_REASON_HEADER).getValue().equals("inactive"))
     {
-        throw new EventOverException();
+        throw new PlayerInactiveException();
     }
   } 
-
+  
+  private static void playerAuthErrorCheck(HttpResponse resp)
+		    throws PlayerAuthException
+  {
+	if(resp.getStatusLine().getStatusCode() == HttpStatus.SC_UNAUTHORIZED
+      && resp.containsHeader(WWW_AUTH_HEADER)
+      && resp.getFirstHeader(WWW_AUTH_HEADER).getValue().equals("begin-participating"))
+	{
+	  throw new PlayerAuthException();
+	}
+  } 
 
   public static HttpResponse doGet(URI uri, String ticketHash)
     throws IOException
@@ -249,12 +259,13 @@ public class ServerConnection{
   }
 
   public static String doEventRelatedGet(URI uri, String ticketHash)
-    throws AuthenticationException, IOException, EventOverException
+    throws AuthenticationException, IOException, PlayerInactiveException, PlayerAuthException
   {
     final HttpResponse resp = doGet(uri, ticketHash);
     final String response = EntityUtils.toString(resp.getEntity());
     Log.d(TAG, "Event related response: \"" + response +"\"");
-    eventOverErrorCheck(resp);
+    playerInactiveErrorCheck(resp);
+    playerAuthErrorCheck(resp);
     basicResponseErrorCheck(resp, response);
     return response;
   }
@@ -297,12 +308,14 @@ public class ServerConnection{
 
   public static String doEventRelatedPut( 
     URI uri, String ticketHash, String payload)
-    throws AuthenticationException, IOException, EventOverException
+    throws AuthenticationException, IOException, PlayerInactiveException, 
+    PlayerAuthException
   {
     final HttpResponse resp = doPut(uri, ticketHash, payload);
     final String response = EntityUtils.toString(resp.getEntity());
     Log.d(TAG, "Event related Put response: \"" + response +"\"");
-    eventOverErrorCheck(resp);
+    playerInactiveErrorCheck(resp);
+    playerAuthErrorCheck(resp);
     basicResponseErrorCheck(resp, response);
     return response;
   }
@@ -335,12 +348,13 @@ public class ServerConnection{
 
   public static String doEventRelatedPost(
     URI uri, String authToken, String payload)
-    throws AuthenticationException, IOException, EventOverException
+    throws AuthenticationException, IOException, PlayerInactiveException, PlayerAuthException
   {
     final HttpResponse resp = doPost(uri, authToken, payload);
     final String response = EntityUtils.toString(resp.getEntity());
     Log.d(TAG, "Event related Post response: \"" + response +"\"");
-    eventOverErrorCheck(resp);
+    playerInactiveErrorCheck(resp);
+    playerAuthErrorCheck(resp);
     basicResponseErrorCheck(resp, response);
     return response;
 
@@ -365,12 +379,14 @@ public class ServerConnection{
   }
 
   public static void doEventRelatedDelete(URI uri, String ticketHash)
-    throws IOException, AuthenticationException, EventOverException
+    throws IOException, AuthenticationException, PlayerInactiveException, PlayerAuthException
   {
     final HttpResponse resp = doDelete(uri, ticketHash);
     final String response = EntityUtils.toString(resp.getEntity());
     Log.d(TAG, "Delete response: \"" + response +"\"");
-    eventOverErrorCheck(resp);
+    playerInactiveErrorCheck(resp);
+    playerAuthErrorCheck(resp);
+
     basicResponseErrorCheck(resp, response);
   }
 
@@ -413,35 +429,17 @@ public class ServerConnection{
     }
   }
 
-  private static void evenJoinConflictCheck(
-    HttpResponse resp,
-    String response,
-    long userId)
-    throws JSONException, ParseException, AlreadyInEventException
+  public static void joinPlayer(long eventId, long userId, String ticketHash)
+    throws IOException, AuthenticationException, PlayerInactiveException, 
+    JSONException, ParseException, PlayerPasswordException
   {
-    if(resp.getStatusLine().getStatusCode() == HttpStatus.SC_CONFLICT){
-      JSONObject event = new JSONObject(response);
-      if(userId == event.getLong("host_id")){
-        //TODO throw already hosting exception
-      }
-      else{
-        throw new AlreadyInEventException(
-          event.getLong("id"), event.getString("name"));
-      }
-    }
-  }
-
-  public static void joinEvent(long eventId, long userId, String ticketHash)
-    throws IOException, AuthenticationException, EventOverException, 
-    AlreadyInEventException, JSONException, ParseException
-  {
-    joinEvent(eventId, userId, "", ticketHash);
+    joinPlayer(eventId, userId, "", ticketHash);
   }
 
 
-  public static void joinEvent(long eventId, long userId, String password, String ticketHash)
-    throws IOException, AuthenticationException, EventOverException,
-    AlreadyInEventException, JSONException, ParseException
+  public static void joinPlayer(long eventId, long userId, String password, String ticketHash)
+    throws IOException, AuthenticationException, PlayerInactiveException,
+    JSONException, ParseException, PlayerPasswordException
   {
     try{
       URI uri  = new URI(
@@ -454,13 +452,19 @@ public class ServerConnection{
       }
       else{
         final HashSet<Header> headers = new HashSet<Header>();
-        headers.add(new BasicHeader(EVENT_PASSWORD_HEADER, password));
+        headers.add(new BasicHeader(PLAYER_PASSWORD_HEADER, password));
         resp = doPut(uri, ticketHash, "", headers);
       }
       final String response = EntityUtils.toString(resp.getEntity());
       Log.d(TAG, "Event join Put response: \"" + response +"\"");
-      evenJoinConflictCheck(resp, response, userId);
-      eventOverErrorCheck(resp);
+      playerInactiveErrorCheck(resp);
+      if(
+        resp.getStatusLine().getStatusCode() == HttpStatus.SC_UNAUTHORIZED
+        && resp.containsHeader(WWW_AUTH_HEADER)
+        && resp.getFirstHeader(WWW_AUTH_HEADER).getValue().equals("player-password"))
+      {
+        throw new PlayerPasswordException();
+      }
       basicResponseErrorCheck(resp, response);
     }
     catch(URISyntaxException e){
@@ -468,30 +472,10 @@ public class ServerConnection{
     }
   }
 
-  public static void leaveEvent(long eventId, long userId, String authToken)
-    throws IOException, AuthenticationException
-  {
-    try{
-      URI uri = new URI(
-        NETWORK_PROTOCOL, null, SERVER_HOST, SERVER_PORT, 
-        "/udj/events/"+eventId+"/users/"+userId,
-        null, null);
-      try{
-        doEventRelatedDelete(uri, authToken);
-      }
-      catch(EventOverException e){
-        //Should never actually get here
-      }
-    }
-    catch(URISyntaxException e){
-      //TODO inform caller that their query is bad 
-    }
-  }
-
   public static JSONObject getActivePlaylist(long eventId, 
     String authToken)
     throws JSONException, ParseException, IOException, AuthenticationException,
-    EventOverException
+    PlayerInactiveException, PlayerAuthException
   {
     try{
       URI uri = new URI(
@@ -510,7 +494,7 @@ public class ServerConnection{
   public static List<LibraryEntry> availableMusicQuery(
     String query, long eventId, String authToken)
     throws JSONException, ParseException, IOException, AuthenticationException,
-    EventOverException
+    PlayerInactiveException, PlayerAuthException
   {
     try{
       URI uri = new URI(
@@ -528,7 +512,7 @@ public class ServerConnection{
 
   public static List<LibraryEntry> getRandomMusic(int max, long eventId, String authToken)
     throws JSONException, ParseException, IOException, AuthenticationException,
-    EventOverException
+    PlayerInactiveException, PlayerAuthException
   {
     try{
       URI uri = new URI(
@@ -548,7 +532,7 @@ public class ServerConnection{
   public static void addSongsToActivePlaylist(
     HashMap<Long, Long> requests, long eventId, String authToken)
     throws JSONException, ParseException, IOException, AuthenticationException,
-    EventOverException
+    PlayerInactiveException, PlayerAuthException
   {
     try{
       URI uri = new URI(
@@ -567,7 +551,7 @@ public class ServerConnection{
 
   public static void removeSongsFromActivePlaylist(
     List<Long> requests, long eventId, String authToken)
-    throws IOException, AuthenticationException, EventOverException
+    throws IOException, AuthenticationException, PlayerInactiveException, PlayerAuthException
   {
     for(Long plId: requests){
       try{
@@ -598,26 +582,6 @@ public class ServerConnection{
     return toReturn;
   }
 
-  public static HashMap<Long,Long> getAddRequests(
-    long userId, long eventId, String authToken)
-    throws JSONException, ParseException, IOException, AuthenticationException,
-    EventOverException
-  {
-    try{
-      URI uri = new URI(
-        NETWORK_PROTOCOL, null, SERVER_HOST, SERVER_PORT,
-        "/udj/events/"+eventId+"/active_playlist/users/"+
-          userId + "/add_requests",
-        null, null);
-      return getRequestsHashMap(
-        new JSONArray(doEventRelatedGet(uri, authToken)));
-    }
-    catch(URISyntaxException e){
-      //TODO inform caller that their query is bad 
-    }
-    return null;
-  }
-
   private static HashMap<Long, Long> getRequestsHashMap(JSONArray requests)
     throws JSONException
   {
@@ -632,7 +596,7 @@ public class ServerConnection{
   public static JSONObject getVoteRequests(
     long userId, long eventId, String authToken)
     throws JSONException, ParseException, IOException, AuthenticationException,
-    EventOverException
+    PlayerInactiveException, PlayerAuthException
   {
     try{
       URI uri = new URI(
@@ -650,13 +614,13 @@ public class ServerConnection{
 
   public static void doSongVotes(Cursor voteRequests, 
     long eventId, long userId, String authToken)
-    throws IOException, AuthenticationException, EventOverException
+    throws IOException, AuthenticationException, PlayerInactiveException, PlayerAuthException
   {
     if(voteRequests.moveToFirst()){
       int idColumnIndex = voteRequests.getColumnIndex(
-        UDJEventProvider.VOTE_PLAYLIST_ENTRY_ID_COLUMN);
+        UDJPlayerProvider.VOTE_PLAYLIST_ENTRY_ID_COLUMN);
       int voteTypeIndex = voteRequests.getColumnIndex(
-        UDJEventProvider.VOTE_TYPE_COLUMN);
+        UDJPlayerProvider.VOTE_TYPE_COLUMN);
       do{
         long playlistId = voteRequests.getLong(idColumnIndex);
         int voteType = voteRequests.getInt(voteTypeIndex);
@@ -667,13 +631,13 @@ public class ServerConnection{
 
   private static void voteOnSong(
     long eventId, long playlistId, long userId, int voteType, String authToken)
-    throws IOException, AuthenticationException, EventOverException
+    throws IOException, AuthenticationException, PlayerInactiveException, PlayerAuthException
   {
     String voteString = null;
-    if(voteType == UDJEventProvider.UP_VOTE_TYPE){
+    if(voteType == UDJPlayerProvider.UP_VOTE_TYPE){
       voteString = "upvote";
     }
-    else if(voteType == UDJEventProvider.DOWN_VOTE_TYPE){
+    else if(voteType == UDJPlayerProvider.DOWN_VOTE_TYPE){
       voteString = "downvote";
     }
     try{

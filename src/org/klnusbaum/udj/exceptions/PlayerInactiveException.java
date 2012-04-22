@@ -18,21 +18,21 @@
  */
 package org.klnusbaum.udj.exceptions;
 
-public class EventOverException extends Exception{
+public class PlayerInactiveException extends Exception{
 
-  public EventOverException(){
+  public PlayerInactiveException(){
     super();
   }
 
-  public EventOverException(String message){
+  public PlayerInactiveException(String message){
     super(message);
   }
 
-  public EventOverException(String message, Throwable cause){
+  public PlayerInactiveException(String message, Throwable cause){
     super(message, cause);
   }
 
-  public EventOverException(Throwable cause){
+  public PlayerInactiveException(Throwable cause){
     super(cause);
   }
 }

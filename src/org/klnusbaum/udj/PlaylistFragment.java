@@ -18,7 +18,6 @@
  */
 package org.klnusbaum.udj;
 
-import org.klnusbaum.udj.PullToRefresh.PullToRefreshListView;
 import org.klnusbaum.udj.PullToRefresh.RefreshableListFragment;
 import org.klnusbaum.udj.network.PlaylistSyncService;
 
@@ -61,7 +60,7 @@ public class PlaylistFragment extends RefreshableListFragment implements
 
 	@Override
 	protected void doRefreshWork() {
-		((EventActivity) getActivity()).getPlaylistFromServer();
+		((PlayerActivity) getActivity()).getPlaylistFromServer();
 	}
 
 	@Override
@@ -90,14 +89,14 @@ public class PlaylistFragment extends RefreshableListFragment implements
 		Cursor song = (Cursor) playlistAdapter.getItem(info.position);
 		MenuInflater inflater = getActivity().getMenuInflater();
 		inflater.inflate(R.menu.playlist_context, menu);
-		if (song.getLong(song.getColumnIndex(UDJEventProvider.ADDER_ID_COLUMN)) == userId) {
+		if (song.getLong(song.getColumnIndex(UDJPlayerProvider.ADDER_ID_COLUMN)) == userId) {
 			menu.findItem(R.id.vote_up).setEnabled(false);
 			menu.findItem(R.id.vote_down).setEnabled(false);
 		} else if (!song.isNull(song
-				.getColumnIndex(UDJEventProvider.VOTE_TYPE_COLUMN))) {
+				.getColumnIndex(UDJPlayerProvider.VOTE_TYPE_COLUMN))) {
 			int voteType = song.getInt(song
-					.getColumnIndex(UDJEventProvider.VOTE_TYPE_COLUMN));
-			if (voteType == UDJEventProvider.UP_VOTE_TYPE) {
+					.getColumnIndex(UDJPlayerProvider.VOTE_TYPE_COLUMN));
+			if (voteType == UDJPlayerProvider.UP_VOTE_TYPE) {
 				menu.findItem(R.id.vote_up).setEnabled(false);
 				menu.findItem(R.id.remove_song).setEnabled(false);
 			} else {
@@ -107,7 +106,7 @@ public class PlaylistFragment extends RefreshableListFragment implements
 		} else {
 			menu.findItem(R.id.remove_song).setEnabled(false);
 		}
-		int titleIndex = song.getColumnIndex(UDJEventProvider.TITLE_COLUMN);
+		int titleIndex = song.getColumnIndex(UDJPlayerProvider.TITLE_COLUMN);
 		menu.setHeaderTitle(song.getString(titleIndex));
 	}
 
@@ -135,9 +134,9 @@ public class PlaylistFragment extends RefreshableListFragment implements
 
 	private void shareSong(int position) {
 		Cursor toShare = (Cursor) playlistAdapter.getItem(position);
-		int titleIndex = toShare.getColumnIndex(UDJEventProvider.TITLE_COLUMN);
+		int titleIndex = toShare.getColumnIndex(UDJPlayerProvider.TITLE_COLUMN);
 		String songTitle = toShare.getString(titleIndex);
-		String eventName = am.getUserData(account, Constants.EVENT_NAME_DATA);
+		String eventName = am.getUserData(account, Constants.PLAYER_NAME_DATA);
 		Intent shareIntent = new Intent(Intent.ACTION_SEND);
 		shareIntent.setType("text/plain");
 		shareIntent.putExtra(android.content.Intent.EXTRA_TEXT,
@@ -152,10 +151,10 @@ public class PlaylistFragment extends RefreshableListFragment implements
 	private void removeSong(int position) {
 		Cursor toRemove = (Cursor) playlistAdapter.getItem(position);
 		int idIndex = toRemove
-				.getColumnIndex(UDJEventProvider.PLAYLIST_ID_COLUMN);
+				.getColumnIndex(UDJPlayerProvider.PLAYLIST_ID_COLUMN);
 		Log.d(TAG, "Removing song with id " + toRemove.getLong(idIndex));
 		Intent removeSongIntent = new Intent(Intent.ACTION_DELETE,
-				UDJEventProvider.PLAYLIST_REMOVE_REQUEST_URI, getActivity(),
+				UDJPlayerProvider.PLAYLIST_REMOVE_REQUEST_URI, getActivity(),
 				PlaylistSyncService.class);
 		removeSongIntent.putExtra(Constants.ACCOUNT_EXTRA, account);
 		removeSongIntent.putExtra(Constants.PLAYLIST_ID_EXTRA,
@@ -167,19 +166,19 @@ public class PlaylistFragment extends RefreshableListFragment implements
 	}
 
 	private void upVoteSong(int position) {
-		voteOnSong(position, UDJEventProvider.UP_VOTE_TYPE);
+		voteOnSong(position, UDJPlayerProvider.UP_VOTE_TYPE);
 	}
 
 	private void downVoteSong(int position) {
-		voteOnSong(position, UDJEventProvider.DOWN_VOTE_TYPE);
+		voteOnSong(position, UDJPlayerProvider.DOWN_VOTE_TYPE);
 	}
 
 	private void voteOnSong(int position, int voteType) {
 		Cursor song = (Cursor) playlistAdapter.getItem(position);
-		int idIndex = song.getColumnIndex(UDJEventProvider.PLAYLIST_ID_COLUMN);
+		int idIndex = song.getColumnIndex(UDJPlayerProvider.PLAYLIST_ID_COLUMN);
 		long playlistId = song.getLong(idIndex);
 		Intent voteIntent = new Intent(Intent.ACTION_INSERT,
-				UDJEventProvider.VOTES_URI, getActivity(),
+				UDJPlayerProvider.VOTES_URI, getActivity(),
 				PlaylistSyncService.class);
 		voteIntent.putExtra(Constants.ACCOUNT_EXTRA, account);
 		voteIntent.putExtra(Constants.VOTE_TYPE_EXTRA, voteType);
@@ -191,8 +190,8 @@ public class PlaylistFragment extends RefreshableListFragment implements
 		switch (id) {
 		case PLAYLIST_LOADER_ID:
 			return new CursorLoader(getActivity(),
-					UDJEventProvider.PLAYLIST_URI, null, null, null,
-					UDJEventProvider.PRIORITY_COLUMN);
+					UDJPlayerProvider.PLAYLIST_URI, null, null, null,
+					UDJPlayerProvider.PRIORITY_COLUMN);
 		default:
 			return null;
 		}
@@ -221,39 +220,37 @@ public class PlaylistFragment extends RefreshableListFragment implements
 		private static final String PLAYLIST_ADAPTER_TAG = "PlaylistAdapter";
 
 		public PlaylistAdapter(Context context, Cursor c, long userId) {
-			super(context, c);
+			super(context, c, 0);
 			this.userId = userId;
 		}
 
 		@Override
 		public void bindView(View view, Context context, Cursor cursor) {
-			int playlistIdIndex = cursor
-					.getColumnIndex(UDJEventProvider.PLAYLIST_ID_COLUMN);
-			int playlistId = cursor.getInt(playlistIdIndex);
+
 
 			TextView songName = (TextView) view
 					.findViewById(R.id.playlistSongName);
 			int titleIndex = cursor
-					.getColumnIndex(UDJEventProvider.TITLE_COLUMN);
+					.getColumnIndex(UDJPlayerProvider.TITLE_COLUMN);
 			songName.setText(cursor.getString(titleIndex));
 
 			TextView artist = (TextView) view
 					.findViewById(R.id.playlistArtistName);
 			int artistIndex = cursor
-					.getColumnIndex(UDJEventProvider.ARTIST_COLUMN);
+					.getColumnIndex(UDJPlayerProvider.ARTIST_COLUMN);
 			artist.setText(getString(R.string.by) + " "
 					+ cursor.getString(artistIndex));
 
 			TextView addByUser = (TextView) view
 					.findViewById(R.id.playlistAddedBy);
 			int adderIdIndex = cursor
-					.getColumnIndex(UDJEventProvider.ADDER_ID_COLUMN);
+					.getColumnIndex(UDJPlayerProvider.ADDER_ID_COLUMN);
 			if (cursor.getLong(adderIdIndex) == userId) {
 				addByUser.setText(getString(R.string.added_by) + " "
 						+ getString(R.string.you));
 			} else {
 				int adderUserNameIndex = cursor
-						.getColumnIndex(UDJEventProvider.ADDER_USERNAME_COLUMN);
+						.getColumnIndex(UDJPlayerProvider.ADDER_USERNAME_COLUMN);
 				addByUser.setText(getString(R.string.added_by) + " "
 						+ cursor.getString(adderUserNameIndex));
 			}

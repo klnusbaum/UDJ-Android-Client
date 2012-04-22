@@ -24,7 +24,7 @@ import org.klnusbaum.udj.PullToRefresh.RefreshableListFragment;
 import org.klnusbaum.udj.auth.AuthActivity;
 import org.klnusbaum.udj.containers.Player;
 import org.klnusbaum.udj.network.EventCommService;
-import org.klnusbaum.udj.network.EventCommService.EventJoinError;
+import org.klnusbaum.udj.network.EventCommService.PlayerJoinError;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
@@ -53,43 +53,28 @@ import android.view.ViewGroup;
 import android.view.LayoutInflater;
 
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-
-import org.apache.http.auth.AuthenticationException;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import org.klnusbaum.udj.network.EventCommService;
-import org.klnusbaum.udj.containers.Player;
-import org.klnusbaum.udj.auth.AuthActivity;
-import org.klnusbaum.udj.network.EventCommService.EventJoinError;
-
-
 public class PlayerListFragment extends RefreshableListFragment implements 
   LoaderManager.LoaderCallbacks<PlayersLoader.PlayersLoaderResult>,
   LocationListener
 {
 
 
-  private static final String TAG = "EventListFragment";
+  private static final String TAG = "PlayerListFragment";
   private static final String PROG_DIALOG_TAG = "prog_dialog";
-  private static final String EVENT_JOIN_FAIL_TAG = "prog_dialog";
+  private static final String PLAYER_JOIN_FAIL_TAG = "prog_dialog";
   private static final String PASSWORD_TAG = "password_dialog";
   private static final String LOCATION_EXTRA = "location";
-  private static final String EVENT_SEARCH_QUERY = 
-    "org.klnusbaum.udj.EventSearchQuery";
-  private static final String EVENT_SEARCH_TYPE_EXTRA = 
-    "org.klnusbaum.udj.EventSearchType";
+  private static final String PLAYER_SEARCH_QUERY = 
+    "org.klnusbaum.udj.PlayerSearchQuery";
+  private static final String PLAYER_SEARCH_TYPE_EXTRA = 
+    "org.klnusbaum.udj.PlayerSearchType";
   private static final String LOCATION_STATE_EXTRA = 
     "org.klnusbaum.udj.LastKnownLocation";
   private static final String LAST_SEARCH_TYPE_EXTRA = 
     "org.klnusbaum.udj.LastSearchType";
   private static final int ACCOUNT_CREATION_REQUEST_CODE = 0;
 
-  private interface EventSearch{
+  private interface PlayerSearch{
     public abstract Bundle getLoaderArgs();
     public abstract int getSearchType();
   }
@@ -99,11 +84,11 @@ public class PlayerListFragment extends RefreshableListFragment implements
     refreshList();
   }
 
-  public static class LocationEventSearch implements EventSearch{
+  public static class LocationPlayerSearch implements PlayerSearch{
     Location givenLocation;
     public static final int SEARCH_TYPE = 0; 
 
-    public LocationEventSearch(Location givenLocation){
+    public LocationPlayerSearch(Location givenLocation){
       this.givenLocation = givenLocation;
     }
 
@@ -113,7 +98,7 @@ public class PlayerListFragment extends RefreshableListFragment implements
 
     public Bundle getLoaderArgs(){
       Bundle loaderArgs = new Bundle(); 
-      loaderArgs.putInt(EVENT_SEARCH_TYPE_EXTRA, SEARCH_TYPE);
+      loaderArgs.putInt(PLAYER_SEARCH_TYPE_EXTRA, SEARCH_TYPE);
       loaderArgs.putParcelable(LOCATION_EXTRA, givenLocation);
       return loaderArgs;
     }
@@ -123,17 +108,17 @@ public class PlayerListFragment extends RefreshableListFragment implements
     }
   }
 
-  public static class NameEventSearch implements EventSearch{
+  public static class NamePlayerSearch implements PlayerSearch{
     String query;
     private static final int SEARCH_TYPE = 1; 
-    public NameEventSearch(String query){
+    public NamePlayerSearch(String query){
       this.query = query;
     }
 
     public Bundle getLoaderArgs(){
       Bundle loaderArgs = new Bundle();
-      loaderArgs.putInt(EVENT_SEARCH_TYPE_EXTRA, SEARCH_TYPE);
-      loaderArgs.putString(EVENT_SEARCH_QUERY, query);
+      loaderArgs.putInt(PLAYER_SEARCH_TYPE_EXTRA, SEARCH_TYPE);
+      loaderArgs.putString(PLAYER_SEARCH_QUERY, query);
       return loaderArgs;
     }
 
@@ -147,25 +132,24 @@ public class PlayerListFragment extends RefreshableListFragment implements
   }
 
 
-  private PlayerListAdapter eventAdapter;
+  private PlayerListAdapter playerAdapter;
   private LocationManager lm;
   private Location lastKnown = null;
   private Account account = null;
-  private EventSearch lastSearch = null;
+  private PlayerSearch lastSearch = null;
   private AccountManager am;
 
-  private BroadcastReceiver eventJoinedReceiver = new BroadcastReceiver(){
+  private BroadcastReceiver playerJoinedReceiver = new BroadcastReceiver(){
     public void onReceive(Context context, Intent intent){
-      Log.d(TAG, "Recieved event broadcats");
+      Log.d(TAG, "Recieved player broadcats");
       dismissProgress();
-      getActivity().unregisterReceiver(eventJoinedReceiver);
-      AccountManager am = AccountManager.get(context);
-      if(intent.getAction().equals(Constants.JOINED_EVENT_ACTION)){
-        Intent eventActivityIntent = new Intent(context, EventActivity.class);
+      getActivity().unregisterReceiver(playerJoinedReceiver);
+      if(intent.getAction().equals(Constants.JOINED_PLAYER_ACTION)){
+        Intent eventActivityIntent = new Intent(context, PlayerActivity.class);
         startActivity(eventActivityIntent); 
       }
-      else if(intent.getAction().equals(Constants.EVENT_JOIN_FAILED_ACTION)){
-        handleEventJoinFail();
+      else if(intent.getAction().equals(Constants.PLAYER_JOIN_FAILED_ACTION)){
+        handlePlayerJoinFail();
       }
     }
   };
@@ -201,8 +185,8 @@ public class PlayerListFragment extends RefreshableListFragment implements
       }
     }
     setEmptyText(getActivity().getString(R.string.no_event_items));
-    eventAdapter = new PlayerListAdapter(getActivity());
-    setListAdapter(eventAdapter);
+    playerAdapter = new PlayerListAdapter(getActivity());
+    setListAdapter(playerAdapter);
     setListShown(false);
   }
 
@@ -224,7 +208,7 @@ public class PlayerListFragment extends RefreshableListFragment implements
       }
     }
     if(lastSearch == null){
-      lastSearch = new LocationEventSearch(lastKnown);
+      lastSearch = new LocationPlayerSearch(lastKnown);
     }
   }
 
@@ -249,40 +233,37 @@ public class PlayerListFragment extends RefreshableListFragment implements
 
   public void onResume(){
     super.onResume();
-    EventPasswordFragment pFrag =
-      (EventPasswordFragment)getActivity().getSupportFragmentManager().findFragmentByTag(PASSWORD_TAG);
+    PlayerPasswordFragment pFrag =
+      (PlayerPasswordFragment)getActivity().getSupportFragmentManager().findFragmentByTag(PASSWORD_TAG);
     if(pFrag != null){
       pFrag.registerPasswordEnteredListener(this);
     }
 
     if(account != null){
-      int eventState = Utils.getEventState(getActivity(), account);
+      int playerState = Utils.getEventState(getActivity(), account);
       Log.d(TAG, "Checking Event State");
-      if(eventState == Constants.JOINING_EVENT){
+      if(playerState == Constants.JOINING_PLAYER){
         Log.d(TAG, "Is joining");
         Log.d(TAG, "Reregistering event listener");
-        registerEventListener();
+        registerPlayerListener();
       }
-      else if(eventState == Constants.EVENT_JOIN_FAILED){
+      else if(playerState == Constants.PLAYER_JOIN_FAILED){
         Log.d(TAG, "Event Joined Failed");
         dismissProgress();
-        handleEventJoinFail();
-        //TODO inform user joining failed.
+        handlePlayerJoinFail();
       }
-      else if(eventState == Constants.IN_EVENT){
+      else if(playerState == Constants.IN_PLAYER){
         Log.d(TAG, "Already signed into event. Checking Progress visibility");
         if(isShowingProgress()){
           Log.d(TAG, "Determined progress is indeed showing");
           dismissProgress();
         }
-        long eventId = Long.valueOf(
-          am.getUserData(account, Constants.LAST_EVENT_ID_DATA));
         Intent startEventActivity = 
-          new Intent(getActivity(), EventActivity.class);
+          new Intent(getActivity(), PlayerActivity.class);
         startActivity(startEventActivity);
         return;
       }
-      else if(eventAdapter == null || eventAdapter.getCount() ==0){
+      else if(playerAdapter == null || playerAdapter.getCount() ==0){
         refreshList();
       }
     }
@@ -292,12 +273,12 @@ public class PlayerListFragment extends RefreshableListFragment implements
     super.onPause();
     if(account != null){
       int eventState = Utils.getEventState(getActivity(), account);
-      if(eventState == Constants.JOINING_EVENT){
-        getActivity().unregisterReceiver(eventJoinedReceiver);
+      if(eventState == Constants.JOINING_PLAYER){
+        getActivity().unregisterReceiver(playerJoinedReceiver);
       }
     }
 
-    EventPasswordFragment pFrag = (EventPasswordFragment)getActivity().getSupportFragmentManager().findFragmentByTag(PASSWORD_TAG);
+    PlayerPasswordFragment pFrag = (PlayerPasswordFragment)getActivity().getSupportFragmentManager().findFragmentByTag(PASSWORD_TAG);
     if(pFrag != null){
       pFrag.unregisterPasswordEnteredListener();
     }
@@ -311,35 +292,35 @@ public class PlayerListFragment extends RefreshableListFragment implements
   public void onSaveInstanceState(Bundle outState){
     super.onSaveInstanceState(outState);
     outState.putParcelable(LOCATION_STATE_EXTRA, lastKnown);
-    outState.putInt(EVENT_SEARCH_TYPE_EXTRA, lastSearch.getSearchType());
-    if(lastSearch.getSearchType() == NameEventSearch.SEARCH_TYPE){
+    outState.putInt(PLAYER_SEARCH_TYPE_EXTRA, lastSearch.getSearchType());
+    if(lastSearch.getSearchType() == NamePlayerSearch.SEARCH_TYPE){
       outState.putString(
-        EVENT_SEARCH_QUERY, ((NameEventSearch)lastSearch).getQuery());
+        PLAYER_SEARCH_QUERY, ((NamePlayerSearch)lastSearch).getQuery());
     }
   }
 
   private void restoreLastSearch(Bundle icicle){
     int searchType = icicle.getInt(LAST_SEARCH_TYPE_EXTRA, -1);
     switch(searchType){
-    case LocationEventSearch.SEARCH_TYPE:
-      lastSearch = new LocationEventSearch(lastKnown);
+    case LocationPlayerSearch.SEARCH_TYPE:
+      lastSearch = new LocationPlayerSearch(lastKnown);
       break;
-    case NameEventSearch.SEARCH_TYPE:
-      lastSearch = new NameEventSearch(
-        icicle.getString(EVENT_SEARCH_QUERY));
+    case NamePlayerSearch.SEARCH_TYPE:
+      lastSearch = new NamePlayerSearch(
+        icicle.getString(PLAYER_SEARCH_QUERY));
       break;
     } 
   }
 
-  public void setEventSearch(EventSearch newSearch){
+  public void setPlayerSearch(PlayerSearch newSearch){
     lastSearch = newSearch;
     refreshList();
   }
 
   public void onLocationChanged(Location location){
     lastKnown = location;
-    if(lastSearch.getSearchType() == LocationEventSearch.SEARCH_TYPE){
-      ((LocationEventSearch)lastSearch).setLocation(lastKnown);
+    if(lastSearch.getSearchType() == LocationPlayerSearch.SEARCH_TYPE){
+      ((LocationPlayerSearch)lastSearch).setLocation(lastKnown);
     }
   }
 
@@ -349,78 +330,78 @@ public class PlayerListFragment extends RefreshableListFragment implements
 
   @Override
   public void onListItemClick(ListView l, View v, int position, long id){
-    Player toJoin = (Player)eventAdapter.getItem(position);
+    Player toJoin = (Player)playerAdapter.getItem(position);
     if(toJoin.getHasPassword()){
-      getPasswordForEvent(toJoin);
+      getPasswordForPlayer(toJoin);
     }
     else{
-      joinEvent(toJoin);
+      joinPlayer(toJoin);
     }
   }
 
-  public void getPasswordForEvent(Player toJoin){
+  public void getPasswordForPlayer(Player toJoin){
     Bundle eventBundle = toJoin.bundleUp();
-    EventPasswordFragment passwordFragment = new EventPasswordFragment();
+    PlayerPasswordFragment passwordFragment = new PlayerPasswordFragment();
     passwordFragment.registerPasswordEnteredListener(this);
     passwordFragment.setArguments(eventBundle);
     passwordFragment.show(getActivity().getSupportFragmentManager(), PASSWORD_TAG);
   }
 
-  public void joinEvent(Player toJoin){
-    joinEvent(toJoin, "");
+  public void joinPlayer(Player toJoin){
+    joinPlayer(toJoin, "");
   }
 
-  public void joinEvent(Player toJoin, String password){
-    Log.d(TAG, "Joining Event");
+  public void joinPlayer(Player toJoin, String password){
+    Log.d(TAG, "Joining Player");
     am.setUserData(
       account,
-      Constants.EVENT_STATE_DATA,
-      String.valueOf(Constants.JOINING_EVENT));
+      Constants.PLAYER_STATE_DATA,
+      String.valueOf(Constants.JOINING_PLAYER));
     showProgress();
-    Intent joinEventIntent = new Intent(
+    Intent joinPlayerIntent = new Intent(
       Intent.ACTION_INSERT,
-      Constants.EVENT_URI,
+      Constants.PLAYER_URI,
       getActivity(),
       EventCommService.class);
-    joinEventIntent.putExtra(
-      Constants.EVENT_ID_EXTRA,
+    joinPlayerIntent.putExtra(
+      Constants.PLAYER_ID_EXTRA,
       toJoin.getPlayerId());
-    joinEventIntent.putExtra(
-      Constants.EVENT_NAME_EXTRA,
+    joinPlayerIntent.putExtra(
+      Constants.PLAYER_NAME_EXTRA,
       toJoin.getName());
-    joinEventIntent.putExtra(
-      Constants.EVENT_HOSTNAME_EXTRA,
+    joinPlayerIntent.putExtra(
+      Constants.PLAYER_OWNER_EXTRA,
       toJoin.getOwnerName());
-    joinEventIntent.putExtra(
-      Constants.EVENT_HOST_ID_EXTRA,
+    joinPlayerIntent.putExtra(
+      Constants.PLAYER_OWNER_ID_EXTRA,
       toJoin.getOwnerId());
-    joinEventIntent.putExtra(
-      Constants.EVENT_LAT_EXTRA,
+    joinPlayerIntent.putExtra(
+      Constants.PLAYER_LAT_EXTRA,
       toJoin.getLatitude());
-    joinEventIntent.putExtra(
-      Constants.EVENT_LONG_EXTRA,
+    joinPlayerIntent.putExtra(
+      Constants.PLAYER_LONG_EXTRA,
       toJoin.getLongitude());
-    joinEventIntent.putExtra(Constants.ACCOUNT_EXTRA, account);
-    joinEventIntent.putExtra(Constants.EVENT_PASSWORD_EXTRA, password);
-    getActivity().startService(joinEventIntent);
+    joinPlayerIntent.putExtra(Constants.ACCOUNT_EXTRA, account);
+    joinPlayerIntent.putExtra(Constants.PLAYER_PASSWORD_EXTRA, password);
+    getActivity().startService(joinPlayerIntent);
   }
 
   public Loader<PlayersLoader.PlayersLoaderResult> onCreateLoader(
     int id, Bundle args)
   {
-    int eventSearchType = args.getInt(EVENT_SEARCH_TYPE_EXTRA, 
+    int playerSearchType = args.getInt(PLAYER_SEARCH_TYPE_EXTRA, 
       -1);
-    if(eventSearchType == LocationEventSearch.SEARCH_TYPE){
+    if(playerSearchType == LocationPlayerSearch.SEARCH_TYPE){
       return new PlayersLoader(
         getActivity(), 
         account,
         (Location)args.getParcelable(LOCATION_EXTRA));
     }
-    else if(eventSearchType == NameEventSearch.SEARCH_TYPE){
+    else if(playerSearchType == NamePlayerSearch.SEARCH_TYPE){
       return new PlayersLoader(
         getActivity(), 
         account,
-        args.getString(EVENT_SEARCH_QUERY));
+        args.getString(PLAYER_SEARCH_QUERY));
     }
     else{
       return null;
@@ -433,15 +414,15 @@ public class PlayerListFragment extends RefreshableListFragment implements
     refreshDone();
     switch(data.getError()){
     case NO_ERROR:
-      eventAdapter = 
-        new PlayerListAdapter(getActivity(), data.getPlayers(), null);
-      setListAdapter(eventAdapter);
+      playerAdapter = 
+        new PlayerListAdapter(getActivity(), data.getPlayers());
+      setListAdapter(playerAdapter);
       break;
     case NO_LOCATION:
       setEmptyText(getString(R.string.no_location_error));
       break;
     case SERVER_ERROR:
-      setEmptyText(getString(R.string.events_load_error));
+      setEmptyText(getString(R.string.players_load_error));
       break;
     case NO_CONNECTION:
       setEmptyText(getString(R.string.no_network_connection));
@@ -468,19 +449,19 @@ public class PlayerListFragment extends RefreshableListFragment implements
   }
 
   private void showProgress(){
-    registerEventListener();
+    registerPlayerListener();
     ProgressFragment progFragment = new ProgressFragment();
     progFragment.show(
       getActivity().getSupportFragmentManager(), PROG_DIALOG_TAG);
   }
 
-  private void registerEventListener(){
+  private void registerPlayerListener(){
     getActivity().registerReceiver(
-      eventJoinedReceiver, 
-      new IntentFilter(Constants.JOINED_EVENT_ACTION));
+      playerJoinedReceiver, 
+      new IntentFilter(Constants.JOINED_PLAYER_ACTION));
     getActivity().registerReceiver(
-      eventJoinedReceiver, 
-      new IntentFilter(Constants.EVENT_JOIN_FAILED_ACTION));
+      playerJoinedReceiver, 
+      new IntentFilter(Constants.PLAYER_JOIN_FAILED_ACTION));
     Log.d(TAG, "Listener registered");
   }
 
@@ -506,31 +487,30 @@ public class PlayerListFragment extends RefreshableListFragment implements
   }
 
 
-  private void handleEventJoinFail(){
-    EventJoinError joinError = EventJoinError.valueOf(
-      am.getUserData(account, Constants.EVENT_JOIN_ERROR));
+  private void handlePlayerJoinFail(){
+    PlayerJoinError joinError = PlayerJoinError.valueOf(
+      am.getUserData(account, Constants.PLAYER_JOIN_ERROR));
     am.setUserData(
       account,
-      Constants.EVENT_STATE_DATA,
-      String.valueOf(Constants.NOT_IN_EVENT));
-    DialogFragment newFrag = new EventJoinFailDialog();
-    AccountManager am = AccountManager.get(getActivity());
+      Constants.PLAYER_STATE_DATA,
+      String.valueOf(Constants.NOT_IN_PLAYER));
+    DialogFragment newFrag = new PlayerJoinFailDialog();
     Bundle args = new Bundle();
-    args.putInt(Constants.EVENT_JOIN_ERROR_EXTRA, joinError.ordinal());
+    args.putInt(Constants.PLAYER_JOIN_ERROR_EXTRA, joinError.ordinal());
     newFrag.setArguments(args);
     newFrag.show(
-      getActivity().getSupportFragmentManager(), EVENT_JOIN_FAIL_TAG);
+      getActivity().getSupportFragmentManager(), PLAYER_JOIN_FAIL_TAG);
   }
 
-  public static class EventJoinFailDialog extends DialogFragment{
+  public static class PlayerJoinFailDialog extends DialogFragment{
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState){
       Bundle args = getArguments();
-      EventJoinError joinError = 
-        EventJoinError.values()[args.getInt(Constants.EVENT_JOIN_ERROR_EXTRA)];
+      PlayerJoinError joinError = 
+        PlayerJoinError.values()[args.getInt(Constants.PLAYER_JOIN_ERROR_EXTRA)];
       AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
-        .setTitle(R.string.event_join_fail_title);
+        .setTitle(R.string.player_join_fail_title);
       String message; 
       switch(joinError){
       case SERVER_ERROR:
@@ -539,9 +519,9 @@ public class PlayerListFragment extends RefreshableListFragment implements
       case AUTHENTICATION_ERROR:
         message = getString(R.string.auth_join_fail_message); 
         break;
-      case EVENT_OVER_ERROR:
+      case PLAYER_INACTIVE_ERROR:
         ((PlayerSelectorActivity)getActivity()).refreshList();
-        message = getString(R.string.event_over_join_fail_message); 
+        message = getString(R.string.player_inactive_join_fail_message); 
         break;
       case NO_NETWORK_ERROR:
         message = getString(R.string.no_network_join_fail_message); 
@@ -562,7 +542,7 @@ public class PlayerListFragment extends RefreshableListFragment implements
     }
   }
 
-  public static class EventPasswordFragment extends DialogFragment{
+  public static class PlayerPasswordFragment extends DialogFragment{
 
     Player toJoin;
     EditText passwordEdit;
@@ -575,8 +555,8 @@ public class PlayerListFragment extends RefreshableListFragment implements
     }
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle icicle){
-        View v = inflater.inflate(R.layout.event_password, container, false);
-        passwordEdit = (EditText)v.findViewById(R.id.event_password_edit);
+        View v = inflater.inflate(R.layout.player_password, container, false);
+        passwordEdit = (EditText)v.findViewById(R.id.player_password_edit);
         okButton = (Button)v.findViewById(R.id.ok_button);
         okButton.setOnClickListener(new View.OnClickListener(){
           public void onClick(View v){
@@ -589,7 +569,7 @@ public class PlayerListFragment extends RefreshableListFragment implements
 
     public void passwordEntered(){
       //TODO handle if they didn't type anything in
-      playerListFragment.joinEvent(toJoin, passwordEdit.getText().toString());
+      playerListFragment.joinPlayer(toJoin, passwordEdit.getText().toString());
       dismiss();
     }
 

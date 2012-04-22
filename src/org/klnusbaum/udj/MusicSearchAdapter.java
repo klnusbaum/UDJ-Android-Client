@@ -123,7 +123,7 @@ public class MusicSearchAdapter implements ListAdapter{
         public void onClick(View v){
           Intent addSongIntent = new Intent(
             Intent.ACTION_INSERT,
-            UDJEventProvider.PLAYLIST_ADD_REQUEST_URI,
+            UDJPlayerProvider.PLAYLIST_ADD_REQUEST_URI,
             context,
             PlaylistSyncService.class);
           addSongIntent.putExtra(Constants.ACCOUNT_EXTRA, account);

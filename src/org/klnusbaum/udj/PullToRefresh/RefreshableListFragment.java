@@ -16,7 +16,7 @@ package org.klnusbaum.udj.PullToRefresh;
  * limitations under the License.
  */
 
-import org.klnusbaum.udj.EventActivity;
+import org.klnusbaum.udj.PlayerActivity;
 import org.klnusbaum.udj.R;
 import org.klnusbaum.udj.PullToRefresh.PullToRefreshBase.OnRefreshListener;
 

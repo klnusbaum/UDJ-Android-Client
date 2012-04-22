@@ -35,27 +35,23 @@ import org.klnusbaum.udj.containers.Player;
 
 public class PlayerListAdapter implements ListAdapter{
 
-  public static final String TAG = "EventListAdapter";
+  public static final String TAG = "PlayerListAdapter";
   private List<Player> players;
   private Context context;
-  private View.OnClickListener addClickListener;
   public static final int EVENT_ENTRY_VIEW_TYPE = 0;
 
   public PlayerListAdapter(Context context){
     this.players = null;
-    this.addClickListener = null;
     this.context = context;
   }
 
   public PlayerListAdapter(
     Context context, 
-    List<Player> players,
-    View.OnClickListener addClickListener
+    List<Player> players
   )
   {
     this.players = players;
     this.context = context;
-    this.addClickListener = addClickListener;
   }
 
   public boolean areAllItemsEnabled(){
@@ -106,7 +102,7 @@ public class PlayerListAdapter implements ListAdapter{
       //toReturn = View.inflate(context, R.layout.library_list_item, null);
       LayoutInflater inflater = (LayoutInflater)context.getSystemService(
         Context.LAYOUT_INFLATER_SERVICE);
-      toReturn = inflater.inflate(R.layout.event_list_item, null);
+      toReturn = inflater.inflate(R.layout.player_list_item, null);
     }
 
     TextView eventName = (TextView)toReturn.findViewById(R.id.event_item_name);

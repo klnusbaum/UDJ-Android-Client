@@ -18,53 +18,29 @@
  */
 package org.klnusbaum.udj;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.widget.Toast;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MenuInflater;
-import android.view.View;
 import android.widget.TextView;
-import android.content.Context;
-import android.accounts.AccountManager;
-import android.accounts.Account;
-import android.content.DialogInterface;
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.content.ContentResolver;
 import android.util.Log;
-import android.app.SearchManager;
-import android.net.Uri;
 import android.database.Cursor;
-import android.view.Window;
-import android.os.Build;
-import android.content.BroadcastReceiver;
 
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.DialogFragment;
+
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 
-import java.util.HashMap;
 
-import org.klnusbaum.udj.auth.AuthActivity;
 import org.klnusbaum.udj.Constants;
 import org.klnusbaum.udj.network.PlaylistSyncService;
-import org.klnusbaum.udj.network.EventCommService;
 
 /**
  * The main activity display class.
  */
-public class EventActivity extends EventEndedListenerActivity implements
+public class PlayerActivity extends EventEndedListenerActivity implements
 		LoaderManager.LoaderCallbacks<Cursor> {
-	private static final String QUIT_DIALOG_TAG = "quit_dialog";
 	private static final int CURRENT_SONG_LOADER_ID = 1;
 	private static final String TAG = "EventActivity";
 
@@ -84,9 +60,9 @@ public class EventActivity extends EventEndedListenerActivity implements
 
 	public void getPlaylistFromServer() {
 		int eventState = Utils.getEventState(this, account);
-		if (eventState == Constants.IN_EVENT) {
+		if (eventState == Constants.IN_PLAYER) {
 			Intent getPlaylist = new Intent(Intent.ACTION_VIEW,
-					UDJEventProvider.PLAYLIST_URI, this,
+					UDJPlayerProvider.PLAYLIST_URI, this,
 					PlaylistSyncService.class);
 			getPlaylist.putExtra(Constants.ACCOUNT_EXTRA, account);
 			startService(getPlaylist);
@@ -96,8 +72,8 @@ public class EventActivity extends EventEndedListenerActivity implements
 	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 		switch (id) {
 		case CURRENT_SONG_LOADER_ID:
-			return new CursorLoader(this, UDJEventProvider.CURRENT_SONG_URI,
-					new String[] { UDJEventProvider.TITLE_COLUMN }, null, null,
+			return new CursorLoader(this, UDJPlayerProvider.CURRENT_SONG_URI,
+					new String[] { UDJPlayerProvider.TITLE_COLUMN }, null, null,
 					null);
 		default:
 			return null;
@@ -117,7 +93,7 @@ public class EventActivity extends EventEndedListenerActivity implements
 	private void setCurrentSongDisplay(Cursor data) {
 		if (data != null && data.moveToFirst()) {
 			currentSong.setText(data.getString(data
-					.getColumnIndex(UDJEventProvider.TITLE_COLUMN)));
+					.getColumnIndex(UDJPlayerProvider.TITLE_COLUMN)));
 		} else {
 			currentSong.setText(R.string.no_current_song);
 		}
@@ -125,7 +101,7 @@ public class EventActivity extends EventEndedListenerActivity implements
 
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.event, menu);
+		inflater.inflate(R.menu.player, menu);
 		return true;
 	}
 
@@ -163,48 +139,5 @@ public class EventActivity extends EventEndedListenerActivity implements
 	private void doRandomSearch() {
 		Intent randomIntent = new Intent(this, RandomSearchActivity.class);
 		startActivity(randomIntent);
-	}
-
-	@Override
-	public void onBackPressed() {
-		DialogFragment newFrag = new QuitDialogFragment();
-		newFrag.show(getSupportFragmentManager(), QUIT_DIALOG_TAG);
-	}
-
-	private void doQuit() {
-		AccountManager am = AccountManager.get(this);
-		am.setUserData(account, Constants.EVENT_STATE_DATA,
-				String.valueOf(Constants.LEAVING_EVENT));
-		Intent leaveEvent = new Intent(Intent.ACTION_DELETE,
-				Constants.EVENT_URI, this, EventCommService.class);
-		leaveEvent.putExtra(Constants.ACCOUNT_EXTRA, account);
-		startService(leaveEvent);
-		setResult(Activity.RESULT_OK);
-		finish();
-	}
-
-	public static class QuitDialogFragment extends DialogFragment {
-
-		@Override
-		public Dialog onCreateDialog(Bundle savedInstanceState) {
-			return new AlertDialog.Builder(getActivity())
-					.setTitle(R.string.quit_title)
-					.setMessage(R.string.quit_message)
-					.setPositiveButton(android.R.string.ok,
-							new DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog,
-										int whichButton) {
-									dismiss();
-									((EventActivity) getActivity()).doQuit();
-								}
-							})
-					.setNegativeButton(android.R.string.cancel,
-							new DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog,
-										int whichButton) {
-									dismiss();
-								}
-							}).create();
-		}
 	}
 }

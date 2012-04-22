@@ -37,13 +37,15 @@ import java.util.HashMap;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import org.apache.http.ParseException;
 import org.apache.http.auth.AuthenticationException;
 
 import org.klnusbaum.udj.Constants;
 import org.klnusbaum.udj.Utils;
-import org.klnusbaum.udj.UDJEventProvider;
-import org.klnusbaum.udj.exceptions.EventOverException;
-import org.klnusbaum.udj.exceptions.AlreadyInEventException;
+import org.klnusbaum.udj.UDJPlayerProvider;
+import org.klnusbaum.udj.exceptions.PlayerAuthException;
+import org.klnusbaum.udj.exceptions.PlayerInactiveException;
+import org.klnusbaum.udj.exceptions.PlayerPasswordException;
 
 
 /**
@@ -51,13 +53,14 @@ import org.klnusbaum.udj.exceptions.AlreadyInEventException;
  */
 public class EventCommService extends IntentService{
 
-  public enum EventJoinError{
+  public enum PlayerJoinError{
     NO_ERROR,
     AUTHENTICATION_ERROR,
     SERVER_ERROR,
-    EVENT_OVER_ERROR,
+    PLAYER_INACTIVE_ERROR,
     NO_NETWORK_ERROR,
-    ALREADY_IN_EVENT_ERROR
+    PLAYER_PASSWORD_ERROR,
+    UNKNOWN_ERROR
   }
 
   private static final String TAG = "EventCommService";
@@ -75,10 +78,6 @@ public class EventCommService extends IntentService{
     if(intent.getAction().equals(Intent.ACTION_INSERT)){
       enterEvent(intent, am, account, true);
     }
-    else if(intent.getAction().equals(Intent.ACTION_DELETE)){
-      //TODO handle if userId is null shouldn't ever be, but hey...
-      leaveEvent(am, account, true);
-    }
     else{
       Log.d(TAG, "ACTION wasn't delete or insert, it was " + 
         intent.getAction());
@@ -89,7 +88,7 @@ public class EventCommService extends IntentService{
     Intent intent, AccountManager am, Account account, boolean attemptReauth)
   {
     if(!Utils.isNetworkAvailable(this)){
-      doLoginFail(am, account, EventJoinError.NO_NETWORK_ERROR);
+      doLoginFail(am, account, PlayerJoinError.NO_NETWORK_ERROR);
       return;
     }
 
@@ -104,12 +103,12 @@ public class EventCommService extends IntentService{
       //TODO handle if event id isn't provided
       authToken = am.blockingGetAuthToken(account, "", true);  
       eventId = intent.getLongExtra(
-        Constants.EVENT_ID_EXTRA,
-        Constants.NO_EVENT_ID);
-      if(intent.hasExtra(Constants.EVENT_PASSWORD_EXTRA)){
+        Constants.PLAYER_ID_EXTRA,
+        Constants.NO_PLAYER_ID);
+      if(intent.hasExtra(Constants.PLAYER_PASSWORD_EXTRA)){
         Log.d(TAG, "password given for event");
         hasPassword = true;
-        password = intent.getStringExtra(Constants.EVENT_PASSWORD_EXTRA);
+        password = intent.getStringExtra(Constants.PLAYER_PASSWORD_EXTRA);
       }
       else{
         Log.d(TAG, "No password given for event");
@@ -117,81 +116,79 @@ public class EventCommService extends IntentService{
     }
     catch(OperationCanceledException e){
       Log.e(TAG, "Operation canceled exception in EventCommService" );
-      doLoginFail(am, account, EventJoinError.AUTHENTICATION_ERROR);
+      doLoginFail(am, account, PlayerJoinError.AUTHENTICATION_ERROR);
       return;
     }
     catch(AuthenticatorException e){
       Log.e(TAG, "Authenticator exception in EventCommService" );
-      doLoginFail(am, account, EventJoinError.AUTHENTICATION_ERROR);
+      doLoginFail(am, account, PlayerJoinError.AUTHENTICATION_ERROR);
       return;
     }
     catch(IOException e){
       Log.e(TAG, "IO exception in EventCommService" );
-      doLoginFail(am, account, EventJoinError.AUTHENTICATION_ERROR);
+      doLoginFail(am, account, PlayerJoinError.AUTHENTICATION_ERROR);
       return;
     }
 
     try{
       if(!hasPassword){
-        ServerConnection.joinEvent(eventId, userId, authToken);
+        ServerConnection.joinPlayer(eventId, userId, authToken);
       }
       else{
-        ServerConnection.joinEvent(eventId, userId, password, authToken);
+        ServerConnection.joinPlayer(eventId, userId, password, authToken);
       }
       setEventData(intent, am, account);
       ContentResolver cr = getContentResolver();
-      UDJEventProvider.eventCleanup(cr);
-      HashMap<Long,Long> previousRequests = ServerConnection.getAddRequests(
-        userId, eventId, authToken);
-      UDJEventProvider.setPreviousAddRequests(cr, previousRequests);
+      UDJPlayerProvider.eventCleanup(cr);
       JSONObject previousVotes = 
         ServerConnection.getVoteRequests(userId, eventId, authToken);
-      UDJEventProvider.setPreviousVoteRequests(cr, previousVotes);
-      Intent joinedEventIntent = new Intent(Constants.JOINED_EVENT_ACTION);
+      UDJPlayerProvider.setPreviousVoteRequests(cr, previousVotes);
+      Intent joinedEventIntent = new Intent(Constants.JOINED_PLAYER_ACTION);
       am.setUserData(
-        account, Constants.LAST_EVENT_ID_DATA, String.valueOf(eventId));
+        account, Constants.LAST_PLAYER_ID_DATA, String.valueOf(eventId));
       am.setUserData(
         account, 
-        Constants.EVENT_STATE_DATA, 
-        String.valueOf(Constants.IN_EVENT));
+        Constants.PLAYER_STATE_DATA, 
+        String.valueOf(Constants.IN_PLAYER));
       Log.d(TAG, "Sending joined event broadcast");
       sendBroadcast(joinedEventIntent);
     }
     catch(IOException e){
       Log.e(TAG, "IO exception when joining event");
       Log.e(TAG, e.getMessage());
-      doLoginFail(am, account, EventJoinError.SERVER_ERROR);
+      doLoginFail(am, account, PlayerJoinError.SERVER_ERROR);
     }
     catch(JSONException e){
       Log.e(TAG, 
         "JSON exception when joining event");
       Log.e(TAG, e.getMessage());
-      doLoginFail(am, account, EventJoinError.SERVER_ERROR);
+      doLoginFail(am, account, PlayerJoinError.SERVER_ERROR);
     }
     catch(AuthenticationException e){
       handleLoginAuthException(intent, am, account, authToken, attemptReauth);
     }
-    catch(EventOverException e){
-      Log.e(TAG, "Event Over Exception when joining event");
-      //Log.e(TAG, e.getMessage());
-      doLoginFail(am, account, EventJoinError.EVENT_OVER_ERROR);
-    }
-    catch(AlreadyInEventException e){
-      Log.e(TAG, "Already In Event Exception when joining event");
-      try{
-        ServerConnection.leaveEvent(e.getEventId(), userId, authToken);
-        enterEvent(intent, am, account, true);
-      } 
-      catch(AuthenticationException f){
-        handleLoginAuthException(intent, am, account, authToken, attemptReauth);
-      }
-      catch(IOException f){
-        Log.e(TAG, "IO exception when attempting to leave one event before "+ 
-          "joining another");
-        Log.e(TAG, f.getMessage());
-        doLoginFail(am, account, EventJoinError.SERVER_ERROR);
-      }
-    }
+    catch(PlayerInactiveException e){
+      Log.e(TAG, "Player inactive Exception when joining player");
+      doLoginFail(am, account, PlayerJoinError.PLAYER_INACTIVE_ERROR);
+    } catch (ParseException e) {
+		e.printStackTrace();
+	    doLoginFail(am, account, PlayerJoinError.SERVER_ERROR);
+    } catch (PlayerPasswordException e) {
+		Log.e(TAG, "Player Password Exception");
+		e.printStackTrace();
+	    doLoginFail(am, account, PlayerJoinError.PLAYER_PASSWORD_ERROR);
+	} catch (PlayerAuthException e) {
+        /**
+         * Getting this error here would be really weird since theoretically we just 
+         * joined the player. But it is theoretically possible.
+         * I'll could just try rejoining the event again. This is bad though because
+         * we could get stuck in infinite recursion. I'm just going to through an
+         * Unknown error and then let the user try again or something.
+         */
+		Log.e(TAG, "Player Auth Exception. REALLY REALLY WERID. WHY ARE YOU GETTING THIS?");
+		e.printStackTrace();
+	    doLoginFail(am, account, PlayerJoinError.UNKNOWN_ERROR);
+	}
   }
 
   private void handleLoginAuthException(
@@ -207,25 +204,25 @@ public class EventCommService extends IntentService{
     else{
       Log.e(TAG, 
         "Hard Authentication exception when joining event");
-      doLoginFail(am, account, EventJoinError.AUTHENTICATION_ERROR);
+      doLoginFail(am, account, PlayerJoinError.AUTHENTICATION_ERROR);
     }
   }
 
   private void doLoginFail(
     AccountManager am, 
     Account account, 
-    EventJoinError error)
+    PlayerJoinError error)
   {
     am.setUserData(
       account,
-      Constants.EVENT_STATE_DATA,
-      String.valueOf(Constants.EVENT_JOIN_FAILED));
+      Constants.PLAYER_STATE_DATA,
+      String.valueOf(Constants.PLAYER_JOIN_FAILED));
     am.setUserData(
       account, 
-      Constants.EVENT_JOIN_ERROR, 
+      Constants.PLAYER_JOIN_ERROR, 
       error.toString());
     Intent eventJoinFailedIntent = 
-      new Intent(Constants.EVENT_JOIN_FAILED_ACTION);
+      new Intent(Constants.PLAYER_JOIN_FAILED_ACTION);
     Log.d(TAG, "Sending event join failure broadcast");
     sendBroadcast(eventJoinFailedIntent);
   }
@@ -233,98 +230,37 @@ public class EventCommService extends IntentService{
   private void setEventData(Intent intent, AccountManager am, Account account){
     am.setUserData(
       account, 
-      Constants.EVENT_NAME_DATA, 
-      intent.getStringExtra(Constants.EVENT_NAME_EXTRA));
+      Constants.PLAYER_NAME_DATA, 
+      intent.getStringExtra(Constants.PLAYER_NAME_EXTRA));
     am.setUserData(
       account, 
-      Constants.EVENT_HOSTNAME_DATA, 
-      intent.getStringExtra(Constants.EVENT_HOSTNAME_EXTRA));
+      Constants.PLAYER_HOSTNAME_DATA, 
+      intent.getStringExtra(Constants.PLAYER_OWNER_EXTRA));
     am.setUserData(
       account, 
-      Constants.EVENT_HOST_ID_DATA, 
-      String.valueOf(intent.getLongExtra(Constants.EVENT_HOST_ID_EXTRA,-1)));
+      Constants.PLAYER_HOST_ID_DATA, 
+      String.valueOf(intent.getLongExtra(Constants.PLAYER_OWNER_ID_EXTRA,-1)));
     am.setUserData(
       account, 
-      Constants.EVENT_LAT_DATA, 
-      String.valueOf(intent.getDoubleExtra(Constants.EVENT_LAT_EXTRA, -100.0))
+      Constants.PLAYER_LAT_DATA, 
+      String.valueOf(intent.getDoubleExtra(Constants.PLAYER_LAT_EXTRA, -100.0))
     );
     am.setUserData(
       account, 
-      Constants.EVENT_LONG_DATA, 
-      String.valueOf(intent.getDoubleExtra(Constants.EVENT_LONG_EXTRA, -100.0))
+      Constants.PLAYER_LONG_DATA, 
+      String.valueOf(intent.getDoubleExtra(Constants.PLAYER_LONG_EXTRA, -100.0))
     );
   }
 
-  private void leaveEvent(
-    AccountManager am, Account account, boolean attemptReauth)
-  {
-    Log.d(TAG, "In leave event"); 
-    
-    if(account == null){
-      //TODO handle error
-      return;
-    }
-
-    long userId;
-    String authToken; 
-    try{
-      userId = 
-        Long.valueOf(am.getUserData(account, Constants.USER_ID_DATA));
-      //TODO handle if event id isn't provided
-      authToken = am.blockingGetAuthToken(account, "", true);  
-    }
-    catch(OperationCanceledException e){
-      Log.e(TAG, "Operation canceled exception in EventCommService" );
-      return;
-    }
-    catch(AuthenticatorException e){
-      Log.e(TAG, "Authenticator exception in EventCommService" );
-      return;
-    }
-    catch(IOException e){
-      Log.e(TAG, "IO exception in EventCommService" );
-      return;
-    }
-
-    try{
-      long eventId = 
-        Long.valueOf(am.getUserData(account, Constants.LAST_EVENT_ID_DATA));
-      if(eventId != Constants.NO_EVENT_ID){
-        ServerConnection.leaveEvent(eventId, Long.valueOf(userId), authToken);
-        setNotInEvent(account);
-        Intent leftEventIntent = new Intent(Constants.LEFT_EVENT_ACTION);
-        sendBroadcast(leftEventIntent);
-      }
-    }
-    catch(IOException e){
-      Log.e(TAG, "IO exception in EventCommService: " + e.getMessage());
-    }
-    catch(AuthenticationException e){
-      if(attemptReauth){
-        Log.e(TAG, "Soft Authentication exception in EventCommService" );
-        am.invalidateAuthToken(Constants.ACCOUNT_TYPE, authToken);
-        leaveEvent(am, account, false);
-      }
-      else{
-        Log.e(TAG, "HARD Authentication exception in EventCommService" );
-      }
-    }
-    finally{
-      //TODO potential this get's repeated because it's already called once
-      //above. I'll deal with that fact later.
-      setNotInEvent(account);
-    }
-    //TODO need to implement exponential back off when log out fails.
-    // 1. This is just nice to the server
-    // 2. If we don't log out, there could be problems on the next event joined
-  }
 
   private void setNotInEvent(Account account){
     AccountManager am = AccountManager.get(this);
-    am.setUserData(account, Constants.LAST_EVENT_ID_DATA, 
-      String.valueOf(Constants.NO_EVENT_ID));
-    am.setUserData(account, Constants.EVENT_STATE_DATA, 
-      String.valueOf(Constants.NOT_IN_EVENT));
+    am.setUserData(account, Constants.LAST_PLAYER_ID_DATA, 
+      String.valueOf(Constants.NO_PLAYER_ID));
+    am.setUserData(account, Constants.PLAYER_STATE_DATA, 
+      String.valueOf(Constants.NOT_IN_PLAYER));
+    Intent leftEventIntent = new Intent(Constants.LEFT_EVENT_ACTION);
+    sendBroadcast(leftEventIntent);
   }
 
 }

@@ -20,17 +20,10 @@ package org.klnusbaum.udj;
 
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 
-import android.app.Activity;
+
 import android.os.Bundle;
-import android.accounts.AccountManager;
-import android.accounts.Account;
 import android.content.Intent;
-import android.content.Context;
-import android.view.View;
-import android.view.Window;
 import android.app.SearchManager;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -42,9 +35,6 @@ import android.view.MenuInflater;
  */
 public class PlayerSelectorActivity extends FragmentActivity{
 
-  private Account account;
-  private AccountManager am;
-  private PlayerListFragment list;
 
   @Override
   public void onCreate(Bundle savedInstanceState){
@@ -57,15 +47,15 @@ public class PlayerSelectorActivity extends FragmentActivity{
     }
   }
 
-  private PlayerListFragment getEventList(){
+  private PlayerListFragment getPlayerList(){
     return
       ((PlayerListFragment)getSupportFragmentManager().findFragmentById(android.R.id.content));
   }
 
   protected void onNewIntent(Intent intent){
     if(Intent.ACTION_SEARCH.equals(intent.getAction())){
-      PlayerListFragment list = getEventList();
-      list.setEventSearch(new PlayerListFragment.NameEventSearch(
+      PlayerListFragment list = getPlayerList();
+      list.setPlayerSearch(new PlayerListFragment.NamePlayerSearch(
         intent.getStringExtra(SearchManager.QUERY)));
     }
     else{
@@ -75,14 +65,14 @@ public class PlayerSelectorActivity extends FragmentActivity{
 
   public boolean onCreateOptionsMenu(Menu menu){
     MenuInflater inflater = getMenuInflater();
-    inflater.inflate(R.menu.event_list, menu);
+    inflater.inflate(R.menu.player_list, menu);
     return true;
   }
 
   public boolean onOptionsItemSelected(MenuItem item){
     switch (item.getItemId()) {
     case R.id.menu_refresh:
-    PlayerListFragment list= getEventList();
+    PlayerListFragment list= getPlayerList();
     list.setListShown(false);
       list.refreshList();
       
@@ -96,7 +86,7 @@ public class PlayerSelectorActivity extends FragmentActivity{
   }
 
   public void refreshList(){
-    getEventList().refreshList();
+    getPlayerList().refreshList();
   }
 
 }

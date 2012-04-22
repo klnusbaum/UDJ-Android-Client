@@ -35,9 +35,9 @@ import org.json.JSONException;
 import org.apache.http.auth.AuthenticationException;
 import org.apache.http.ParseException;
 
-import org.klnusbaum.udj.network.ServerConnection;
 import org.klnusbaum.udj.containers.LibraryEntry;
-import org.klnusbaum.udj.exceptions.EventOverException;
+import org.klnusbaum.udj.exceptions.PlayerAuthException;
+import org.klnusbaum.udj.exceptions.PlayerInactiveException;
 
 public abstract class MusicSearchLoader 
   extends AsyncTaskLoader<MusicSearchLoader.MusicSearchResult>
@@ -45,10 +45,12 @@ public abstract class MusicSearchLoader
 
   public enum MusicSearchError{
     NO_ERROR,
-    EVENT_ENDED_ERROR,
+    PLAYER_INACTIVE_ERROR,
     NO_SEARCH_ERROR,
     SERVER_ERROR,
-    AUTHENTICATION_ERROR};
+    AUTHENTICATION_ERROR,
+    PLAYER_AUTH_ERROR
+  };
   private static final String TAG = "MusicSearchLoader";
 
   public static class MusicSearchResult{
@@ -107,7 +109,7 @@ public abstract class MusicSearchLoader
 
     try{
       long eventId = 
-        Long.valueOf(am.getUserData(account, Constants.LAST_EVENT_ID_DATA));
+        Long.valueOf(am.getUserData(account, Constants.LAST_PLAYER_ID_DATA));
       return doSearch(eventId, authToken);
     }
     catch(JSONException e){
@@ -131,9 +133,11 @@ public abstract class MusicSearchLoader
         return new MusicSearchResult(null, MusicSearchError.AUTHENTICATION_ERROR);
       }
     }
-    catch(EventOverException e){
-      return new MusicSearchResult(null, MusicSearchError.EVENT_ENDED_ERROR);
-    }
+    catch(PlayerInactiveException e){
+      return new MusicSearchResult(null, MusicSearchError.PLAYER_INACTIVE_ERROR);
+    } catch (PlayerAuthException e) {
+        return new MusicSearchResult(null, MusicSearchError.PLAYER_AUTH_ERROR);
+	}
   }
 
   @Override
@@ -142,5 +146,6 @@ public abstract class MusicSearchLoader
   }
 
   protected abstract MusicSearchResult doSearch(long eventId, String authToken) throws
-    JSONException, ParseException, IOException, AuthenticationException, EventOverException;
+    JSONException, ParseException, IOException, AuthenticationException,
+    PlayerInactiveException, PlayerAuthException;
 }

@@ -64,13 +64,13 @@ public abstract class EventEndedListenerActivity extends FragmentActivity{
   protected void onResume(){
     super.onResume();
     int eventState = Utils.getEventState(this, account);
-    if(eventState == Constants.LEAVING_EVENT || 
-      eventState == Constants. NOT_IN_EVENT)
+    if(eventState == Constants.LEAVING_PLAYER || 
+      eventState == Constants.NOT_IN_PLAYER)
     {
       setResult(Activity.RESULT_OK);
       finish();
     }
-    else if(eventState == Constants.EVENT_ENDED){
+    else if(eventState == Constants.PLAYER_ENDED){
       eventEnded();
     }
     else{
@@ -128,11 +128,11 @@ public abstract class EventEndedListenerActivity extends FragmentActivity{
       AccountManager am = AccountManager.get(getActivity());
       am.setUserData(
         getAccount(), 
-        Constants.EVENT_STATE_DATA, 
-        String.valueOf(Constants.LEAVING_EVENT));
+        Constants.PLAYER_STATE_DATA, 
+        String.valueOf(Constants.LEAVING_PLAYER));
       Intent leaveEvent = new Intent(
         Intent.ACTION_DELETE,
-        Constants.EVENT_URI,
+        Constants.PLAYER_URI,
         getActivity(),
         EventCommService.class);
       leaveEvent.putExtra(Constants.ACCOUNT_EXTRA, getAccount());

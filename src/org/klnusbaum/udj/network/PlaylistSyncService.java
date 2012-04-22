@@ -54,11 +54,12 @@ import org.apache.http.auth.AuthenticationException;
 import org.apache.http.ParseException;
 
 import org.klnusbaum.udj.Constants;
-import org.klnusbaum.udj.UDJEventProvider;
-import org.klnusbaum.udj.EventActivity;
+import org.klnusbaum.udj.UDJPlayerProvider;
+import org.klnusbaum.udj.PlayerActivity;
 import org.klnusbaum.udj.PlayerSelectorActivity;
 import org.klnusbaum.udj.R;
-import org.klnusbaum.udj.exceptions.EventOverException;
+import org.klnusbaum.udj.exceptions.PlayerAuthException;
+import org.klnusbaum.udj.exceptions.PlayerInactiveException;
 import org.klnusbaum.udj.Utils;
 
 
@@ -71,20 +72,20 @@ public class PlaylistSyncService extends IntentService{
 
   private static final String TAG = "PlaylistSyncService";
   private static final String[] addRequestsProjection = new String[] {
-    UDJEventProvider.ADD_REQUEST_ID_COLUMN,
-    UDJEventProvider.ADD_REQUEST_LIB_ID_COLUMN};
+    UDJPlayerProvider.ADD_REQUEST_ID_COLUMN,
+    UDJPlayerProvider.ADD_REQUEST_LIB_ID_COLUMN};
   private static final String addRequestSeleciton = 
-    UDJEventProvider.ADD_REQUEST_SYNC_STATUS_COLUMN + 
+    UDJPlayerProvider.ADD_REQUEST_SYNC_STATUS_COLUMN + 
     "=" +
-    UDJEventProvider.ADD_REQUEST_NEEDS_SYNC;
+    UDJPlayerProvider.ADD_REQUEST_NEEDS_SYNC;
 
   private static final String[] removeRequestsProjection = new String[] {
-    UDJEventProvider.REMOVE_REQUEST_PLAYLIST_ID_COLUMN
+    UDJPlayerProvider.REMOVE_REQUEST_PLAYLIST_ID_COLUMN
   };
   private static final String removeRequestSeleciton =
-    UDJEventProvider.REMOVE_REQUEST_SYNC_STATUS_COLUMN +
+    UDJPlayerProvider.REMOVE_REQUEST_SYNC_STATUS_COLUMN +
     "=" +
-    UDJEventProvider.REMOVE_REQUEST_NEEDS_SYNC;
+    UDJPlayerProvider.REMOVE_REQUEST_NEEDS_SYNC;
 
   public PlaylistSyncService(){
     super("PlaylistSyncService");
@@ -95,24 +96,24 @@ public class PlaylistSyncService extends IntentService{
     final Account account =
       (Account)intent.getParcelableExtra(Constants.ACCOUNT_EXTRA);
     long eventId = Long.valueOf(AccountManager.get(this).getUserData(
-      account, Constants.LAST_EVENT_ID_DATA));
+      account, Constants.LAST_PLAYER_ID_DATA));
     //TODO hanle error if eventId is bad
     if(intent.getAction().equals(Intent.ACTION_INSERT)){
-      if(intent.getData().equals(UDJEventProvider.PLAYLIST_ADD_REQUEST_URI)){
+      if(intent.getData().equals(UDJPlayerProvider.PLAYLIST_ADD_REQUEST_URI)){
         long libId = intent.getLongExtra(
           Constants.LIB_ID_EXTRA, 
-          UDJEventProvider.INVALID_LIB_ID);
+          UDJPlayerProvider.INVALID_LIB_ID);
         insertAddSongRequest(libId);
         syncAddRequests(account, eventId, true);
       }
-      else if(intent.getData().equals(UDJEventProvider.VOTES_URI)){
+      else if(intent.getData().equals(UDJPlayerProvider.VOTES_URI)){
         //TODO handle if Playlist id is bad
         long playlistId = 
           intent.getLongExtra(Constants.PLAYLIST_ID_EXTRA, -1);
         //TODO handle if votetype is bad
         int voteType = intent.getIntExtra(
           Constants.VOTE_TYPE_EXTRA, 
-          UDJEventProvider.INVALID_VOTE_TYPE);
+          UDJPlayerProvider.INVALID_VOTE_TYPE);
         addVoteRequest(playlistId, voteType);
         syncVoteRequests(account, eventId, true); 
       }
@@ -123,7 +124,7 @@ public class PlaylistSyncService extends IntentService{
     }
     else if(intent.getAction().equals(Intent.ACTION_DELETE)){
       Log.d(TAG, "Handling delete");
-      if(intent.getData().equals(UDJEventProvider.PLAYLIST_REMOVE_REQUEST_URI)){
+      if(intent.getData().equals(UDJPlayerProvider.PLAYLIST_REMOVE_REQUEST_URI)){
         Log.d(TAG, "In plalist syncservice, about to insert song into remove requests");
         //TODO handle if Playlist id is bad.
         long playlistId = intent.getLongExtra(Constants.PLAYLIST_ID_EXTRA, -1);
@@ -185,12 +186,17 @@ public class PlaylistSyncService extends IntentService{
     catch(OperationApplicationException e){
       Log.e(TAG, "Operation Application exception when retreiving playist");
     }
-    catch(EventOverException e){
-      Log.e(TAG, "Event over exceptoin when retreiving playlist");
-      Utils.handleEventOver(this, account);
+    catch(PlayerInactiveException e){
+      Log.e(TAG, "Player Inactive exception when retreiving playlist");
+      Utils.handleInactivePlayer(this, account);
     }
+    catch (PlayerAuthException e) {
+		//TODO REAUTH AND THEN TRY GETTING PLAYLIST AGAIN
+		e.printStackTrace();
+	}
     //TODO This point of the app seems very dangerous as there are so many
     // exceptions that could occuer. Need to pay special attention to this.
+
   }
 
   private void syncAddRequests(
@@ -199,7 +205,7 @@ public class PlaylistSyncService extends IntentService{
     Log.d(TAG, "Sycning add requests");
     ContentResolver cr = getContentResolver();
     Cursor requestsCursor = cr.query(
-      UDJEventProvider.PLAYLIST_ADD_REQUEST_URI,
+      UDJPlayerProvider.PLAYLIST_ADD_REQUEST_URI,
       addRequestsProjection,
       addRequestSeleciton,
       null,
@@ -207,9 +213,9 @@ public class PlaylistSyncService extends IntentService{
     HashMap<Long, Long> addRequests = new HashMap<Long, Long>();
     if(requestsCursor.moveToFirst()){
       int requestIdColumn = requestsCursor.getColumnIndex(
-        UDJEventProvider.ADD_REQUEST_ID_COLUMN);
+        UDJPlayerProvider.ADD_REQUEST_ID_COLUMN);
       int libIdColumn = requestsCursor.getColumnIndex(
-        UDJEventProvider.ADD_REQUEST_LIB_ID_COLUMN);
+        UDJPlayerProvider.ADD_REQUEST_LIB_ID_COLUMN);
       do{
         addRequests.put(
           requestsCursor.getLong(requestIdColumn),
@@ -273,10 +279,13 @@ public class PlaylistSyncService extends IntentService{
         alertAddSongException(account);
         Log.e(TAG, "Operation Application exception when adding to playist");
       }
-      catch(EventOverException e){
+      catch(PlayerInactiveException e){
         Log.e(TAG, "Event over exceptoin when retreiving playlist");
-        Utils.handleEventOver(this, account);
-      }
+        Utils.handleInactivePlayer(this, account);
+      } catch (PlayerAuthException e) {
+		//TODO REAUTH AND THEN TRY ADD AGAIN
+		e.printStackTrace();
+	}
     }
     //TODO This point of the app seems very dangerous as there are so many
     // exceptions that could occuer. Need to pay special attention to this.
@@ -288,7 +297,7 @@ public class PlaylistSyncService extends IntentService{
     Log.d(TAG, "syncing remove requests");
     ContentResolver cr = getContentResolver();
     Cursor requestsCursor = cr.query(
-      UDJEventProvider.PLAYLIST_REMOVE_REQUEST_URI,
+      UDJPlayerProvider.PLAYLIST_REMOVE_REQUEST_URI,
       removeRequestsProjection,
       removeRequestSeleciton,
       null,
@@ -297,7 +306,7 @@ public class PlaylistSyncService extends IntentService{
     ArrayList<Long> removeRequests = new ArrayList<Long>();
     if(requestsCursor.moveToFirst()){
       int requestIdColumn = requestsCursor.getColumnIndex(
-        UDJEventProvider.REMOVE_REQUEST_PLAYLIST_ID_COLUMN);
+        UDJPlayerProvider.REMOVE_REQUEST_PLAYLIST_ID_COLUMN);
       do{
         removeRequests.add(requestsCursor.getLong(requestIdColumn));
       }while(requestsCursor.moveToNext());
@@ -356,10 +365,13 @@ public class PlaylistSyncService extends IntentService{
         alertRemoveSongException(account);
         Log.e(TAG, "Operation Application exception when adding to playist");
       }
-      catch(EventOverException e){
+      catch(PlayerInactiveException e){
         Log.e(TAG, "Event over exceptoin when retreiving playlist");
-        Utils.handleEventOver(this, account);
-      }
+        Utils.handleInactivePlayer(this, account);
+      } catch (PlayerAuthException e) {
+		// TODO REAUTH AND THEN TRY AGAIN
+		e.printStackTrace();
+	}
     }
     //TODO This point of the app seems very dangerous as there are so many
     // exceptions that could occuer. Need to pay special attention to this.
@@ -372,10 +384,10 @@ public class PlaylistSyncService extends IntentService{
     Log.d(TAG, "Sycning vote requests");
     ContentResolver cr = getContentResolver();
     Cursor requestsCursor = cr.query(
-      UDJEventProvider.VOTES_URI,
+      UDJPlayerProvider.VOTES_URI,
       null,
-      UDJEventProvider.VOTE_SYNC_STATUS_COLUMN + "=" +
-        UDJEventProvider.VOTE_NEEDS_SYNC,
+      UDJPlayerProvider.VOTE_SYNC_STATUS_COLUMN + "=" +
+        UDJPlayerProvider.VOTE_NEEDS_SYNC,
       null,
       null);
     if(requestsCursor.getCount() >0){
@@ -417,10 +429,13 @@ public class PlaylistSyncService extends IntentService{
           Log.e(TAG, "Hard Authentication exception when retreiving playist");
         }
       }
-      catch(EventOverException e){
+      catch(PlayerInactiveException e){
         Log.e(TAG, "Event over exceptoin when retreiving playlist");
-        Utils.handleEventOver(this, account);
-      }
+        Utils.handleInactivePlayer(this, account);
+      } catch (PlayerAuthException e) {
+		// TODO REAUTH AND THEN TRY AGAIN
+		e.printStackTrace();
+	  }
       finally{
         requestsCursor.close();
       }
@@ -436,7 +451,7 @@ public class PlaylistSyncService extends IntentService{
       System.currentTimeMillis());
     Intent syncAddRequests = new Intent(
       Intent.ACTION_INSERT,
-      UDJEventProvider.PLAYLIST_ADD_REQUEST_URI,
+      UDJPlayerProvider.PLAYLIST_ADD_REQUEST_URI,
       this,
       PlaylistSyncService.class);
     syncAddRequests.putExtra(Constants.ACCOUNT_EXTRA, account);
@@ -460,7 +475,7 @@ public class PlaylistSyncService extends IntentService{
       System.currentTimeMillis());
     Intent syncRemoveRequests = new Intent(
       Intent.ACTION_DELETE,
-      UDJEventProvider.PLAYLIST_REMOVE_REQUEST_URI,
+      UDJPlayerProvider.PLAYLIST_REMOVE_REQUEST_URI,
       this,
       PlaylistSyncService.class);
     syncRemoveRequests.putExtra(Constants.ACCOUNT_EXTRA, account);
@@ -481,29 +496,29 @@ public class PlaylistSyncService extends IntentService{
   private void addVoteRequest(long playlistId, int voteType){
     ContentResolver cr = getContentResolver();
     Cursor alreadyThere = cr.query(
-      UDJEventProvider.VOTES_URI, 
+      UDJPlayerProvider.VOTES_URI, 
       null,
-      UDJEventProvider.VOTE_PLAYLIST_ENTRY_ID_COLUMN+"="+playlistId, 
+      UDJPlayerProvider.VOTE_PLAYLIST_ENTRY_ID_COLUMN+"="+playlistId, 
       null, 
       null);
     if(alreadyThere.moveToFirst()){
       ContentValues toUpdate = new ContentValues();
-      toUpdate.put(UDJEventProvider.VOTE_TYPE_COLUMN, voteType);
-      toUpdate.put(UDJEventProvider.VOTE_SYNC_STATUS_COLUMN, 
-        UDJEventProvider.VOTE_NEEDS_SYNC);
+      toUpdate.put(UDJPlayerProvider.VOTE_TYPE_COLUMN, voteType);
+      toUpdate.put(UDJPlayerProvider.VOTE_SYNC_STATUS_COLUMN, 
+        UDJPlayerProvider.VOTE_NEEDS_SYNC);
       cr.update(
-        UDJEventProvider.VOTES_URI, 
+        UDJPlayerProvider.VOTES_URI, 
         toUpdate, 
-        UDJEventProvider.VOTE_PLAYLIST_ENTRY_ID_COLUMN+"="+playlistId, 
+        UDJPlayerProvider.VOTE_PLAYLIST_ENTRY_ID_COLUMN+"="+playlistId, 
         null);
     }
     else{
       ContentValues toInsert = new ContentValues();
-      toInsert.put(UDJEventProvider.VOTE_TYPE_COLUMN, voteType);
+      toInsert.put(UDJPlayerProvider.VOTE_TYPE_COLUMN, voteType);
       toInsert.put(
-        UDJEventProvider.VOTE_PLAYLIST_ENTRY_ID_COLUMN, 
+        UDJPlayerProvider.VOTE_PLAYLIST_ENTRY_ID_COLUMN, 
         Long.valueOf(playlistId));
-      cr.insert(UDJEventProvider.VOTES_URI, toInsert);
+      cr.insert(UDJPlayerProvider.VOTES_URI, toInsert);
     }
     alreadyThere.close();
     showVoteToast(playlistId, voteType, cr);
@@ -514,16 +529,16 @@ public class PlaylistSyncService extends IntentService{
   {
     Log.d(TAG, "Showing toast for id: " + String.valueOf(playlistId));
     String voteMessage = "";
-    if(voteType == UDJEventProvider.UP_VOTE_TYPE){
+    if(voteType == UDJPlayerProvider.UP_VOTE_TYPE){
       voteMessage += getString(R.string.voting_up_message);
     }
-    else if(voteType == UDJEventProvider.DOWN_VOTE_TYPE){
+    else if(voteType == UDJPlayerProvider.DOWN_VOTE_TYPE){
       voteMessage += getString(R.string.voting_down_message);
     }
     Cursor song = cr.query(
-      UDJEventProvider.PLAYLIST_URI, 
-      new String[] {UDJEventProvider.TITLE_COLUMN},
-      UDJEventProvider.PLAYLIST_ID_COLUMN + "=" + String.valueOf(playlistId),
+      UDJPlayerProvider.PLAYLIST_URI, 
+      new String[] {UDJPlayerProvider.TITLE_COLUMN},
+      UDJPlayerProvider.PLAYLIST_ID_COLUMN + "=" + String.valueOf(playlistId),
       null,
       null);
     song.moveToFirst();
@@ -538,17 +553,17 @@ public class PlaylistSyncService extends IntentService{
 
   private void insertAddSongRequest(long libId){
     ContentValues toInsert = new ContentValues();
-    toInsert.put(UDJEventProvider.ADD_REQUEST_LIB_ID_COLUMN, libId);
+    toInsert.put(UDJPlayerProvider.ADD_REQUEST_LIB_ID_COLUMN, libId);
     ContentResolver cr = getContentResolver();
-    cr.insert(UDJEventProvider.PLAYLIST_ADD_REQUEST_URI, toInsert);
+    cr.insert(UDJPlayerProvider.PLAYLIST_ADD_REQUEST_URI, toInsert);
   }
 
   private void insertSongRemoveRequest(long playlistId){
     Log.d(TAG, "In inserting song remove request with id " + playlistId);
     ContentValues toInsert = new ContentValues();
     toInsert.put(
-        UDJEventProvider.REMOVE_REQUEST_PLAYLIST_ID_COLUMN, playlistId);
+        UDJPlayerProvider.REMOVE_REQUEST_PLAYLIST_ID_COLUMN, playlistId);
     ContentResolver cr = getContentResolver();
-    cr.insert(UDJEventProvider.PLAYLIST_REMOVE_REQUEST_URI, toInsert);
+    cr.insert(UDJPlayerProvider.PLAYLIST_REMOVE_REQUEST_URI, toInsert);
   }
 }

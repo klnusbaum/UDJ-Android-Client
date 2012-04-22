@@ -63,7 +63,7 @@
           />
         </activity>
         <activity 
-          android:name="EventActivity"
+          android:name=".PlayerActivity"
           android:launchMode="singleTop"
         >
           <intent-filter>
@@ -140,7 +140,7 @@
           </intent-filter>
         </receiver>
 
-        <provider android:name="org.klnusbaum.udj.UDJEventProvider"
+        <provider android:name=".UDJPlayerProvider"
           android:authorities="org.klnusbaum.udj"
         />
     </application>

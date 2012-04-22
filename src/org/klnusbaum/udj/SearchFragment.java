@@ -74,9 +74,12 @@ public abstract class SearchFragment extends RefreshableListFragment
       setListAdapter(searchAdapter);
     }
     else if(data.getError() ==
-      MusicSearchLoader.MusicSearchError.EVENT_ENDED_ERROR)
+      MusicSearchLoader.MusicSearchError.PLAYER_INACTIVE_ERROR)
     {
-      Utils.handleEventOver(getActivity(), account);
+      Utils.handleInactivePlayer(getActivity(), account);
+    }
+    else if(data.getError() == MusicSearchLoader.MusicSearchError.PLAYER_AUTH_ERROR){
+    	//TODO REAUTH AND TRY AGAIN
     }
 
     if(isResumed()){

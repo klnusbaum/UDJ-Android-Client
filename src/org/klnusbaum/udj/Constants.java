@@ -25,42 +25,42 @@ public class Constants{
   public static final String ACCOUNT_TYPE = "org.klnusbaum.udj";
   public static final String AUTHORITY = "org.klnusbaum.udj";
   public static final String USER_ID_DATA = "org.klnusbaum.udj.userid";
-  public static final String LAST_EVENT_ID_DATA = "org.klnusbaum.udj.EventId";
-  public static final String EVENT_NAME_DATA = "org.klnusbaum.udj.EventName";
-  public static final String EVENT_HOSTNAME_DATA = 
+  public static final String LAST_PLAYER_ID_DATA = "org.klnusbaum.udj.PlayerId";
+  public static final String PLAYER_NAME_DATA = "org.klnusbaum.udj.PlayerName";
+  public static final String PLAYER_HOSTNAME_DATA = 
     "org.klnusbaum.udj.EventHostName";
-  public static final String EVENT_LAT_DATA = "org.klnusbaum.udj.EventLat";
-  public static final String EVENT_LONG_DATA = "org.klnusbaum.udj.EventLong";
-  public static final String EVENT_JOIN_ERROR = "org.klnusbaum.udj.EventJoinError";
+  public static final String PLAYER_LAT_DATA = "org.klnusbaum.udj.PlayerLat";
+  public static final String PLAYER_LONG_DATA = "org.klnusbaum.udj.PlayerLong";
+  public static final String PLAYER_JOIN_ERROR = "org.klnusbaum.udj.PlayerJoinError";
 
 
-  public static final String EVENT_HOST_ID_DATA = "org.klnusbaum.udj.EventHostId";
-  public static final long NO_EVENT_ID = -1;
+  public static final String PLAYER_HOST_ID_DATA = "org.klnusbaum.udj.PlayerOwnerId";
+  public static final long NO_PLAYER_ID = -1;
 
-  public static final String EVENT_STATE_DATA = "org.klusbaum.udj.EventState";
-  public static final int EVENT_JOIN_FAILED = -1;
-  public static final int NOT_IN_EVENT = 0;
-  public static final int JOINING_EVENT = 1;
-  public static final int IN_EVENT = 2;
-  public static final int LEAVING_EVENT = 3;
-  public static final int EVENT_ENDED = 4;
+  public static final String PLAYER_STATE_DATA = "org.klusbaum.udj.PlayerState";
+  public static final int PLAYER_JOIN_FAILED = -1;
+  public static final int NOT_IN_PLAYER = 0;
+  public static final int JOINING_PLAYER = 1;
+  public static final int IN_PLAYER = 2;
+  public static final int LEAVING_PLAYER = 3;
+  public static final int PLAYER_ENDED = 4;
 
 
   /** Constants use for passing account related info in intents */
   public static final String ACCOUNT_EXTRA = "org.klnusbaum.udj.account";
-  public static final String EVENT_ID_EXTRA = "org.klnusbaum.udj.EventId";
+  public static final String PLAYER_ID_EXTRA = "org.klnusbaum.udj.PlayerId";
   public static final String VOTE_TYPE_EXTRA = "org.klnusbaum.udj.VoteType";
   public static final String PLAYLIST_ID_EXTRA = "org.klnusbaum.udj.PlaylistId";
   public static final String LIB_ID_EXTRA = "org.klnusbaum.udj.LibId";
-  public static final String EVENT_NAME_EXTRA = "org.klnusbaum.udj.EventName";
-  public static final String EVENT_HOSTNAME_EXTRA = 
-    "org.klnusbaum.udj.EventHostName";
-  public static final String EVENT_HOST_ID_EXTRA = "org.klnusbaum.udj.EventHostId";
-  public static final String EVENT_LAT_EXTRA = "org.klnusbaum.udj.EventLat";
-  public static final String EVENT_LONG_EXTRA = "org.klnusbaum.udj.EventLong";
-  public static final String EVENT_JOIN_ERROR_EXTRA = "org.klnusbaum.udj.EventJoinError";
-  public static final String EVENT_EXTRA = "org.klnusbaum.udj.Event";
-  public static final String EVENT_PASSWORD_EXTRA = "org.klnusbaum.udj.EventPassword";
+  public static final String PLAYER_NAME_EXTRA = "org.klnusbaum.udj.PlayerName";
+  public static final String PLAYER_OWNER_EXTRA = 
+    "org.klnusbaum.udj.PlayerOwnerName";
+  public static final String PLAYER_OWNER_ID_EXTRA = "org.klnusbaum.udj.PlaywerOwnderId";
+  public static final String PLAYER_LAT_EXTRA = "org.klnusbaum.udj.PlayerLat";
+  public static final String PLAYER_LONG_EXTRA = "org.klnusbaum.udj.PlayerLong";
+  public static final String PLAYER_JOIN_ERROR_EXTRA = "org.klnusbaum.udj.PlayerJoinError";
+  public static final String EVENT_EXTRA = "org.klnusbaum.udj.Player";
+  public static final String PLAYER_PASSWORD_EXTRA = "org.klnusbaum.udj.PlayerPassword";
 
 
   /** Constants for actions used throughout */
@@ -69,14 +69,14 @@ public class Constants{
   public static final String LEFT_EVENT_ACTION = "org.klnusbaum.udj.LeftEvent";
   public static final String EVENT_ENDED_ACTION = 
     "org.klnusbaum.udj.EventEnded";
-  public static final String JOINED_EVENT_ACTION = 
+  public static final String JOINED_PLAYER_ACTION = 
     "org.klnusbaum.udj.JoinedEvent";
-  public static final String EVENT_JOIN_FAILED_ACTION = 
+  public static final String PLAYER_JOIN_FAILED_ACTION = 
     "org.klnusbaum.udj.EventJoinFailed";
   public static final String SHOW_TOAST_ACTION = "org.klnusbaum.udj.ShowToast";
 
   /** URI constants */
-  public static final Uri EVENT_URI = new Uri.Builder().
+  public static final Uri PLAYER_URI = new Uri.Builder().
     authority(Constants.AUTHORITY).appendPath("event").build();
 
   /** Error constants */

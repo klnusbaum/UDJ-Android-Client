@@ -47,14 +47,14 @@ public class Utils{
 
   public static int getEventState(Context context, Account account){
     AccountManager am = AccountManager.get(context);
-    return Integer.valueOf(am.getUserData(account, Constants.EVENT_STATE_DATA));
+    return Integer.valueOf(am.getUserData(account, Constants.PLAYER_STATE_DATA));
   }
 
-  public static void handleEventOver(Context context, Account account){
+  public static void handleInactivePlayer(Context context, Account account){
     Log.d(TAG, "Handling event over exception");
     AccountManager am = AccountManager.get(context);
-    am.setUserData(account, Constants.EVENT_STATE_DATA, 
-      String.valueOf(Constants.EVENT_ENDED));
+    am.setUserData(account, Constants.PLAYER_STATE_DATA, 
+      String.valueOf(Constants.PLAYER_ENDED));
     Intent eventEndedBroadcast = new Intent(Constants.EVENT_ENDED_ACTION);
     context.sendBroadcast(eventEndedBroadcast);
   }

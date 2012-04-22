@@ -35,7 +35,7 @@ import android.util.Log;
 
 import org.klnusbaum.udj.R;
 import org.klnusbaum.udj.Constants;
-import org.klnusbaum.udj.UDJEventProvider;
+import org.klnusbaum.udj.UDJPlayerProvider;
 import org.klnusbaum.udj.containers.LibraryEntry;
 import org.klnusbaum.udj.network.ServerConnection;
 
@@ -51,34 +51,34 @@ public class RESTProcessor{
   private static void setCurrentSong(JSONObject currentSong, ContentResolver cr)
     throws JSONException
   {
-    cr.delete(UDJEventProvider.CURRENT_SONG_URI, null, null); 
+    cr.delete(UDJPlayerProvider.CURRENT_SONG_URI, null, null); 
     ContentValues toInsert = new ContentValues();
     toInsert.put(
-      UDJEventProvider.PLAYLIST_ID_COLUMN, currentSong.getLong("id"));
+      UDJPlayerProvider.PLAYLIST_ID_COLUMN, currentSong.getLong("id"));
     toInsert.put(
-      UDJEventProvider.UP_VOTES_COLUMN, currentSong.getInt("up_votes"));
+      UDJPlayerProvider.UP_VOTES_COLUMN, currentSong.getInt("up_votes"));
     toInsert.put(
-      UDJEventProvider.DOWN_VOTES_COLUMN, currentSong.getInt("down_votes"));
+      UDJPlayerProvider.DOWN_VOTES_COLUMN, currentSong.getInt("down_votes"));
     toInsert.put(
-      UDJEventProvider.TIME_ADDED_COLUMN, currentSong.getString("time_added"));
+      UDJPlayerProvider.TIME_ADDED_COLUMN, currentSong.getString("time_added"));
     toInsert.put(
-      UDJEventProvider.TIME_PLAYED_COLUMN, 
+      UDJPlayerProvider.TIME_PLAYED_COLUMN, 
       currentSong.getString("time_played"));
     toInsert.put(
-      UDJEventProvider.DURATION_COLUMN, currentSong.getInt("duration"));
+      UDJPlayerProvider.DURATION_COLUMN, currentSong.getInt("duration"));
     toInsert.put(
-      UDJEventProvider.TITLE_COLUMN, currentSong.getString("title"));
+      UDJPlayerProvider.TITLE_COLUMN, currentSong.getString("title"));
     toInsert.put(
-      UDJEventProvider.ARTIST_COLUMN, currentSong.getString("artist"));
+      UDJPlayerProvider.ARTIST_COLUMN, currentSong.getString("artist"));
     toInsert.put(
-      UDJEventProvider.ALBUM_COLUMN, currentSong.getString("album"));
+      UDJPlayerProvider.ALBUM_COLUMN, currentSong.getString("album"));
     toInsert.put(
-      UDJEventProvider.ADDER_ID_COLUMN, currentSong.getLong("adder_id"));
+      UDJPlayerProvider.ADDER_ID_COLUMN, currentSong.getLong("adder_id"));
     toInsert.put(
-      UDJEventProvider.ADDER_USERNAME_COLUMN, 
+      UDJPlayerProvider.ADDER_USERNAME_COLUMN, 
       currentSong.getString("adder_username"));
-    cr.insert(UDJEventProvider.CURRENT_SONG_URI, toInsert);
-    cr.notifyChange(UDJEventProvider.CURRENT_SONG_URI, null);
+    cr.insert(UDJPlayerProvider.CURRENT_SONG_URI, toInsert);
+    cr.notifyChange(UDJPlayerProvider.CURRENT_SONG_URI, null);
   }
 
   public static void setActivePlaylist(
@@ -121,18 +121,18 @@ public class RESTProcessor{
       resolver.applyBatch(Constants.AUTHORITY, batchOps);
       batchOps.clear();
     }
-    resolver.notifyChange(UDJEventProvider.PLAYLIST_URI, null);
+    resolver.notifyChange(UDJPlayerProvider.PLAYLIST_URI, null);
   }
 
   private static Set<Long> getNeedUpdatePlaylistEntries(ContentResolver cr){
     HashSet<Long> toReturn = new HashSet<Long>();
     Cursor currentPlaylist = cr.query(
-      UDJEventProvider.PLAYLIST_URI, 
-      new String[]{UDJEventProvider.PLAYLIST_ID_COLUMN},
+      UDJPlayerProvider.PLAYLIST_URI, 
+      new String[]{UDJPlayerProvider.PLAYLIST_ID_COLUMN},
       null, null, null);
     if(currentPlaylist.moveToFirst()){
       int playlistIdColumn = 
-        currentPlaylist.getColumnIndex(UDJEventProvider.PLAYLIST_ID_COLUMN);
+        currentPlaylist.getColumnIndex(UDJPlayerProvider.PLAYLIST_ID_COLUMN);
       do{
         toReturn.add(currentPlaylist.getLong(playlistIdColumn));
       }while(currentPlaylist.moveToNext());
@@ -154,13 +154,13 @@ public class RESTProcessor{
     String[] selectionArgs = new String[playlistEntries.length()];
     int i;
     for(i=0; i<playlistEntries.length()-1; i++){
-      where += UDJEventProvider.PLAYLIST_ID_COLUMN + "!=? AND ";
+      where += UDJPlayerProvider.PLAYLIST_ID_COLUMN + "!=? AND ";
       selectionArgs[i] = playlistEntries.getJSONObject(i).getString("id");
     }
     selectionArgs[i] = playlistEntries.getJSONObject(i).getString("id");
-    where += UDJEventProvider.PLAYLIST_ID_COLUMN + "!=?";  
+    where += UDJPlayerProvider.PLAYLIST_ID_COLUMN + "!=?";  
 
-    cr.delete(UDJEventProvider.PLAYLIST_URI, where, selectionArgs); 
+    cr.delete(UDJPlayerProvider.PLAYLIST_URI, where, selectionArgs); 
   }
 
   private static ContentProviderOperation getPlaylistInsertOp(
@@ -168,19 +168,19 @@ public class RESTProcessor{
     throws JSONException
   {
     final ContentProviderOperation.Builder insertOp = 
-      ContentProviderOperation.newInsert(UDJEventProvider.PLAYLIST_URI)
-      .withValue(UDJEventProvider.PLAYLIST_ID_COLUMN, entry.getLong("id"))
-      .withValue(UDJEventProvider.UP_VOTES_COLUMN, entry.getInt("up_votes"))
-      .withValue(UDJEventProvider.DOWN_VOTES_COLUMN, entry.getInt("down_votes"))
-      .withValue(UDJEventProvider.TIME_ADDED_COLUMN, 
+      ContentProviderOperation.newInsert(UDJPlayerProvider.PLAYLIST_URI)
+      .withValue(UDJPlayerProvider.PLAYLIST_ID_COLUMN, entry.getLong("id"))
+      .withValue(UDJPlayerProvider.UP_VOTES_COLUMN, entry.getInt("up_votes"))
+      .withValue(UDJPlayerProvider.DOWN_VOTES_COLUMN, entry.getInt("down_votes"))
+      .withValue(UDJPlayerProvider.TIME_ADDED_COLUMN, 
         entry.getString("time_added"))
-      .withValue(UDJEventProvider.PRIORITY_COLUMN, priority)
-      .withValue(UDJEventProvider.TITLE_COLUMN, entry.getString("title"))
-      .withValue(UDJEventProvider.ARTIST_COLUMN, entry.getString("artist"))
-      .withValue(UDJEventProvider.ALBUM_COLUMN, entry.getString("album"))
-      .withValue(UDJEventProvider.DURATION_COLUMN, entry.getInt("duration"))
-      .withValue(UDJEventProvider.ADDER_ID_COLUMN, entry.getLong("adder_id"))
-      .withValue(UDJEventProvider.ADDER_USERNAME_COLUMN, 
+      .withValue(UDJPlayerProvider.PRIORITY_COLUMN, priority)
+      .withValue(UDJPlayerProvider.TITLE_COLUMN, entry.getString("title"))
+      .withValue(UDJPlayerProvider.ARTIST_COLUMN, entry.getString("artist"))
+      .withValue(UDJPlayerProvider.ALBUM_COLUMN, entry.getString("album"))
+      .withValue(UDJPlayerProvider.DURATION_COLUMN, entry.getInt("duration"))
+      .withValue(UDJPlayerProvider.ADDER_ID_COLUMN, entry.getLong("adder_id"))
+      .withValue(UDJPlayerProvider.ADDER_USERNAME_COLUMN, 
         entry.getString("adder_username"));
     return insertOp.build();
   }
@@ -190,15 +190,15 @@ public class RESTProcessor{
     throws JSONException
   {
     final ContentProviderOperation.Builder updateOp = 
-      ContentProviderOperation.newUpdate(UDJEventProvider.PLAYLIST_URI)
+      ContentProviderOperation.newUpdate(UDJPlayerProvider.PLAYLIST_URI)
       .withSelection(
-        UDJEventProvider.PLAYLIST_ID_COLUMN + 
+        UDJPlayerProvider.PLAYLIST_ID_COLUMN + 
         "=" + currentEntry.getInt("id"), null)
-      .withValue(UDJEventProvider.PRIORITY_COLUMN, String.valueOf(priority))
+      .withValue(UDJPlayerProvider.PRIORITY_COLUMN, String.valueOf(priority))
       .withValue(
-        UDJEventProvider.UP_VOTES_COLUMN, currentEntry.getInt("up_votes"))
+        UDJPlayerProvider.UP_VOTES_COLUMN, currentEntry.getInt("up_votes"))
       .withValue(
-        UDJEventProvider.DOWN_VOTES_COLUMN, currentEntry.getInt("down_votes"));
+        UDJPlayerProvider.DOWN_VOTES_COLUMN, currentEntry.getInt("down_votes"));
     return updateOp.build();
   }
 
@@ -226,12 +226,12 @@ public class RESTProcessor{
   private static ContentProviderOperation getAddRequestSyncedOp(long requestId){
     final ContentProviderOperation.Builder updateBuilder = 
       ContentProviderOperation.newUpdate(
-        UDJEventProvider.PLAYLIST_ADD_REQUEST_URI)
+        UDJPlayerProvider.PLAYLIST_ADD_REQUEST_URI)
       .withSelection(
-        UDJEventProvider.ADD_REQUEST_ID_COLUMN + "=" +String.valueOf(requestId),
+        UDJPlayerProvider.ADD_REQUEST_ID_COLUMN + "=" +String.valueOf(requestId),
         null)
-      .withValue(UDJEventProvider.ADD_REQUEST_SYNC_STATUS_COLUMN,
-         UDJEventProvider.ADD_REQUEST_SYNCED);
+      .withValue(UDJPlayerProvider.ADD_REQUEST_SYNC_STATUS_COLUMN,
+         UDJPlayerProvider.ADD_REQUEST_SYNCED);
     return updateBuilder.build();
   }
 
@@ -259,12 +259,12 @@ public class RESTProcessor{
   private static ContentProviderOperation getRemoveRequestSyncedOp(long plId){
     final ContentProviderOperation.Builder updateBuilder = 
       ContentProviderOperation.newUpdate(
-        UDJEventProvider.PLAYLIST_REMOVE_REQUEST_URI)
+        UDJPlayerProvider.PLAYLIST_REMOVE_REQUEST_URI)
       .withSelection(
-        UDJEventProvider.REMOVE_REQUEST_PLAYLIST_ID_COLUMN + "=" +String.valueOf(plId),
+        UDJPlayerProvider.REMOVE_REQUEST_PLAYLIST_ID_COLUMN + "=" +String.valueOf(plId),
         null)
-      .withValue(UDJEventProvider.ADD_REQUEST_SYNC_STATUS_COLUMN,
-         UDJEventProvider.REMOVE_REQUEST_SYNCED);
+      .withValue(UDJPlayerProvider.ADD_REQUEST_SYNC_STATUS_COLUMN,
+         UDJPlayerProvider.REMOVE_REQUEST_SYNCED);
     return updateBuilder.build();
   }
 
@@ -274,18 +274,18 @@ public class RESTProcessor{
     ContentResolver cr = context.getContentResolver();
     if(voteRequests.moveToFirst()){
       int idColIndex = 
-        voteRequests.getColumnIndex(UDJEventProvider.VOTE_ID_COLUMN);
+        voteRequests.getColumnIndex(UDJPlayerProvider.VOTE_ID_COLUMN);
       do{
         //TODO these should be batch operations
         long requestId = voteRequests.getLong(idColIndex);
         ContentValues updatedValue = new ContentValues();
         updatedValue.put(
-          UDJEventProvider.VOTE_SYNC_STATUS_COLUMN, 
-          UDJEventProvider.VOTE_SYNCED);
+          UDJPlayerProvider.VOTE_SYNC_STATUS_COLUMN, 
+          UDJPlayerProvider.VOTE_SYNCED);
         cr.update(
-          UDJEventProvider.VOTES_URI,
+          UDJPlayerProvider.VOTES_URI,
           updatedValue,
-          UDJEventProvider.VOTE_ID_COLUMN + "=" + requestId,
+          UDJPlayerProvider.VOTE_ID_COLUMN + "=" + requestId,
           null);
       }while(voteRequests.moveToNext());
     }
