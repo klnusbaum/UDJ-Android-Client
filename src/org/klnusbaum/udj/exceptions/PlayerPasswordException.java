@@ -1,6 +1,8 @@
 package org.klnusbaum.udj.exceptions;
 
 public class PlayerPasswordException extends Exception {
+	public static final long serialVersionUID = 1;
+
 	public PlayerPasswordException(){
 		super();
 	}

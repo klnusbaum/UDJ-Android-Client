@@ -19,18 +19,12 @@
 package org.klnusbaum.udj;
 
 import android.os.Bundle;
+import android.accounts.AccountManager;
 import android.content.Intent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MenuInflater;
-import android.widget.TextView;
 import android.util.Log;
-import android.database.Cursor;
-
-
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
 
 
 import org.klnusbaum.udj.Constants;
@@ -39,63 +33,26 @@ import org.klnusbaum.udj.network.PlaylistSyncService;
 /**
  * The main activity display class.
  */
-public class PlayerActivity extends EventEndedListenerActivity implements
-		LoaderManager.LoaderCallbacks<Cursor> {
-	private static final int CURRENT_SONG_LOADER_ID = 1;
+public class PlayerActivity extends PlayerInactivityListenerActivity {
 	private static final String TAG = "EventActivity";
 
-	private TextView currentSong;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.event);
-		currentSong = (TextView) findViewById(R.id.current_song_title);
-		setCurrentSongDisplay(null);
+		setContentView(R.layout.player);
 		// TODO hanle if no event
 		getPlaylistFromServer();
-		getSupportLoaderManager()
-				.initLoader(CURRENT_SONG_LOADER_ID, null, this);
 	}
 
 	public void getPlaylistFromServer() {
-		int eventState = Utils.getEventState(this, account);
+		int eventState = Utils.getPlayerState(this, account);
 		if (eventState == Constants.IN_PLAYER) {
 			Intent getPlaylist = new Intent(Intent.ACTION_VIEW,
 					UDJPlayerProvider.PLAYLIST_URI, this,
 					PlaylistSyncService.class);
 			getPlaylist.putExtra(Constants.ACCOUNT_EXTRA, account);
 			startService(getPlaylist);
-		}
-	}
-
-	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-		switch (id) {
-		case CURRENT_SONG_LOADER_ID:
-			return new CursorLoader(this, UDJPlayerProvider.CURRENT_SONG_URI,
-					new String[] { UDJPlayerProvider.TITLE_COLUMN }, null, null,
-					null);
-		default:
-			return null;
-		}
-	}
-
-	public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-		if (loader.getId() == CURRENT_SONG_LOADER_ID) {
-			setCurrentSongDisplay(data);
-		}
-	}
-
-	public void onLoaderReset(Loader<Cursor> loader) {
-
-	}
-
-	private void setCurrentSongDisplay(Cursor data) {
-		if (data != null && data.moveToFirst()) {
-			currentSong.setText(data.getString(data
-					.getColumnIndex(UDJPlayerProvider.TITLE_COLUMN)));
-		} else {
-			currentSong.setText(R.string.no_current_song);
 		}
 	}
 
@@ -139,5 +96,10 @@ public class PlayerActivity extends EventEndedListenerActivity implements
 	private void doRandomSearch() {
 		Intent randomIntent = new Intent(this, RandomSearchActivity.class);
 		startActivity(randomIntent);
+	}
+	
+	public void onBackPressed(){
+	    AccountManager am = AccountManager.get(this);
+	    Utils.leavePlayer(am, account);
 	}
 }

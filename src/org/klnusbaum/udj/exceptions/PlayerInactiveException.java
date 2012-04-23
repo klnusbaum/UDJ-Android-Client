@@ -19,6 +19,8 @@
 package org.klnusbaum.udj.exceptions;
 
 public class PlayerInactiveException extends Exception{
+	public static final long serialVersionUID = 1;
+
 
   public PlayerInactiveException(){
     super();

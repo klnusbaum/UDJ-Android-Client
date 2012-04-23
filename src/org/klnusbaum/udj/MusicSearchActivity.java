@@ -18,19 +18,17 @@
  */
 package org.klnusbaum.udj;
 
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 
 import android.os.Bundle;
 import android.content.Intent;
-import android.content.Context;
 import android.util.Log;
 import android.app.SearchManager;
 
 /**
  * An Activity which displays the results of a library search.
  */
-public class MusicSearchActivity extends EventEndedListenerActivity{
+public class MusicSearchActivity extends PlayerInactivityListenerActivity{
 
   private static final String TAG = "MusicActivity";
   private MusicSearchFragment searchFrag;

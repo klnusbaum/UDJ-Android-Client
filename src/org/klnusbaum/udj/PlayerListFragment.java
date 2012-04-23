@@ -23,8 +23,8 @@ import java.util.List;
 import org.klnusbaum.udj.PullToRefresh.RefreshableListFragment;
 import org.klnusbaum.udj.auth.AuthActivity;
 import org.klnusbaum.udj.containers.Player;
-import org.klnusbaum.udj.network.EventCommService;
-import org.klnusbaum.udj.network.EventCommService.PlayerJoinError;
+import org.klnusbaum.udj.network.PlayerCommService;
+import org.klnusbaum.udj.network.PlayerCommService.PlayerJoinError;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
@@ -240,7 +240,7 @@ public class PlayerListFragment extends RefreshableListFragment implements
     }
 
     if(account != null){
-      int playerState = Utils.getEventState(getActivity(), account);
+      int playerState = Utils.getPlayerState(getActivity(), account);
       Log.d(TAG, "Checking Event State");
       if(playerState == Constants.JOINING_PLAYER){
         Log.d(TAG, "Is joining");
@@ -272,7 +272,7 @@ public class PlayerListFragment extends RefreshableListFragment implements
   public void onPause(){
     super.onPause();
     if(account != null){
-      int eventState = Utils.getEventState(getActivity(), account);
+      int eventState = Utils.getPlayerState(getActivity(), account);
       if(eventState == Constants.JOINING_PLAYER){
         getActivity().unregisterReceiver(playerJoinedReceiver);
       }
@@ -362,7 +362,7 @@ public class PlayerListFragment extends RefreshableListFragment implements
       Intent.ACTION_INSERT,
       Constants.PLAYER_URI,
       getActivity(),
-      EventCommService.class);
+      PlayerCommService.class);
     joinPlayerIntent.putExtra(
       Constants.PLAYER_ID_EXTRA,
       toJoin.getPlayerId());

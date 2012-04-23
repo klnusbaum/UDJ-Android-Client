@@ -20,7 +20,6 @@ package org.klnusbaum.udj;
 
 import android.support.v4.content.Loader;
 
-import android.content.Intent;
 import android.accounts.Account;
 import android.app.SearchManager;
 

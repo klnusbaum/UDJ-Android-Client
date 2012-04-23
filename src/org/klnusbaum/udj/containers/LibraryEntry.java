@@ -18,15 +18,10 @@
  */
 package org.klnusbaum.udj.containers;
 
-import android.database.Cursor;
-import android.os.Bundle;
-import android.util.Log;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONException;
 
-import java.util.List;
 import java.util.ArrayList;
 
 

@@ -20,23 +20,14 @@ package org.klnusbaum.udj.network;
 
 import android.util.Log;
 import android.location.Location;
-import android.database.Cursor;
 
 import java.util.List;
-import java.util.HashMap;
 import java.util.Set;
 import java.util.HashSet;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.security.KeyStore;
-import java.security.NoSuchAlgorithmException;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateException;
 
 
 import org.apache.http.params.BasicHttpParams;
@@ -45,14 +36,12 @@ import org.apache.http.HttpVersion;
 import org.apache.http.Header;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.auth.AuthenticationException;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.client.methods.HttpPost;
@@ -61,12 +50,9 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.NameValuePair;
 import org.apache.http.ParseException;
-import org.apache.http.client.HttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.conn.params.ConnManagerParams;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
 import org.apache.http.util.EntityUtils;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.conn.ssl.SSLSocketFactory;
@@ -78,7 +64,6 @@ import org.json.JSONException;
 
 import org.klnusbaum.udj.containers.LibraryEntry;
 import org.klnusbaum.udj.containers.Player;
-import org.klnusbaum.udj.UDJPlayerProvider;
 import org.klnusbaum.udj.exceptions.PlayerAuthException;
 import org.klnusbaum.udj.exceptions.PlayerInactiveException;
 import org.klnusbaum.udj.exceptions.APIVersionException;
@@ -124,9 +109,8 @@ public class ServerConnection{
   private static final String PLAYER_PASSWORD_HEADER = "X-Udj-Player-Password";
 
 
-  private static final int REGISTRATION_TIMEOUT = 30 * 1000; // ms
+  //private static final int REGISTRATION_TIMEOUT = 30 * 1000; // ms
 
-  private static final String AVAILABLE_QUERY_PARAM = "query";
 
   private static DefaultHttpClient httpClient;
 
@@ -226,18 +210,7 @@ public class ServerConnection{
     {
         throw new PlayerInactiveException();
     }
-  } 
-  
-  private static void playerAuthErrorCheck(HttpResponse resp)
-		    throws PlayerAuthException
-  {
-	if(resp.getStatusLine().getStatusCode() == HttpStatus.SC_UNAUTHORIZED
-      && resp.containsHeader(WWW_AUTH_HEADER)
-      && resp.getFirstHeader(WWW_AUTH_HEADER).getValue().equals("begin-participating"))
-	{
-	  throw new PlayerAuthException();
-	}
-  } 
+  }
 
   public static HttpResponse doGet(URI uri, String ticketHash)
     throws IOException
@@ -265,7 +238,6 @@ public class ServerConnection{
     final String response = EntityUtils.toString(resp.getEntity());
     Log.d(TAG, "Event related response: \"" + response +"\"");
     playerInactiveErrorCheck(resp);
-    playerAuthErrorCheck(resp);
     basicResponseErrorCheck(resp, response);
     return response;
   }
@@ -281,7 +253,6 @@ public class ServerConnection{
   {
     Log.d(TAG, "Doing put to uri: " + uri);
     Log.d(TAG, "Put payload is: "+ (payload != null ? payload : "no payload"));
-    String toReturn = null;
     final HttpPut put = new HttpPut(uri);
     put.addHeader(TICKET_HASH_HEADER, ticketHash);
     for(Header h: headers){
@@ -315,7 +286,6 @@ public class ServerConnection{
     final String response = EntityUtils.toString(resp.getEntity());
     Log.d(TAG, "Event related Put response: \"" + response +"\"");
     playerInactiveErrorCheck(resp);
-    playerAuthErrorCheck(resp);
     basicResponseErrorCheck(resp, response);
     return response;
   }
@@ -325,7 +295,6 @@ public class ServerConnection{
   {
     Log.d(TAG, "Doing post to uri: " + uri);
     Log.d(TAG, "Post payload is: "+ (payload != null ? payload : "no payload"));
-    String toReturn = null;
     final HttpPost post = new HttpPost(uri);
     if(payload != null){
       StringEntity entity = new StringEntity(payload);
@@ -354,7 +323,6 @@ public class ServerConnection{
     final String response = EntityUtils.toString(resp.getEntity());
     Log.d(TAG, "Event related Post response: \"" + response +"\"");
     playerInactiveErrorCheck(resp);
-    playerAuthErrorCheck(resp);
     basicResponseErrorCheck(resp, response);
     return response;
 
@@ -385,8 +353,6 @@ public class ServerConnection{
     final String response = EntityUtils.toString(resp.getEntity());
     Log.d(TAG, "Delete response: \"" + response +"\"");
     playerInactiveErrorCheck(resp);
-    playerAuthErrorCheck(resp);
-
     basicResponseErrorCheck(resp, response);
   }
 
@@ -529,121 +495,60 @@ public class ServerConnection{
   }
 
 
-  public static void addSongsToActivePlaylist(
-    HashMap<Long, Long> requests, long eventId, String authToken)
+  public static void addSongToActivePlaylist(
+    long playerId, long libId, String authToken)
     throws JSONException, ParseException, IOException, AuthenticationException,
     PlayerInactiveException, PlayerAuthException
   {
     try{
       URI uri = new URI(
         NETWORK_PROTOCOL, null, SERVER_HOST, SERVER_PORT,
-        "/udj/events/"+eventId+"/active_playlist/songs",
+        "/udj/player/"+playerId+"/active_playlist/songs/"+String.valueOf(libId),
         null, null);
-      String payload = getAddToActivePlaylistJSON(requests).toString();
-      Log.d(TAG, "Add songs to active playlist payload");
-      Log.d(TAG, payload);
-      doEventRelatedPut(uri, authToken, payload); 
+      Log.d(TAG, "Add song to active playlist: " + libId);
+      doEventRelatedPut(uri, authToken, ""); 
     }
     catch(URISyntaxException e){
       //TODO inform caller that their query is bad 
     }
   }
 
-  public static void removeSongsFromActivePlaylist(
-    List<Long> requests, long eventId, String authToken)
+  public static void removeSongFromActivePlaylist(long playerId, long libId, String authToken)
     throws IOException, AuthenticationException, PlayerInactiveException, PlayerAuthException
   {
-    for(Long plId: requests){
-      try{
-        URI uri = new URI(
-          NETWORK_PROTOCOL, null, SERVER_HOST, SERVER_PORT,
-          "/udj/events/"+eventId+"/active_playlist/songs/"+plId,
-          null, null);
-        Log.d(TAG, "Add remove song from active playlist: " + plId);
-        doEventRelatedDelete(uri, authToken);
-      }
-      catch(URISyntaxException e){
-        //TODO inform caller that their query is bad 
-      }
-    }
+
+  	try{
+  		URI uri = new URI(
+  				NETWORK_PROTOCOL, null, SERVER_HOST, SERVER_PORT,
+  				"/udj/player/"+playerId+"/active_playlist/songs/"+libId,
+  				null, null);
+  		Log.d(TAG, "Add remove song from active playlist: " + libId);
+  		doEventRelatedDelete(uri, authToken);
+  	}
+  	catch(URISyntaxException e){
+  		//TODO inform caller that their query is bad 
+  	}
   }
 
-
-  private static JSONArray getAddToActivePlaylistJSON(
-    HashMap<Long, Long> requests) throws JSONException
-  {
-    JSONArray toReturn = new JSONArray();
-    for(Long requestId : requests.keySet()){
-      JSONObject requestObject = new JSONObject();
-      requestObject.put("client_request_id", requestId);
-      requestObject.put("lib_id", requests.get(requestId));
-      toReturn.put(requestObject);
-    }
-    return toReturn;
-  }
-
-  private static HashMap<Long, Long> getRequestsHashMap(JSONArray requests)
-    throws JSONException
-  {
-    HashMap<Long, Long> toReturn = new HashMap<Long, Long>();
-    for(int i=0; i<requests.length(); ++i){
-      JSONObject jObj = requests.getJSONObject(i);
-      toReturn.put(jObj.getLong("client_request_id"), jObj.getLong("lib_id"));
-    }
-    return toReturn;
-  }
-
-  public static JSONObject getVoteRequests(
-    long userId, long eventId, String authToken)
-    throws JSONException, ParseException, IOException, AuthenticationException,
-    PlayerInactiveException, PlayerAuthException
-  {
-    try{
-      URI uri = new URI(
-        NETWORK_PROTOCOL, null, SERVER_HOST, SERVER_PORT,
-        "/udj/events/"+eventId+"/active_playlist/users/"+
-          userId + "/votes",
-        null, null);
-      return new JSONObject(doEventRelatedGet(uri, authToken));
-    }
-    catch(URISyntaxException e){
-      //TODO inform caller that their query is bad 
-    }
-    return null;
-  }
-
-  public static void doSongVotes(Cursor voteRequests, 
-    long eventId, long userId, String authToken)
-    throws IOException, AuthenticationException, PlayerInactiveException, PlayerAuthException
-  {
-    if(voteRequests.moveToFirst()){
-      int idColumnIndex = voteRequests.getColumnIndex(
-        UDJPlayerProvider.VOTE_PLAYLIST_ENTRY_ID_COLUMN);
-      int voteTypeIndex = voteRequests.getColumnIndex(
-        UDJPlayerProvider.VOTE_TYPE_COLUMN);
-      do{
-        long playlistId = voteRequests.getLong(idColumnIndex);
-        int voteType = voteRequests.getInt(voteTypeIndex);
-        voteOnSong(eventId, playlistId, userId, voteType, authToken);
-      }while(voteRequests.moveToNext());
-    }
-  }
-
-  private static void voteOnSong(
-    long eventId, long playlistId, long userId, int voteType, String authToken)
+ 
+  public static void voteOnSong(
+    long playerId, long userId, long libId, int voteType, String authToken)
     throws IOException, AuthenticationException, PlayerInactiveException, PlayerAuthException
   {
     String voteString = null;
-    if(voteType == UDJPlayerProvider.UP_VOTE_TYPE){
+    if(voteType == 1){
       voteString = "upvote";
     }
-    else if(voteType == UDJPlayerProvider.DOWN_VOTE_TYPE){
+    else if(voteType == -1){
       voteString = "downvote";
+    }
+    else{
+    	throw new IllegalArgumentException("Vote type must be either 1 or -1");
     }
     try{
       URI uri = new URI(
         NETWORK_PROTOCOL, null, SERVER_HOST, SERVER_PORT,
-        "/udj/events/"+eventId+"/active_playlist/" + playlistId + "/users/"+
+        "/udj/player/"+playerId+"/active_playlist/songs/" + libId + "/users/"+
           userId + "/" + voteString,
         null, null);
       doEventRelatedPost(uri, authToken, null);

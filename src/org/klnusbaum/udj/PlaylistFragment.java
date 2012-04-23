@@ -26,6 +26,7 @@ import android.accounts.AccountManager;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
@@ -93,10 +94,10 @@ public class PlaylistFragment extends RefreshableListFragment implements
 			menu.findItem(R.id.vote_up).setEnabled(false);
 			menu.findItem(R.id.vote_down).setEnabled(false);
 		} else if (!song.isNull(song
-				.getColumnIndex(UDJPlayerProvider.VOTE_TYPE_COLUMN))) {
+				.getColumnIndex(UDJPlayerProvider.DID_VOTE_COLUMN))) {
 			int voteType = song.getInt(song
-					.getColumnIndex(UDJPlayerProvider.VOTE_TYPE_COLUMN));
-			if (voteType == UDJPlayerProvider.UP_VOTE_TYPE) {
+					.getColumnIndex(UDJPlayerProvider.DID_VOTE_COLUMN));
+			if (voteType == 1) {
 				menu.findItem(R.id.vote_up).setEnabled(false);
 				menu.findItem(R.id.remove_song).setEnabled(false);
 			} else {
@@ -151,13 +152,12 @@ public class PlaylistFragment extends RefreshableListFragment implements
 	private void removeSong(int position) {
 		Cursor toRemove = (Cursor) playlistAdapter.getItem(position);
 		int idIndex = toRemove
-				.getColumnIndex(UDJPlayerProvider.PLAYLIST_ID_COLUMN);
+				.getColumnIndex(UDJPlayerProvider.LIB_ID_COLUMN);
 		Log.d(TAG, "Removing song with id " + toRemove.getLong(idIndex));
-		Intent removeSongIntent = new Intent(Intent.ACTION_DELETE,
-				UDJPlayerProvider.PLAYLIST_REMOVE_REQUEST_URI, getActivity(),
-				PlaylistSyncService.class);
+		Intent removeSongIntent = new Intent(getActivity(), PlaylistSyncService.class);
+		removeSongIntent.setAction(Intent.ACTION_DELETE);
 		removeSongIntent.putExtra(Constants.ACCOUNT_EXTRA, account);
-		removeSongIntent.putExtra(Constants.PLAYLIST_ID_EXTRA,
+		removeSongIntent.putExtra(Constants.LIB_ID_EXTRA,
 				toRemove.getLong(idIndex));
 		getActivity().startService(removeSongIntent);
 		Toast toast = Toast.makeText(getActivity(),
@@ -166,31 +166,33 @@ public class PlaylistFragment extends RefreshableListFragment implements
 	}
 
 	private void upVoteSong(int position) {
-		voteOnSong(position, UDJPlayerProvider.UP_VOTE_TYPE);
+		voteOnSong(position, 1);
 	}
 
 	private void downVoteSong(int position) {
-		voteOnSong(position, UDJPlayerProvider.DOWN_VOTE_TYPE);
+		voteOnSong(position, -1);
 	}
 
 	private void voteOnSong(int position, int voteType) {
 		Cursor song = (Cursor) playlistAdapter.getItem(position);
-		int idIndex = song.getColumnIndex(UDJPlayerProvider.PLAYLIST_ID_COLUMN);
-		long playlistId = song.getLong(idIndex);
+		int idIndex = song.getColumnIndex(UDJPlayerProvider.LIB_ID_COLUMN);
+		long libId = song.getLong(idIndex);
 		Intent voteIntent = new Intent(Intent.ACTION_INSERT,
 				UDJPlayerProvider.VOTES_URI, getActivity(),
 				PlaylistSyncService.class);
 		voteIntent.putExtra(Constants.ACCOUNT_EXTRA, account);
-		voteIntent.putExtra(Constants.VOTE_TYPE_EXTRA, voteType);
-		voteIntent.putExtra(Constants.PLAYLIST_ID_EXTRA, playlistId);
+		voteIntent.putExtra(Constants.VOTE_WEIGHT_EXTRA, voteType);
+		voteIntent.putExtra(Constants.LIB_ID_EXTRA, libId);
 		getActivity().startService(voteIntent);
 	}
 
 	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 		switch (id) {
 		case PLAYLIST_LOADER_ID:
+			Uri playlistUri = UDJPlayerProvider.PLAYLIST_URI.buildUpon().appendQueryParameter(
+					UDJPlayerProvider.USER_ID_PARAM, String.valueOf(userId)).build();
 			return new CursorLoader(getActivity(),
-					UDJPlayerProvider.PLAYLIST_URI, null, null, null,
+					playlistUri, null, null, null,
 					UDJPlayerProvider.PRIORITY_COLUMN);
 		default:
 			return null;

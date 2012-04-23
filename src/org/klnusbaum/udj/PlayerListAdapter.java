@@ -23,7 +23,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.content.Context;
 import android.widget.TextView;
-import android.widget.ImageButton;
 import android.database.DataSetObserver;
 import android.view.LayoutInflater;
 import android.widget.ImageView;

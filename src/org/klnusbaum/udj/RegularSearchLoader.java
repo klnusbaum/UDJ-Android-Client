@@ -18,13 +18,8 @@
  */
 package org.klnusbaum.udj;
 
-import android.support.v4.content.AsyncTaskLoader;
 
 import android.content.Context;
-import android.util.Log;
-import android.accounts.OperationCanceledException;
-import android.accounts.AuthenticatorException;
-import android.accounts.AccountManager;
 import android.accounts.Account;
 
 import java.util.List;

@@ -19,16 +19,11 @@
 package org.klnusbaum.udj.network;
 
 import android.accounts.Account;
-import android.accounts.AccountManager;
-import android.accounts.AuthenticatorException;
-import android.accounts.OperationCanceledException;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ContentProviderClient;
 import android.content.Context;
 import android.content.SyncResult;
 import android.os.Bundle;
-import android.text.TextUtils;
-import android.util.Log;
 
 
 public class SyncAdapter extends AbstractThreadedSyncAdapter{

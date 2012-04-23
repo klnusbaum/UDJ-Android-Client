@@ -22,7 +22,6 @@ import java.io.IOException;
 
 import org.apache.http.auth.AuthenticationException;
 
-import android.content.SharedPreferences;
 import android.accounts.AbstractAccountAuthenticator;
 import android.accounts.Account;
 import android.accounts.AccountAuthenticatorResponse;
@@ -33,7 +32,6 @@ import android.os.Bundle;
 import android.text.TextUtils;
 
 import org.json.JSONException;
-import org.klnusbaum.udj.R;
 import org.klnusbaum.udj.Constants;
 import org.klnusbaum.udj.network.ServerConnection;
 import org.klnusbaum.udj.NeedUpdateActivity;

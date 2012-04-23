@@ -25,9 +25,7 @@ import org.json.JSONObject;
 import org.json.JSONException;
 
 import java.util.List;
-import java.util.ArrayList;
 
-import android.util.Log;
 import android.os.Bundle;
 
 public class Player{

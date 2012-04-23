@@ -49,7 +49,7 @@ public class Constants{
   /** Constants use for passing account related info in intents */
   public static final String ACCOUNT_EXTRA = "org.klnusbaum.udj.account";
   public static final String PLAYER_ID_EXTRA = "org.klnusbaum.udj.PlayerId";
-  public static final String VOTE_TYPE_EXTRA = "org.klnusbaum.udj.VoteType";
+  public static final String VOTE_WEIGHT_EXTRA = "org.klnusbaum.udj.VoteType";
   public static final String PLAYLIST_ID_EXTRA = "org.klnusbaum.udj.PlaylistId";
   public static final String LIB_ID_EXTRA = "org.klnusbaum.udj.LibId";
   public static final String PLAYER_NAME_EXTRA = "org.klnusbaum.udj.PlayerName";
@@ -67,7 +67,7 @@ public class Constants{
   public static final String ADD_REQUESTS_SYNCED = 
     "org.klnusbaum.udj.addRequestsSynced";
   public static final String LEFT_EVENT_ACTION = "org.klnusbaum.udj.LeftEvent";
-  public static final String EVENT_ENDED_ACTION = 
+  public static final String PLAYER_INACTIVE_ACTION = 
     "org.klnusbaum.udj.EventEnded";
   public static final String JOINED_PLAYER_ACTION = 
     "org.klnusbaum.udj.JoinedEvent";

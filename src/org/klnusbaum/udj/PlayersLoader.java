@@ -31,7 +31,6 @@ import android.accounts.AccountManager;
 import android.accounts.AuthenticatorException;
 
 import java.io.IOException;
-import java.io.FileOutputStream;
 import java.util.List;
 
 import org.apache.http.auth.AuthenticationException;

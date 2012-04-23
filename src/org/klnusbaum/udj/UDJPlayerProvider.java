@@ -46,6 +46,8 @@ public class UDJPlayerProvider extends ContentProvider{
 
   public static final Uri VOTES_URI = 
     Uri.parse("content://org.klnusbaum.udj/playlist/votes");
+  
+  public static final String USER_ID_PARAM = "user_id";
 
 
   /** PLAYLIST TABLE */
@@ -58,6 +60,7 @@ public class UDJPlayerProvider extends ContentProvider{
 
   /** Constants used for various Playlist column names */
   public static final String PLAYLIST_ID_COLUMN = "_id";
+  public static final String LIB_ID_COLUMN = "lib_id";
   public static final String PRIORITY_COLUMN = "priority";
   public static final String TIME_ADDED_COLUMN ="time_added";
   public static final String TITLE_COLUMN = "title";
@@ -73,6 +76,7 @@ public class UDJPlayerProvider extends ContentProvider{
   private static final String PLAYLIST_TABLE_CREATE = 
     "CREATE TABLE " + PLAYLIST_TABLE_NAME + "("+
     PLAYLIST_ID_COLUMN + " INTEGER PRIMARY KEY , " +
+    LIB_ID_COLUMN + " INTEGER NOT NULL UNIQUE, "  +
     PRIORITY_COLUMN + " INTEGER NOT NULL, "  +
     TIME_ADDED_COLUMN + " TEXT NOT NULL, " +
     DURATION_COLUMN + " INTEGER NOT NULL, " +
@@ -90,7 +94,7 @@ public class UDJPlayerProvider extends ContentProvider{
 
    /** Constants used for various column names in the votes table */
    public static final String VOTE_ID_COLUMN = "_id";
-   public static final String VOTE_PLAYLIST_ENTRY_ID_COLUMN = "playlist_id";
+   public static final String VOTE_LIB_ID_COLUMN = "lib_id";
    public static final String VOTE_WEIGHT_COLUMN = "vote_weight";
    public static final String VOTER_ID_COLUMN = "voter_id";
 
@@ -99,8 +103,8 @@ public class UDJPlayerProvider extends ContentProvider{
   private static final String VOTES_TABLE_CREATE = 
     "CREATE TABLE " + VOTES_TABLE_NAME + " (" +
     VOTE_ID_COLUMN + " INTEGER PRIMARY KEY AUTOINCREMENT, " + 
-    VOTE_PLAYLIST_ENTRY_ID_COLUMN + " INTEGER REFERENCES " +
-      PLAYLIST_TABLE_NAME + "(" + PLAYLIST_ID_COLUMN + ") ON DELETE CASCADE, " +
+    VOTE_LIB_ID_COLUMN + " INTEGER REFERENCES " +
+      PLAYLIST_TABLE_NAME + "(" + LIB_ID_COLUMN + ") ON DELETE CASCADE, " +
     VOTE_WEIGHT_COLUMN + " INTEGER NOT NULL, " + 
     VOTER_ID_COLUMN + " INTEGER NOT NULL);";
   
@@ -115,7 +119,7 @@ public class UDJPlayerProvider extends ContentProvider{
   public static final String UPVOTES_VIEW_CREATE = "create view " + UPVOTES_VIEW_NAME + " " +
     "as select " + PLAYLIST_TABLE_NAME + ".*, count(" + VOTE_WEIGHT_COLUMN + ") as " 
     + UPCOUNT_COLUMN + " from " + VOTES_TABLE_NAME + "where " + VOTE_WEIGHT_COLUMN + "=1 group by " +
-    VOTE_PLAYLIST_ENTRY_ID_COLUMN + ";";
+    VOTE_LIB_ID_COLUMN + ";";
   
   /** UPVOTES View */
   /** Name of upvotes view */
@@ -128,7 +132,7 @@ public class UDJPlayerProvider extends ContentProvider{
   public static final String DOWNVOTES_VIEW_CREATE = "create view " + DOWNVOTES_VIEW_NAME + " " +
     "as select " + PLAYLIST_TABLE_NAME + ".*, count(" + VOTE_WEIGHT_COLUMN + ") as " 
     + DOWNCOUNT_COLUMN + " from " + VOTES_TABLE_NAME + "where " + VOTE_WEIGHT_COLUMN + "=-1 group by " +
-    VOTE_PLAYLIST_ENTRY_ID_COLUMN + ";";
+    VOTE_LIB_ID_COLUMN + ";";
   
 
   /** Playlist View */
@@ -142,11 +146,12 @@ public class UDJPlayerProvider extends ContentProvider{
     "CREATE VIEW " + PLAYLIST_VIEW_NAME + " AS SELECT " + PLAYLIST_TABLE_NAME + ".*, " +
     UPVOTES_VIEW_NAME + "." + UPCOUNT_COLUMN + ", " + DOWNVOTES_VIEW_NAME + "." + DOWNCOUNT_COLUMN + " " +
     "FROM " + PLAYLIST_TABLE_NAME + " LEFT JOIN " + UPVOTES_VIEW_NAME + " ON " + 
-    PLAYLIST_VIEW_NAME + "." + PLAYLIST_ID_COLUMN + "=" + UPVOTES_VIEW_NAME + "." + PLAYLIST_ID_COLUMN + " " +
+    PLAYLIST_VIEW_NAME + "." + LIB_ID_COLUMN + "=" + UPVOTES_VIEW_NAME + "." + LIB_ID_COLUMN + " " +
     " LEFT JOIN " + DOWNVOTES_VIEW_NAME + " ON " + 
-    PLAYLIST_VIEW_NAME + "." + PLAYLIST_ID_COLUMN + "=" + DOWNVOTES_VIEW_NAME + "." + PLAYLIST_ID_COLUMN + ";";
+    PLAYLIST_VIEW_NAME + "." + LIB_ID_COLUMN + "=" + DOWNVOTES_VIEW_NAME + "." + LIB_ID_COLUMN + ";";
 
 
+  public static final String DID_VOTE_COLUMN = "did_vote";
 
   /** Helper for opening up the actual database. */
   private EventDBHelper dbOpenHelper;
@@ -233,7 +238,13 @@ public class UDJPlayerProvider extends ContentProvider{
   {
     SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
     if(uri.equals(PLAYLIST_URI)){
-      qb.setTables(PLAYLIST_VIEW_NAME);
+      String userId = uri.getQueryParameter(USER_ID_PARAM);
+      if(userId == null){
+        throw new IllegalArgumentException("Must provide user id when getting playlist uri");  
+      }
+      qb.setTables(PLAYLIST_VIEW_NAME + 
+      		", (select " + VOTE_WEIGHT_COLUMN + "as " + DID_VOTE_COLUMN +", " + VOTE_LIB_ID_COLUMN +
+      		" from " + VOTES_TABLE_NAME + " where " + VOTER_ID_COLUMN + "=" + USER_ID_PARAM + ")");
     }
     else if(uri.equals(VOTES_URI)){
       qb.setTables(VOTES_TABLE_NAME);
@@ -241,7 +252,6 @@ public class UDJPlayerProvider extends ContentProvider{
     else{
       throw new IllegalArgumentException("Unknown URI " + uri);
     }
-
     SQLiteDatabase db = dbOpenHelper.getReadableDatabase();
     Cursor toReturn = qb.query(
       db, projection, selection, selectionArgs, null,
@@ -249,6 +259,7 @@ public class UDJPlayerProvider extends ContentProvider{
 
     toReturn.setNotificationUri(getContext().getContentResolver(), uri);
     return toReturn;
+
   }
 
   @Override

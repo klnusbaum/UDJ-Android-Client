@@ -45,7 +45,7 @@ public class Utils{
     return udjAccounts[0];
   }
 
-  public static int getEventState(Context context, Account account){
+  public static int getPlayerState(Context context, Account account){
     AccountManager am = AccountManager.get(context);
     return Integer.valueOf(am.getUserData(account, Constants.PLAYER_STATE_DATA));
   }
@@ -55,8 +55,15 @@ public class Utils{
     AccountManager am = AccountManager.get(context);
     am.setUserData(account, Constants.PLAYER_STATE_DATA, 
       String.valueOf(Constants.PLAYER_ENDED));
-    Intent eventEndedBroadcast = new Intent(Constants.EVENT_ENDED_ACTION);
+    Intent eventEndedBroadcast = new Intent(Constants.PLAYER_INACTIVE_ACTION);
     context.sendBroadcast(eventEndedBroadcast);
+  }
+  
+  public static void leavePlayer(AccountManager am, Account account){
+    am.setUserData(account, Constants.LAST_PLAYER_ID_DATA, 
+      String.valueOf(Constants.NO_PLAYER_ID));
+    am.setUserData(account, Constants.PLAYER_STATE_DATA, 
+      String.valueOf(Constants.NOT_IN_PLAYER));
   }
 
 }

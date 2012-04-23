@@ -20,6 +20,8 @@ package org.klnusbaum.udj.exceptions;
 
 public class APIVersionException extends Exception{
 
+	public static final long serialVersionUID = 1;
+	
   public APIVersionException(){
     super();
   }

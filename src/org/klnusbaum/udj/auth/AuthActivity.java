@@ -27,7 +27,6 @@ import android.view.View;
 import android.widget.EditText;
 import android.os.Bundle;
 import android.content.DialogInterface;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.app.Dialog;
 import android.util.Log;
