@@ -133,37 +133,39 @@ public class PlaylistFragment extends RefreshableListFragment implements
 		}
 	}
 
-	private void shareSong(int position) {
-		Cursor toShare = (Cursor) playlistAdapter.getItem(position);
-		int titleIndex = toShare.getColumnIndex(UDJPlayerProvider.TITLE_COLUMN);
-		String songTitle = toShare.getString(titleIndex);
-		String eventName = am.getUserData(account, Constants.PLAYER_NAME_DATA);
-		Intent shareIntent = new Intent(Intent.ACTION_SEND);
-		shareIntent.setType("text/plain");
-		shareIntent.putExtra(android.content.Intent.EXTRA_TEXT,
-				getString(R.string.song_share_1) + " " + songTitle + " "
-						+ getString(R.string.song_share_2) + " " + eventName
-						+ ".");
-		startActivity(Intent.createChooser(shareIntent,
-				getString(R.string.share_via)));
+  private void shareSong(int position) {
+    Cursor toShare = (Cursor) playlistAdapter.getItem(position);
+    int titleIndex = toShare.getColumnIndex(UDJPlayerProvider.TITLE_COLUMN);
+    String songTitle = toShare.getString(titleIndex);
+    String eventName = am.getUserData(account, Constants.PLAYER_NAME_DATA);
+    Intent shareIntent = new Intent(Intent.ACTION_SEND);
+    shareIntent.setType("text/plain");
+    shareIntent.putExtra(android.content.Intent.EXTRA_TEXT,
+        getString(R.string.song_share_1) + " " + songTitle + " "
+            + getString(R.string.song_share_2) + " " + eventName
+            + ".");
+    startActivity(Intent.createChooser(shareIntent,
+        getString(R.string.share_via)));
 
-	}
+  }
 
-	private void removeSong(int position) {
-		Cursor toRemove = (Cursor) playlistAdapter.getItem(position);
-		int idIndex = toRemove
-				.getColumnIndex(UDJPlayerProvider.LIB_ID_COLUMN);
-		Log.d(TAG, "Removing song with id " + toRemove.getLong(idIndex));
-		Intent removeSongIntent = new Intent(getActivity(), PlaylistSyncService.class);
-		removeSongIntent.setAction(Intent.ACTION_DELETE);
-		removeSongIntent.putExtra(Constants.ACCOUNT_EXTRA, account);
-		removeSongIntent.putExtra(Constants.LIB_ID_EXTRA,
-				toRemove.getLong(idIndex));
-		getActivity().startService(removeSongIntent);
-		Toast toast = Toast.makeText(getActivity(),
-				getString(R.string.removing_song), Toast.LENGTH_SHORT);
-		toast.show();
-	}
+  private void removeSong(int position) {
+    Cursor toRemove = (Cursor) playlistAdapter.getItem(position);
+    int idIndex = toRemove
+        .getColumnIndex(UDJPlayerProvider.LIB_ID_COLUMN);
+    Log.d(TAG, "Removing song with id " + toRemove.getLong(idIndex));
+    Intent removeSongIntent = new Intent(
+      Intent.ACTION_DELETE,
+      UDJPlayerProvider.PLAYLIST_URI,
+      getActivity(),
+      PlaylistSyncService.class);
+    removeSongIntent.putExtra(Constants.ACCOUNT_EXTRA, account);
+    removeSongIntent.putExtra(Constants.LIB_ID_EXTRA, toRemove.getLong(idIndex));
+    getActivity().startService(removeSongIntent);
+    Toast toast = Toast.makeText(getActivity(),
+        getString(R.string.removing_song), Toast.LENGTH_SHORT);
+    toast.show();
+  }
 
 	private void upVoteSong(int position) {
 		voteOnSong(position, 1);

@@ -101,5 +101,6 @@ public class PlayerActivity extends PlayerInactivityListenerActivity {
 	public void onBackPressed(){
 	    AccountManager am = AccountManager.get(this);
 	    Utils.leavePlayer(am, account);
+	    finish();
 	}
 }

@@ -480,7 +480,7 @@ public class PlayerListFragment extends RefreshableListFragment implements
 
     public Dialog onCreateDialog(Bundle icicle){
       final ProgressDialog dialog = new ProgressDialog(getActivity());
-      dialog.setMessage(getActivity().getString(R.string.joining_event));
+      dialog.setMessage(getActivity().getString(R.string.joining_player));
       dialog.setIndeterminate(true);
       return dialog;
     }

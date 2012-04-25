@@ -237,7 +237,7 @@ public class ServerConnection{
   {
     final HttpResponse resp = doGet(uri, ticketHash);
     final String response = EntityUtils.toString(resp.getEntity());
-    Log.d(TAG, "Event related response: \"" + response +"\"");
+    Log.d(TAG, "Player related response: \"" + response +"\"");
     playerInactiveErrorCheck(resp);
     basicResponseErrorCheck(resp, response);
     return response;
@@ -286,6 +286,7 @@ public class ServerConnection{
     final HttpResponse resp = doPut(uri, ticketHash, payload);
     final String response = EntityUtils.toString(resp.getEntity());
     Log.d(TAG, "Player related Put response: \"" + response +"\"");
+    Log.d(TAG, "Player status code: \"" + resp.getStatusLine().getStatusCode());
     playerInactiveErrorCheck(resp);
     basicResponseErrorCheck(resp, response);
     return response;
@@ -364,12 +365,12 @@ public class ServerConnection{
   {
     if(location == null) return null;
     try{
-      URI eventsQuery = new URI(
+      URI playersQuery = new URI(
         NETWORK_PROTOCOL, null, SERVER_HOST, SERVER_PORT, 
         "/udj/players/" + location.getLatitude() + "/" + location.getLongitude(),
         null, null);
-      JSONArray events = new JSONArray(doSimpleGet(eventsQuery, ticketHash));
-      return Player.fromJSONArray(events);
+      JSONArray players = new JSONArray(doSimpleGet(playersQuery, ticketHash));
+      return Player.fromJSONArray(players);
     }
     catch(URISyntaxException e){
       return null;
@@ -383,12 +384,12 @@ public class ServerConnection{
     JSONException, ParseException, IOException, AuthenticationException
   {
     try{
-      URI eventsQuery = new URI(
+      URI playersQuery = new URI(
         NETWORK_PROTOCOL, null, SERVER_HOST, SERVER_PORT, 
         "/udj/players/",
         PARAM_PLAYER_NAME+"="+query, null);
-      JSONArray events = new JSONArray(doSimpleGet(eventsQuery, ticketHash));
-      return Player.fromJSONArray(events);
+      JSONArray players = new JSONArray(doSimpleGet(playersQuery, ticketHash));
+      return Player.fromJSONArray(players);
     }
     catch(URISyntaxException e){
       return null;

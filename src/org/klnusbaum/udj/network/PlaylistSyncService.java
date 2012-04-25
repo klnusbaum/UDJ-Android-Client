@@ -183,12 +183,13 @@ public class PlaylistSyncService extends IntentService{
   	}
   	catch(IOException e){
   		alertAddSongException(account, originalIntent);
-  		Log.e(TAG, "IO exception when adding to playist");
+  		Log.e(TAG, "IO exception when geting authtoken for adding to playist");
+      Log.e(TAG, e.getMessage());
   	}
   	
 		try{
 			ServerConnection.addSongToActivePlaylist(
-					libId, playerId, authToken);
+					playerId, libId, authToken);
 		}
 		catch(JSONException e){
 			alertAddSongException(account, originalIntent);
@@ -201,6 +202,7 @@ public class PlaylistSyncService extends IntentService{
 		catch(IOException e){
 			alertAddSongException(account, originalIntent);
 			Log.e(TAG, "IO exception when adding to playist");
+      Log.e(TAG, e.getMessage());
 		}
 		catch(AuthenticationException e){
 			if(attemptReauth){
@@ -233,15 +235,16 @@ public class PlaylistSyncService extends IntentService{
   	}
   	catch(AuthenticatorException e){
   		alertRemoveSongException(account, originalIntent);
-  		Log.e(TAG, "Authentication exception when adding to playist");
+  		Log.e(TAG, "Authentication exception when removing from playist");
   	}
   	catch(OperationCanceledException e){
   		alertRemoveSongException(account, originalIntent);
-  		Log.e(TAG, "Op Canceled exception when adding to playist");
+  		Log.e(TAG, "Op Canceled exception when removing from playist");
   	}
   	catch(IOException e){
   		alertRemoveSongException(account, originalIntent);
-  		Log.e(TAG, "IO exception when adding to playist");
+  		Log.e(TAG, "IO exception when removing from playist/getting authtoken");
+      Log.e(TAG, e.getMessage());
   	}
 
   	try{
@@ -250,25 +253,26 @@ public class PlaylistSyncService extends IntentService{
   	}
   	catch(ParseException e){
   		alertRemoveSongException(account, originalIntent);
-  		Log.e(TAG, "Parse exception when adding to playist");
+  		Log.e(TAG, "Parse exception when removing from playist");
   	}
   	catch(IOException e){
   		alertRemoveSongException(account, originalIntent);
-  		Log.e(TAG, "IO exception when adding to playist");
+  		Log.e(TAG, "IO exception when removing from playist");
+      Log.e(TAG, e.getMessage());
   	}
   	catch(AuthenticationException e){
   		if(attemptReauth){
   			am.invalidateAuthToken(Constants.ACCOUNT_TYPE, authToken); 
   			removeSongFromPlaylist(account, playerId, libId, false, originalIntent);
-  			Log.e(TAG, "Soft Authentication exception when adding to playist");
+  			Log.e(TAG, "Soft Authentication exception when removing from playist");
   		}
   		else{
   			alertRemoveSongException(account, originalIntent);
-  			Log.e(TAG, "Hard Authentication exception when adding to playist");
+  			Log.e(TAG, "Hard Authentication exception when removing from playist");
   		}
   	}
   	catch(PlayerInactiveException e){
-  		Log.e(TAG, "Event over exceptoin when retreiving playlist");
+  		Log.e(TAG, "Event over exceptoin when removing from playlist");
   		Utils.handleInactivePlayer(this, account);
   	} catch (PlayerAuthException e) {
   		// TODO REAUTH AND THEN TRY AGAIN
@@ -328,31 +332,30 @@ public class PlaylistSyncService extends IntentService{
   private void alertAddSongException(Account account, Intent originalIntent){
     PendingIntent pe = PendingIntent.getService(
       this, 0, originalIntent, 0);
-  	Notification addNotification = new Notification.Builder(this)
-    		.setLargeIcon(((BitmapDrawable)getResources().getDrawable(R.drawable.udjlauncher)).getBitmap())
-    		.setContentTitle(getString(R.string.song_add_failed_title))
-    		.setContentText(getString(R.string.song_add_failed_content))
-    		.setWhen(System.currentTimeMillis())
-    		.setContentIntent(pe).getNotification();
-    		
-    NotificationManager nm = 
-      (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
+    Notification addNotification =
+      new Notification(R.drawable.udjlauncher, "", System.currentTimeMillis());
+    addNotification.setLatestEventInfo(
+        this,
+        getString(R.string.song_add_failed_title),
+        getString(R.string.song_add_failed_content),
+        pe);
+    NotificationManager nm = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
     nm.notify(SONG_ADD_EXCEPTION_ID, addNotification);
   }
 
   private void alertRemoveSongException(Account account, Intent originalIntent){
-  	PendingIntent pe = PendingIntent.getService(
-  			this, 0, originalIntent, 0);
-  	Notification addNotification = new Notification.Builder(this)
-  	  .setLargeIcon(((BitmapDrawable)getResources().getDrawable(R.drawable.udjlauncher)).getBitmap())
-  	  .setContentTitle(getString(R.string.song_remove_failed_title))
-  	  .setContentText(getString(R.string.song_remove_failed_content))
-  	  .setWhen(System.currentTimeMillis())
-  	  .setContentIntent(pe).getNotification();
+    PendingIntent pe = PendingIntent.getService(
+      this, 0, originalIntent, 0);
+    Notification removeNotification = 
+      new Notification(R.drawable.udjlauncher, "", System.currentTimeMillis());
+    removeNotification.setLatestEventInfo(
+        this,
+        getString(R.string.song_remove_failed_title),
+        getString(R.string.song_remove_failed_content),
+        pe);
 
-  	NotificationManager nm = 
-  			(NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
-  	nm.notify(SONG_REMOVE_EXCEPTION_ID, addNotification);
+    NotificationManager nm = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
+    nm.notify(SONG_REMOVE_EXCEPTION_ID, removeNotification);
   }
 
 
