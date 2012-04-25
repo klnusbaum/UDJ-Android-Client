@@ -211,6 +211,7 @@ public class ServerConnection{
         throw new PlayerInactiveException();
     }
   }
+  
 
   public static HttpResponse doGet(URI uri, String ticketHash)
     throws IOException

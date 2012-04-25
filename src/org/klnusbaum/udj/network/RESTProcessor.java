@@ -97,7 +97,7 @@ public class RESTProcessor{
       .withValue(UDJPlayerProvider.ARTIST_COLUMN, song.getString("artist"))
       .withValue(UDJPlayerProvider.ALBUM_COLUMN, song.getString("album"))
       .withValue(UDJPlayerProvider.DURATION_COLUMN, song.getInt("duration"))
-      .withValue(UDJPlayerProvider.ADDER_ID_COLUMN, adder.getLong("user_id"))
+      .withValue(UDJPlayerProvider.ADDER_ID_COLUMN, adder.getLong("id"))
       .withValue(UDJPlayerProvider.ADDER_USERNAME_COLUMN, adder.getString("username"))
       .withValue(UDJPlayerProvider.IS_CURRENTLY_PLAYING_COLUMN, isCurrentSong ? 1 : 0);
     ArrayList<ContentProviderOperation> toReturn = new ArrayList<ContentProviderOperation>();
