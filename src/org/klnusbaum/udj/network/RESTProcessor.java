@@ -51,7 +51,7 @@ public class RESTProcessor{
     JSONObject currentSong = activePlaylist.getJSONObject("current_song");
 
     
-    clearPlaylistAndVotesTable();
+    clearPlaylistAndVotesTable(resolver);
     
     if(currentSong.length() != 0){
       batchOps.addAll(getPlaylistInsertOps(currentSong, 0, true));
@@ -76,9 +76,9 @@ public class RESTProcessor{
     resolver.notifyChange(UDJPlayerProvider.VOTES_URI, null);
   }
 
-  private static void clearPlaylistAndVotesTable() {
-		// TODO Auto-generated method stub
-		
+  private static void clearPlaylistAndVotesTable(ContentResolver cr) {
+		cr.delete(UDJPlayerProvider.PLAYLIST_URI, null, null);
+		cr.delete(UDJPlayerProvider.VOTES_URI, null, null);
 	}
 
   private static List<ContentProviderOperation> getPlaylistInsertOps(

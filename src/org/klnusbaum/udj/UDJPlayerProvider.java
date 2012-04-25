@@ -69,7 +69,7 @@ public class UDJPlayerProvider extends ContentProvider{
   public static final String DURATION_COLUMN = "duration";
   public static final String ADDER_ID_COLUMN = "adder_id";
   public static final String ADDER_USERNAME_COLUMN = "adder_username";
-  public static final String IS_CURRENTLY_PLAYING_COLUMN = "adder_username";
+  public static final String IS_CURRENTLY_PLAYING_COLUMN = "is_currently_player";
 
 
   /** SQL statement for creating the playlist table. */
@@ -85,7 +85,7 @@ public class UDJPlayerProvider extends ContentProvider{
     ALBUM_COLUMN + " TEXT NOT NULL, " +
     ADDER_ID_COLUMN + " INTEGER NOT NULL, " +
     ADDER_USERNAME_COLUMN + " STRING NOT NULL, " +
-    IS_CURRENTLY_PLAYING_COLUMN + " INTEGER NOT NULL DEFAULT=0);";
+    IS_CURRENTLY_PLAYING_COLUMN + " INTEGER NOT NULL DEFAULT 0);";
 
    /** VOTES TABLE */
 
@@ -103,8 +103,7 @@ public class UDJPlayerProvider extends ContentProvider{
   private static final String VOTES_TABLE_CREATE = 
     "CREATE TABLE " + VOTES_TABLE_NAME + " (" +
     VOTE_ID_COLUMN + " INTEGER PRIMARY KEY AUTOINCREMENT, " + 
-    VOTE_LIB_ID_COLUMN + " INTEGER REFERENCES " +
-      PLAYLIST_TABLE_NAME + "(" + LIB_ID_COLUMN + ") ON DELETE CASCADE, " +
+    VOTE_LIB_ID_COLUMN + " INTEGER NOT NULL, " +
     VOTE_WEIGHT_COLUMN + " INTEGER NOT NULL, " + 
     VOTER_ID_COLUMN + " INTEGER NOT NULL);";
   
@@ -116,23 +115,25 @@ public class UDJPlayerProvider extends ContentProvider{
   public static final String UPCOUNT_COLUMN = "upcount";
   
   /** SQL statement for creating the up votes view */
-  public static final String UPVOTES_VIEW_CREATE = "create view " + UPVOTES_VIEW_NAME + " " +
-    "as select " + PLAYLIST_TABLE_NAME + ".*, count(" + VOTE_WEIGHT_COLUMN + ") as " 
-    + UPCOUNT_COLUMN + " from " + VOTES_TABLE_NAME + "where " + VOTE_WEIGHT_COLUMN + "=1 group by " +
-    VOTE_LIB_ID_COLUMN + ";";
+  public static final String UPVOTES_VIEW_CREATE = "CREATE VIEW " + UPVOTES_VIEW_NAME + " " +
+    "AS SELECT " + VOTE_LIB_ID_COLUMN + ", count(" + VOTE_WEIGHT_COLUMN + ") as " 
+    + UPCOUNT_COLUMN + " from " + VOTES_TABLE_NAME + " where " 
+    + VOTE_WEIGHT_COLUMN + "=1 group by " + VOTE_LIB_ID_COLUMN + ";";
   
-  /** UPVOTES View */
-  /** Name of upvotes view */
+  
+  /** DOWNVOTES View */
+  /** Name of DOWNVOTES view */
   private static final String DOWNVOTES_VIEW_NAME = "downvotes";
   
-  /** Constants used for various column names in the upvotes view */
-  public static final String DOWNCOUNT_COLUMN = "upcount";
+  /** Constants used for various column names in the downvotes view */
+  public static final String DOWNCOUNT_COLUMN = "downcount";
   
-  /** SQL statement for creating the up votes view */
-  public static final String DOWNVOTES_VIEW_CREATE = "create view " + DOWNVOTES_VIEW_NAME + " " +
-    "as select " + PLAYLIST_TABLE_NAME + ".*, count(" + VOTE_WEIGHT_COLUMN + ") as " 
-    + DOWNCOUNT_COLUMN + " from " + VOTES_TABLE_NAME + "where " + VOTE_WEIGHT_COLUMN + "=-1 group by " +
-    VOTE_LIB_ID_COLUMN + ";";
+  /** SQL statement for creating the down votes view */
+  public static final String DOWNVOTES_VIEW_CREATE = 
+    "CREATE VIEW " + DOWNVOTES_VIEW_NAME + " AS SELECT " +
+    VOTE_LIB_ID_COLUMN + ", count(" + VOTE_WEIGHT_COLUMN + ") as " 
+    + DOWNCOUNT_COLUMN + " from " + VOTES_TABLE_NAME + " where " 
+    + VOTE_WEIGHT_COLUMN + "=-1 group by " + VOTE_LIB_ID_COLUMN + ";";
   
 
   /** Playlist View */
@@ -146,9 +147,9 @@ public class UDJPlayerProvider extends ContentProvider{
     "CREATE VIEW " + PLAYLIST_VIEW_NAME + " AS SELECT " + PLAYLIST_TABLE_NAME + ".*, " +
     UPVOTES_VIEW_NAME + "." + UPCOUNT_COLUMN + ", " + DOWNVOTES_VIEW_NAME + "." + DOWNCOUNT_COLUMN + " " +
     "FROM " + PLAYLIST_TABLE_NAME + " LEFT JOIN " + UPVOTES_VIEW_NAME + " ON " + 
-    PLAYLIST_VIEW_NAME + "." + LIB_ID_COLUMN + "=" + UPVOTES_VIEW_NAME + "." + LIB_ID_COLUMN + " " +
+    PLAYLIST_TABLE_NAME + "." + LIB_ID_COLUMN + "=" + UPVOTES_VIEW_NAME + "." + LIB_ID_COLUMN + " " +
     " LEFT JOIN " + DOWNVOTES_VIEW_NAME + " ON " + 
-    PLAYLIST_VIEW_NAME + "." + LIB_ID_COLUMN + "=" + DOWNVOTES_VIEW_NAME + "." + LIB_ID_COLUMN + ";";
+    PLAYLIST_TABLE_NAME + "." + LIB_ID_COLUMN + "=" + DOWNVOTES_VIEW_NAME + "." + LIB_ID_COLUMN + ";";
 
 
   public static final String DID_VOTE_COLUMN = "did_vote";
@@ -174,6 +175,8 @@ public class UDJPlayerProvider extends ContentProvider{
     public void onCreate(SQLiteDatabase db){
       db.execSQL(PLAYLIST_TABLE_CREATE);
       db.execSQL(VOTES_TABLE_CREATE);
+      db.execSQL(UPVOTES_VIEW_CREATE);
+      db.execSQL(DOWNVOTES_VIEW_CREATE);
       db.execSQL(PLAYLIST_VIEW_CREATE);
     }
 
@@ -236,26 +239,32 @@ public class UDJPlayerProvider extends ContentProvider{
   public Cursor query(Uri uri, String[] projection, 
     String selection, String[] selectionArgs, String sortOrder)
   {
-    SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
-    if(uri.equals(PLAYLIST_URI)){
+  	Cursor toReturn = null;
+    if(uri.getAuthority().equals(PLAYLIST_URI.getAuthority())
+    		&& uri.getPath().equals(PLAYLIST_URI.getPath()))
+    {
       String userId = uri.getQueryParameter(USER_ID_PARAM);
       if(userId == null){
         throw new IllegalArgumentException("Must provide user id when getting playlist uri");  
       }
-      qb.setTables(PLAYLIST_VIEW_NAME + 
-      		", (select " + VOTE_WEIGHT_COLUMN + "as " + DID_VOTE_COLUMN +", " + VOTE_LIB_ID_COLUMN +
-      		" from " + VOTES_TABLE_NAME + " where " + VOTER_ID_COLUMN + "=" + USER_ID_PARAM + ")");
+      String query = "select " + PLAYLIST_VIEW_NAME + ".*, " + DID_VOTE_COLUMN + " from " + PLAYLIST_VIEW_NAME + 
+      		" left join (select " + VOTE_WEIGHT_COLUMN + " as " + DID_VOTE_COLUMN +", " + VOTE_LIB_ID_COLUMN +
+          		" from " + VOTES_TABLE_NAME + " where " + VOTER_ID_COLUMN + "=" + userId + ") as " +
+          		" user_votes on user_votes." + VOTE_LIB_ID_COLUMN + "=" + PLAYLIST_VIEW_NAME + "." + LIB_ID_COLUMN + ";";
+      toReturn = dbOpenHelper.getReadableDatabase().rawQuery(query, null);
     }
     else if(uri.equals(VOTES_URI)){
+      SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
       qb.setTables(VOTES_TABLE_NAME);
+      SQLiteDatabase db = dbOpenHelper.getReadableDatabase();
+      toReturn = qb.query(
+        db, projection, selection, selectionArgs, null,
+        null, sortOrder);
     }
     else{
       throw new IllegalArgumentException("Unknown URI " + uri);
     }
-    SQLiteDatabase db = dbOpenHelper.getReadableDatabase();
-    Cursor toReturn = qb.query(
-      db, projection, selection, selectionArgs, null,
-      null, sortOrder);
+
 
     toReturn.setNotificationUri(getContext().getContentResolver(), uri);
     return toReturn;

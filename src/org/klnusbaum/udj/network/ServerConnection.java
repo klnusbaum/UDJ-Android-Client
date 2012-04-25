@@ -231,7 +231,7 @@ public class ServerConnection{
     return response;
   }
 
-  public static String doEventRelatedGet(URI uri, String ticketHash)
+  public static String doPlayerRelatedGet(URI uri, String ticketHash)
     throws AuthenticationException, IOException, PlayerInactiveException, PlayerAuthException
   {
     final HttpResponse resp = doGet(uri, ticketHash);
@@ -277,14 +277,14 @@ public class ServerConnection{
     return response;
   }
 
-  public static String doEventRelatedPut( 
+  public static String doPlayerRelatedPut( 
     URI uri, String ticketHash, String payload)
     throws AuthenticationException, IOException, PlayerInactiveException, 
     PlayerAuthException
   {
     final HttpResponse resp = doPut(uri, ticketHash, payload);
     final String response = EntityUtils.toString(resp.getEntity());
-    Log.d(TAG, "Event related Put response: \"" + response +"\"");
+    Log.d(TAG, "Player related Put response: \"" + response +"\"");
     playerInactiveErrorCheck(resp);
     basicResponseErrorCheck(resp, response);
     return response;
@@ -315,13 +315,13 @@ public class ServerConnection{
     return response;
   }
 
-  public static String doEventRelatedPost(
+  public static String doPlayerRelatedPost(
     URI uri, String authToken, String payload)
     throws AuthenticationException, IOException, PlayerInactiveException, PlayerAuthException
   {
     final HttpResponse resp = doPost(uri, authToken, payload);
     final String response = EntityUtils.toString(resp.getEntity());
-    Log.d(TAG, "Event related Post response: \"" + response +"\"");
+    Log.d(TAG, "Player related Post response: \"" + response +"\"");
     playerInactiveErrorCheck(resp);
     basicResponseErrorCheck(resp, response);
     return response;
@@ -346,7 +346,7 @@ public class ServerConnection{
     basicResponseErrorCheck(resp, response);
   }
 
-  public static void doEventRelatedDelete(URI uri, String ticketHash)
+  public static void doPlayerRelatedDelete(URI uri, String ticketHash)
     throws IOException, AuthenticationException, PlayerInactiveException, PlayerAuthException
   {
     final HttpResponse resp = doDelete(uri, ticketHash);
@@ -403,14 +403,14 @@ public class ServerConnection{
   }
 
 
-  public static void joinPlayer(long eventId, long userId, String password, String ticketHash)
+  public static void joinPlayer(long playerId, long userId, String password, String ticketHash)
     throws IOException, AuthenticationException, PlayerInactiveException,
     JSONException, ParseException, PlayerPasswordException
   {
     try{
       URI uri  = new URI(
         NETWORK_PROTOCOL, null, SERVER_HOST, SERVER_PORT, 
-        "/udj/events/" + eventId + "/users/"+userId,
+        "/udj/players/" + playerId + "/users/"+userId,
         null, null);
       final HttpResponse resp;
       if(password == null || password.equals("")){
@@ -422,7 +422,7 @@ public class ServerConnection{
         resp = doPut(uri, ticketHash, "", headers);
       }
       final String response = EntityUtils.toString(resp.getEntity());
-      Log.d(TAG, "Event join Put response: \"" + response +"\"");
+      Log.d(TAG, "Player join Put response: \"" + response +"\"");
       playerInactiveErrorCheck(resp);
       if(
         resp.getStatusLine().getStatusCode() == HttpStatus.SC_UNAUTHORIZED
@@ -434,11 +434,11 @@ public class ServerConnection{
       basicResponseErrorCheck(resp, response);
     }
     catch(URISyntaxException e){
-      Log.e(TAG, "URI syntax error in join event");
+      Log.e(TAG, "URI syntax error in join player");
     }
   }
 
-  public static JSONObject getActivePlaylist(long eventId, 
+  public static JSONObject getActivePlaylist(long playerId, 
     String authToken)
     throws JSONException, ParseException, IOException, AuthenticationException,
     PlayerInactiveException, PlayerAuthException
@@ -446,9 +446,9 @@ public class ServerConnection{
     try{
       URI uri = new URI(
         NETWORK_PROTOCOL, null, SERVER_HOST, SERVER_PORT, 
-        "/udj/events/"+eventId+"/active_playlist",
+        "/udj/players/"+playerId+"/active_playlist",
         null, null);
-      return new JSONObject(doEventRelatedGet(uri, authToken));
+      return new JSONObject(doPlayerRelatedGet(uri, authToken));
     }
     catch(URISyntaxException e){
       return null;
@@ -458,16 +458,16 @@ public class ServerConnection{
 
 
   public static List<LibraryEntry> availableMusicQuery(
-    String query, long eventId, String authToken)
+    String query, long playerId, String authToken)
     throws JSONException, ParseException, IOException, AuthenticationException,
     PlayerInactiveException, PlayerAuthException
   {
     try{
       URI uri = new URI(
         NETWORK_PROTOCOL, null, SERVER_HOST, SERVER_PORT,
-        "/udj/events/"+eventId+"/available_music",
+        "/udj/players/"+playerId+"/available_music",
         "query="+query, null);
-      JSONArray libEntries = new JSONArray(doEventRelatedGet(uri, authToken));
+      JSONArray libEntries = new JSONArray(doPlayerRelatedGet(uri, authToken));
       return LibraryEntry.fromJSONArray(libEntries);
     }
     catch(URISyntaxException e){
@@ -476,16 +476,16 @@ public class ServerConnection{
     return null;
   }
 
-  public static List<LibraryEntry> getRandomMusic(int max, long eventId, String authToken)
+  public static List<LibraryEntry> getRandomMusic(int max, long playerId, String authToken)
     throws JSONException, ParseException, IOException, AuthenticationException,
     PlayerInactiveException, PlayerAuthException
   {
     try{
       URI uri = new URI(
         NETWORK_PROTOCOL, null, SERVER_HOST, SERVER_PORT,
-        "/udj/events/"+eventId+"/available_music/random_songs",
+        "/udj/players/"+playerId+"/available_music/random_songs",
         "max_randoms="+String.valueOf(max), null);
-      JSONArray libEntries = new JSONArray(doEventRelatedGet(uri, authToken));
+      JSONArray libEntries = new JSONArray(doPlayerRelatedGet(uri, authToken));
       return LibraryEntry.fromJSONArray(libEntries);
     }
     catch(URISyntaxException e){
@@ -503,10 +503,10 @@ public class ServerConnection{
     try{
       URI uri = new URI(
         NETWORK_PROTOCOL, null, SERVER_HOST, SERVER_PORT,
-        "/udj/player/"+playerId+"/active_playlist/songs/"+String.valueOf(libId),
+        "/udj/players/"+playerId+"/active_playlist/songs/"+String.valueOf(libId),
         null, null);
       Log.d(TAG, "Add song to active playlist: " + libId);
-      doEventRelatedPut(uri, authToken, ""); 
+      doPlayerRelatedPut(uri, authToken, ""); 
     }
     catch(URISyntaxException e){
       //TODO inform caller that their query is bad 
@@ -520,10 +520,10 @@ public class ServerConnection{
   	try{
   		URI uri = new URI(
   				NETWORK_PROTOCOL, null, SERVER_HOST, SERVER_PORT,
-  				"/udj/player/"+playerId+"/active_playlist/songs/"+libId,
+  				"/udj/players/"+playerId+"/active_playlist/songs/"+libId,
   				null, null);
   		Log.d(TAG, "Add remove song from active playlist: " + libId);
-  		doEventRelatedDelete(uri, authToken);
+  		doPlayerRelatedDelete(uri, authToken);
   	}
   	catch(URISyntaxException e){
   		//TODO inform caller that their query is bad 
@@ -548,10 +548,10 @@ public class ServerConnection{
     try{
       URI uri = new URI(
         NETWORK_PROTOCOL, null, SERVER_HOST, SERVER_PORT,
-        "/udj/player/"+playerId+"/active_playlist/songs/" + libId + "/users/"+
+        "/udj/players/"+playerId+"/active_playlist/songs/" + libId + "/users/"+
           userId + "/" + voteString,
         null, null);
-      doEventRelatedPost(uri, authToken, null);
+      doPlayerRelatedPost(uri, authToken, null);
     }
     catch(URISyntaxException e){
       //TODO inform caller that their query is bad 

@@ -46,8 +46,14 @@ public class Utils{
   }
 
   public static int getPlayerState(Context context, Account account){
-    AccountManager am = AccountManager.get(context);
-    return Integer.valueOf(am.getUserData(account, Constants.PLAYER_STATE_DATA));
+		AccountManager am = AccountManager.get(context);
+  	try{
+  		return Integer.valueOf(am.getUserData(account, Constants.PLAYER_STATE_DATA));
+  	}
+  	catch(NumberFormatException e){
+  		am.setUserData(account, Constants.PLAYER_STATE_DATA, String.valueOf(Constants.NOT_IN_PLAYER));
+  		return Constants.NOT_IN_PLAYER;
+  	}
   }
 
   public static void handleInactivePlayer(Context context, Account account){
