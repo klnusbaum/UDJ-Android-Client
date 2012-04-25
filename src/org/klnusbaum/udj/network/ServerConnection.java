@@ -236,8 +236,9 @@ public class ServerConnection{
     throws AuthenticationException, IOException, PlayerInactiveException, PlayerAuthException
   {
     final HttpResponse resp = doGet(uri, ticketHash);
+    Log.d(TAG, "Doing player related get");
     final String response = EntityUtils.toString(resp.getEntity());
-    Log.d(TAG, "Player related response: \"" + response +"\"");
+    Log.d(TAG, "Player related get response: \"" + response +"\"");
     playerInactiveErrorCheck(resp);
     basicResponseErrorCheck(resp, response);
     return response;

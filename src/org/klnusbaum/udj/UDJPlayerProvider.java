@@ -250,7 +250,7 @@ public class UDJPlayerProvider extends ContentProvider{
       String query = "select " + PLAYLIST_VIEW_NAME + ".*, " + DID_VOTE_COLUMN + " from " + PLAYLIST_VIEW_NAME + 
       		" left join (select " + VOTE_WEIGHT_COLUMN + " as " + DID_VOTE_COLUMN +", " + VOTE_LIB_ID_COLUMN +
           		" from " + VOTES_TABLE_NAME + " where " + VOTER_ID_COLUMN + "=" + userId + ") as " +
-          		" user_votes on user_votes." + VOTE_LIB_ID_COLUMN + "=" + PLAYLIST_VIEW_NAME + "." + LIB_ID_COLUMN + ";";
+          		" user_votes on user_votes." + VOTE_LIB_ID_COLUMN + "=" + PLAYLIST_VIEW_NAME + "." + LIB_ID_COLUMN ;
       toReturn = dbOpenHelper.getReadableDatabase().rawQuery(query, null);
     }
     else if(uri.equals(VOTES_URI)){
