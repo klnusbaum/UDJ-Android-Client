@@ -30,8 +30,8 @@ import android.content.ContentResolver;
 
 
 /**
- * Content provider used to maintain the content asociated
- * with the current event the user is logged into.
+ * Content provider used to maintain the content associated
+ * with the current player the user is logged into.
  */
 public class UDJPlayerProvider extends ContentProvider{
 
@@ -155,19 +155,19 @@ public class UDJPlayerProvider extends ContentProvider{
   public static final String DID_VOTE_COLUMN = "did_vote";
 
   /** Helper for opening up the actual database. */
-  private EventDBHelper dbOpenHelper;
+  private PlayerDBHelper dbOpenHelper;
 
   /**
    * A class for helping open a PartDB.
    */
-  private class EventDBHelper extends SQLiteOpenHelper{
+  private class PlayerDBHelper extends SQLiteOpenHelper{
 
     /**
-     * Constructs a new EventDBHelper object.
+     * Constructs a new PlayerDBHelper object.
      *
       * @param context The context in which the HostsDBOpenHelper is used.
       */
-    EventDBHelper(Context context){
+    PlayerDBHelper(Context context){
       super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
@@ -188,7 +188,7 @@ public class UDJPlayerProvider extends ContentProvider{
 
   @Override
   public boolean onCreate(){
-    dbOpenHelper = new EventDBHelper(getContext());
+    dbOpenHelper = new PlayerDBHelper(getContext());
     return true;
   }
 
@@ -291,7 +291,7 @@ public class UDJPlayerProvider extends ContentProvider{
      //TODO implement this
   }
 
-  public static void eventCleanup(ContentResolver cr){
+  public static void playerCleanup(ContentResolver cr){
     cr.delete(PLAYLIST_URI, null, null);
     cr.delete(VOTES_URI, null, null);
   }

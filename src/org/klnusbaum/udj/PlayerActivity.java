@@ -34,20 +34,20 @@ import org.klnusbaum.udj.network.PlaylistSyncService;
  * The main activity display class.
  */
 public class PlayerActivity extends PlayerInactivityListenerActivity {
-	private static final String TAG = "EventActivity";
+	private static final String TAG = "PlayerActivity";
 
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.player);
-		// TODO hanle if no event
+		// TODO hanle if no player
 		getPlaylistFromServer();
 	}
 
 	public void getPlaylistFromServer() {
-		int eventState = Utils.getPlayerState(this, account);
-		if (eventState == Constants.IN_PLAYER) {
+		int playerState = Utils.getPlayerState(this, account);
+		if (playerState == Constants.IN_PLAYER) {
 			Intent getPlaylist = new Intent(Intent.ACTION_VIEW,
 					UDJPlayerProvider.PLAYLIST_URI, this,
 					PlaylistSyncService.class);

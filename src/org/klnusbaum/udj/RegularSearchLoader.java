@@ -47,13 +47,13 @@ public class RegularSearchLoader extends MusicSearchLoader{
   }
 
   @Override
-  protected MusicSearchResult doSearch(long eventId, String authToken) throws
+  protected MusicSearchResult doSearch(long playerId, String authToken) throws
     JSONException, ParseException, IOException, AuthenticationException, PlayerInactiveException,
     PlayerAuthException
   {
     if(query != null){
         List<LibraryEntry> list = 
-          ServerConnection.availableMusicQuery(query, eventId, authToken);
+          ServerConnection.availableMusicQuery(query, playerId, authToken);
         return new MusicSearchResult(list);
     }
     return new MusicSearchResult(null, MusicSearchError.NO_SEARCH_ERROR);

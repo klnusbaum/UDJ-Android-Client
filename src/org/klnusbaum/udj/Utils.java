@@ -57,12 +57,12 @@ public class Utils{
   }
 
   public static void handleInactivePlayer(Context context, Account account){
-    Log.d(TAG, "Handling event over exception");
+    Log.d(TAG, "Handling player inactive exception");
     AccountManager am = AccountManager.get(context);
     am.setUserData(account, Constants.PLAYER_STATE_DATA, 
       String.valueOf(Constants.PLAYER_ENDED));
-    Intent eventEndedBroadcast = new Intent(Constants.PLAYER_INACTIVE_ACTION);
-    context.sendBroadcast(eventEndedBroadcast);
+    Intent playerInactiveBroadcast = new Intent(Constants.PLAYER_INACTIVE_ACTION);
+    context.sendBroadcast(playerInactiveBroadcast);
   }
   
   public static void leavePlayer(AccountManager am, Account account){

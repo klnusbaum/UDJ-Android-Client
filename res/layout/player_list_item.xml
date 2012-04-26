@@ -25,7 +25,7 @@
   android:padding="4dp"
 >
   <TextView  
-    android:id="@+id/event_item_name"
+    android:id="@+id/player_item_name"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:textAppearance="?android:attr/textAppearanceLarge"
@@ -35,7 +35,7 @@
     android:padding="2dp"
   />
   <TextView
-    android:id="@+id/event_host_label"
+    android:id="@+id/player_host_label"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:textAppearance="?android:attr/textAppearanceSmall"
@@ -43,11 +43,11 @@
     android:singleLine="true"
     android:ellipsize="marquee"
     android:text="@string/player_owner_label"
-    android:layout_below="@id/event_item_name"
+    android:layout_below="@id/player_item_name"
     android:padding="2dp"
   />
   <TextView  
-    android:id="@+id/event_host_name"
+    android:id="@+id/player_host_name"
     android:padding="2dp"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
@@ -55,8 +55,8 @@
     android:singleLine="true"
     android:textStyle="bold"
     android:ellipsize="marquee"
-    android:layout_below="@id/event_item_name"
-    android:layout_toRightOf="@id/event_host_label"
+    android:layout_below="@id/player_item_name"
+    android:layout_toRightOf="@id/player_host_label"
   />
   <ImageView
     android:id="@+id/lock_icon"

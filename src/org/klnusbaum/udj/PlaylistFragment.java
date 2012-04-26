@@ -137,12 +137,12 @@ public class PlaylistFragment extends RefreshableListFragment implements
     Cursor toShare = (Cursor) playlistAdapter.getItem(position);
     int titleIndex = toShare.getColumnIndex(UDJPlayerProvider.TITLE_COLUMN);
     String songTitle = toShare.getString(titleIndex);
-    String eventName = am.getUserData(account, Constants.PLAYER_NAME_DATA);
+    String playerName = am.getUserData(account, Constants.PLAYER_NAME_DATA);
     Intent shareIntent = new Intent(Intent.ACTION_SEND);
     shareIntent.setType("text/plain");
     shareIntent.putExtra(android.content.Intent.EXTRA_TEXT,
         getString(R.string.song_share_1) + " " + songTitle + " "
-            + getString(R.string.song_share_2) + " " + eventName
+            + getString(R.string.song_share_2) + " " + playerName
             + ".");
     startActivity(Intent.createChooser(shareIntent,
         getString(R.string.share_via)));

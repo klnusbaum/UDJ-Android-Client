@@ -133,7 +133,7 @@ public class PlayerCommService extends IntentService{
   		}
   		setEventData(intent, am, account);
   		ContentResolver cr = getContentResolver();
-  		UDJPlayerProvider.eventCleanup(cr);
+  		UDJPlayerProvider.playerCleanup(cr);
   		Intent joinedEventIntent = new Intent(Constants.JOINED_PLAYER_ACTION);
   		am.setUserData(
   				account, Constants.LAST_PLAYER_ID_DATA, String.valueOf(eventId));

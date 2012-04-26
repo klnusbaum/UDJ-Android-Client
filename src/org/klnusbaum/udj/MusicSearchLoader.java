@@ -108,9 +108,9 @@ public abstract class MusicSearchLoader
     }
 
     try{
-      long eventId = 
+      long playerId = 
         Long.valueOf(am.getUserData(account, Constants.LAST_PLAYER_ID_DATA));
-      return doSearch(eventId, authToken);
+      return doSearch(playerId, authToken);
     }
     catch(JSONException e){
       return new MusicSearchResult(null, 
@@ -145,7 +145,7 @@ public abstract class MusicSearchLoader
     forceLoad();
   }
 
-  protected abstract MusicSearchResult doSearch(long eventId, String authToken) throws
+  protected abstract MusicSearchResult doSearch(long playerId, String authToken) throws
     JSONException, ParseException, IOException, AuthenticationException,
     PlayerInactiveException, PlayerAuthException;
 }

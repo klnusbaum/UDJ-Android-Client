@@ -145,8 +145,8 @@ public class PlayerListFragment extends RefreshableListFragment implements
       dismissProgress();
       getActivity().unregisterReceiver(playerJoinedReceiver);
       if(intent.getAction().equals(Constants.JOINED_PLAYER_ACTION)){
-        Intent eventActivityIntent = new Intent(context, PlayerActivity.class);
-        startActivity(eventActivityIntent); 
+        Intent playerActivityIntent = new Intent(context, PlayerActivity.class);
+        startActivity(playerActivityIntent); 
       }
       else if(intent.getAction().equals(Constants.PLAYER_JOIN_FAILED_ACTION)){
         handlePlayerJoinFail();
@@ -241,26 +241,26 @@ public class PlayerListFragment extends RefreshableListFragment implements
 
     if(account != null){
       int playerState = Utils.getPlayerState(getActivity(), account);
-      Log.d(TAG, "Checking Event State");
+      Log.d(TAG, "Checking Player State");
       if(playerState == Constants.JOINING_PLAYER){
         Log.d(TAG, "Is joining");
-        Log.d(TAG, "Reregistering event listener");
+        Log.d(TAG, "Reregistering player listener");
         registerPlayerListener();
       }
       else if(playerState == Constants.PLAYER_JOIN_FAILED){
-        Log.d(TAG, "Event Joined Failed");
+        Log.d(TAG, "Player joining Failed");
         dismissProgress();
         handlePlayerJoinFail();
       }
       else if(playerState == Constants.IN_PLAYER){
-        Log.d(TAG, "Already signed into event. Checking Progress visibility");
+        Log.d(TAG, "Already signed into player. Checking Progress visibility");
         if(isShowingProgress()){
           Log.d(TAG, "Determined progress is indeed showing");
           dismissProgress();
         }
-        Intent startEventActivity = 
+        Intent startPlayerActivity = 
           new Intent(getActivity(), PlayerActivity.class);
-        startActivity(startEventActivity);
+        startActivity(startPlayerActivity);
         return;
       }
       else if(playerAdapter == null || playerAdapter.getCount() ==0){
@@ -272,8 +272,8 @@ public class PlayerListFragment extends RefreshableListFragment implements
   public void onPause(){
     super.onPause();
     if(account != null){
-      int eventState = Utils.getPlayerState(getActivity(), account);
-      if(eventState == Constants.JOINING_PLAYER){
+      int playerState = Utils.getPlayerState(getActivity(), account);
+      if(playerState == Constants.JOINING_PLAYER){
         getActivity().unregisterReceiver(playerJoinedReceiver);
       }
     }
@@ -340,10 +340,10 @@ public class PlayerListFragment extends RefreshableListFragment implements
   }
 
   public void getPasswordForPlayer(Player toJoin){
-    Bundle eventBundle = toJoin.bundleUp();
+    Bundle playerBundle = toJoin.bundleUp();
     PlayerPasswordFragment passwordFragment = new PlayerPasswordFragment();
     passwordFragment.registerPasswordEnteredListener(this);
-    passwordFragment.setArguments(eventBundle);
+    passwordFragment.setArguments(playerBundle);
     passwordFragment.show(getActivity().getSupportFragmentManager(), PASSWORD_TAG);
   }
 

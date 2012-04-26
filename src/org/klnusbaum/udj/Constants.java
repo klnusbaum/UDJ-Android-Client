@@ -28,7 +28,7 @@ public class Constants{
   public static final String LAST_PLAYER_ID_DATA = "org.klnusbaum.udj.PlayerId";
   public static final String PLAYER_NAME_DATA = "org.klnusbaum.udj.PlayerName";
   public static final String PLAYER_HOSTNAME_DATA = 
-    "org.klnusbaum.udj.EventHostName";
+    "org.klnusbaum.udj.PlayerHostname";
   public static final String PLAYER_LAT_DATA = "org.klnusbaum.udj.PlayerLat";
   public static final String PLAYER_LONG_DATA = "org.klnusbaum.udj.PlayerLong";
   public static final String PLAYER_JOIN_ERROR = "org.klnusbaum.udj.PlayerJoinError";
@@ -59,25 +59,25 @@ public class Constants{
   public static final String PLAYER_LAT_EXTRA = "org.klnusbaum.udj.PlayerLat";
   public static final String PLAYER_LONG_EXTRA = "org.klnusbaum.udj.PlayerLong";
   public static final String PLAYER_JOIN_ERROR_EXTRA = "org.klnusbaum.udj.PlayerJoinError";
-  public static final String EVENT_EXTRA = "org.klnusbaum.udj.Player";
+  public static final String PLAYER_EXTRA = "org.klnusbaum.udj.Player";
   public static final String PLAYER_PASSWORD_EXTRA = "org.klnusbaum.udj.PlayerPassword";
 
 
   /** Constants for actions used throughout */
   public static final String ADD_REQUESTS_SYNCED = 
     "org.klnusbaum.udj.addRequestsSynced";
-  public static final String LEFT_EVENT_ACTION = "org.klnusbaum.udj.LeftEvent";
+  public static final String LEFT_PLAYER_ACTION = "org.klnusbaum.udj.LeftPlayer";
   public static final String PLAYER_INACTIVE_ACTION = 
-    "org.klnusbaum.udj.EventEnded";
+    "org.klnusbaum.udj.PlayerInactive";
   public static final String JOINED_PLAYER_ACTION = 
-    "org.klnusbaum.udj.JoinedEvent";
+    "org.klnusbaum.udj.JoinedPlayer";
   public static final String PLAYER_JOIN_FAILED_ACTION = 
-    "org.klnusbaum.udj.EventJoinFailed";
+    "org.klnusbaum.udj.PlayerJoinFailed";
   public static final String SHOW_TOAST_ACTION = "org.klnusbaum.udj.ShowToast";
 
   /** URI constants */
   public static final Uri PLAYER_URI = new Uri.Builder().
-    authority(Constants.AUTHORITY).appendPath("event").build();
+    authority(Constants.AUTHORITY).appendPath("player").build();
 
   /** Error constants */
   public static final int AUTH_API_VERSION_ERROR = 1;

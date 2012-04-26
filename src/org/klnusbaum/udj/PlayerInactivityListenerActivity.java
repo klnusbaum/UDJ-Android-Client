@@ -46,7 +46,7 @@ public abstract class PlayerInactivityListenerActivity extends FragmentActivity{
     public void onReceive(Context context, Intent intent){
       Log.d(TAG, "Recieved player went inactive broadcast");
       unregisterReceiver(playerInactivityReciever);
-      eventEnded();
+      playerWentInactive();
     }
   };
 
@@ -66,7 +66,7 @@ public abstract class PlayerInactivityListenerActivity extends FragmentActivity{
       finish();
     }
     else if(playerState == Constants.PLAYER_ENDED){
-      eventEnded();
+      playerWentInactive();
     }
     else{
       registerReceiver(
@@ -86,15 +86,15 @@ public abstract class PlayerInactivityListenerActivity extends FragmentActivity{
     }
   }
 
-  private void eventEnded(){
-    DialogFragment newFrag = new EventEndedDialog();
+  private void playerWentInactive(){
+    DialogFragment newFrag = new PlayerInactiveDialog();
     Bundle args = new Bundle();
     args.putParcelable(Constants.ACCOUNT_EXTRA,account);
     newFrag.setArguments(args);
     newFrag.show(getSupportFragmentManager(), PLAYER_INACTIVE_DIALOG);
   }
 
-  public static class EventEndedDialog extends DialogFragment{
+  public static class PlayerInactiveDialog extends DialogFragment{
 
     private Account getAccount(){
       return (Account)getArguments().getParcelable(Constants.ACCOUNT_EXTRA);
@@ -108,18 +108,18 @@ public abstract class PlayerInactivityListenerActivity extends FragmentActivity{
         .setPositiveButton(android.R.string.ok,
           new DialogInterface.OnClickListener(){
             public void onClick(DialogInterface dialog, int whichButton){
-              finalizeEventEnd();
+              finalizePlayer();
             }
           })
         .setOnCancelListener(new DialogInterface.OnCancelListener(){
           public void onCancel(DialogInterface dialog){
-            finalizeEventEnd(); 
+            finalizePlayer(); 
           }
         })
         .create();
     }
     
-    private void finalizeEventEnd(){
+    private void finalizePlayer(){
       AccountManager am = AccountManager.get(getActivity());
       Utils.leavePlayer(am, getAccount());
       getActivity().setResult(Activity.RESULT_OK);

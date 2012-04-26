@@ -43,12 +43,12 @@ public class RandomSearchLoader extends MusicSearchLoader{
   }
 
   @Override
-  protected MusicSearchResult doSearch(long eventId, String authToken) throws
+  protected MusicSearchResult doSearch(long playerId, String authToken) throws
     JSONException, ParseException, IOException,
     AuthenticationException, PlayerInactiveException, PlayerAuthException
   {
     List<LibraryEntry> list =
-        ServerConnection.getRandomMusic(40, eventId, authToken);
+        ServerConnection.getRandomMusic(40, playerId, authToken);
     return new MusicSearchResult(list);
   }
 }

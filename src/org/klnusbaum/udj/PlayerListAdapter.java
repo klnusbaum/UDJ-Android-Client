@@ -37,7 +37,7 @@ public class PlayerListAdapter implements ListAdapter{
   public static final String TAG = "PlayerListAdapter";
   private List<Player> players;
   private Context context;
-  public static final int EVENT_ENTRY_VIEW_TYPE = 0;
+  public static final int PLAYER_ENTRY_VIEW_TYPE = 0;
 
   public PlayerListAdapter(Context context){
     this.players = null;
@@ -75,7 +75,7 @@ public class PlayerListAdapter implements ListAdapter{
     return null;
   }
 
-  public Player getEvent(int position){
+  public Player getPlayer(int position){
     if(players != null){
       return players.get(position);
     }
@@ -90,12 +90,12 @@ public class PlayerListAdapter implements ListAdapter{
   }
 
   public int getItemViewType(int position){
-    return EVENT_ENTRY_VIEW_TYPE;
+    return PLAYER_ENTRY_VIEW_TYPE;
   }
 
   public View getView(int position, View convertView, ViewGroup parent){
     //TODO should probably enforce view type
-    Player player = getEvent(position);
+    Player player = getPlayer(position);
     View toReturn = convertView;
     if(toReturn == null){
       //toReturn = View.inflate(context, R.layout.library_list_item, null);
@@ -104,10 +104,10 @@ public class PlayerListAdapter implements ListAdapter{
       toReturn = inflater.inflate(R.layout.player_list_item, null);
     }
 
-    TextView eventName = (TextView)toReturn.findViewById(R.id.event_item_name);
+    TextView playerName = (TextView)toReturn.findViewById(R.id.player_item_name);
     TextView hostName = 
-      (TextView)toReturn.findViewById(R.id.event_host_name);
-    eventName.setText(player.getName());
+      (TextView)toReturn.findViewById(R.id.player_host_name);
+    playerName.setText(player.getName());
     hostName.setText(player.getOwnerName());
     if(player.getHasPassword()){
       Log.d(TAG, "Unhidding lock");
