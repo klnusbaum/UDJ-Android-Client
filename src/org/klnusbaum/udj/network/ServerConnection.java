@@ -227,7 +227,8 @@ public class ServerConnection{
   {
     final HttpResponse resp = doGet(uri, ticketHash);
     final String response = EntityUtils.toString(resp.getEntity());
-    Log.d(TAG, "Simple get response: \"" + response +"\"");
+    Log.d(TAG, "Simple get response: " + resp.getStatusLine().getStatusCode() +
+        "\"" + response +"\"");
     basicResponseErrorCheck(resp, response);
     return response;
   }
@@ -274,7 +275,8 @@ public class ServerConnection{
   {
     final HttpResponse resp = doPut(uri, ticketHash, payload);
     final String response = EntityUtils.toString(resp.getEntity());
-    Log.d(TAG, "Simple Put response: \"" + response +"\"");
+    Log.d(TAG, "Simple put response: " + resp.getStatusLine().getStatusCode() +
+        "\"" + response +"\"");
     basicResponseErrorCheck(resp, response);
     return response;
   }
@@ -313,7 +315,8 @@ public class ServerConnection{
   {
     final HttpResponse resp = doPost(uri, authToken, payload);
     final String response = EntityUtils.toString(resp.getEntity());
-    Log.d(TAG, "Simple Post response: \"" + response +"\"");
+    Log.d(TAG, "Simple post response: " + resp.getStatusLine().getStatusCode() +
+        "\"" + response +"\"");
     basicResponseErrorCheck(resp, response);
     return response;
   }
@@ -324,7 +327,8 @@ public class ServerConnection{
   {
     final HttpResponse resp = doPost(uri, authToken, payload);
     final String response = EntityUtils.toString(resp.getEntity());
-    Log.d(TAG, "Player related Post response: \"" + response +"\"");
+    Log.d(TAG, "Player post response: " + resp.getStatusLine().getStatusCode() +
+        "\"" + response +"\"");
     playerInactiveErrorCheck(resp);
     basicResponseErrorCheck(resp, response);
     return response;
@@ -345,7 +349,8 @@ public class ServerConnection{
   {
     final HttpResponse resp = doDelete(uri, ticketHash);
     final String response = EntityUtils.toString(resp.getEntity());
-    Log.d(TAG, "Delete response: \"" + response +"\"");
+    Log.d(TAG, "Delete response: " + resp.getStatusLine().getStatusCode() +
+        "\"" + response +"\"");
     basicResponseErrorCheck(resp, response);
   }
 
@@ -354,7 +359,8 @@ public class ServerConnection{
   {
     final HttpResponse resp = doDelete(uri, ticketHash);
     final String response = EntityUtils.toString(resp.getEntity());
-    Log.d(TAG, "Delete response: \"" + response +"\"");
+    Log.d(TAG, "Player related Delete response: " + resp.getStatusLine().getStatusCode() +
+        "\"" + response +"\"");
     playerInactiveErrorCheck(resp);
     basicResponseErrorCheck(resp, response);
   }

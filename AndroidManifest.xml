@@ -59,7 +59,7 @@
           </intent-filter>
           <meta-data 
             android:name="android.app.searchable"
-            android:resource="@xml/event_searchable"
+            android:resource="@xml/player_searchable"
           />
         </activity>
         <activity 

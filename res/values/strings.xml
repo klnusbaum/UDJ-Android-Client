@@ -32,12 +32,12 @@
     <string name="no_library_songs">No Results To Display</string>
     <string name="quit_title">Quit?</string>
     <string name="quit_message">Are you sure you want to leave the party?</string>
-    <string name="no_event_items">No events nearby</string>
+    <string name="no_player_items">No players nearby</string>
     <string name="players_load_error">Error loading players</string>
     <string name="login_error">Login Error</string>
     <string name="login_error_message">Try reentering your username and password</string>
     <string name="song_search_hint">Search for songs...</string>
-    <string name="event_search_hint">Search for events...</string>
+    <string name="player_search_hint">Search for players...</string>
     <string name="searching_lib">Searching library...</string>
     <string name="bad_password">Password incorrect</string>
     <string name="bad_username_and_password">Couldn\'t find account matching the given username and password</string>
@@ -57,7 +57,7 @@
     <string name="no_network_connection">No network connection available</string>
     <string name="player_join_fail_title">Joining Player Failed</string>
     <string name="unknown_error_message">Unknown error. Please contact developers.</string>
-    <string name="server_join_fail_message">We couldn\'t reach the event host</string>
+    <string name="server_join_fail_message">We couldn\'t reach the player</string>
     <string name="auth_join_fail_message">Username and password didn\'t work</string>
     <string name="player_inactive_join_fail_message">Player currently inactive </string>
     <string name="no_network_join_fail_message">No internet connection</string>
@@ -71,22 +71,21 @@
     <string name="vote_down">Vote down</string>
     <string name="remove_song">Remove from playlist</string>
     <string name="total_votes">Rank</string>
-    <string name="logout_of_other_event">Logout</string>
-    <string name="already_in_event_join_fail_message">You\'re logged into</string>
     <string name="menu_random">Random</string>
     <string name="adding_song">Adding</string>
     <string name="dont_have_account">        <![CDATA[
-    Don\'t have an account? <a href="https://www.udjevents.com/registration/register/">
+    Don\'t have an account? <a href="https://www.udjplayer.com/registration/register/">
       Sign up here!</a>]]></string>
   <string name="removing_song">Removing Song</string>
   <string name="song_remove_failed_title">Removing Song(s) Failed</string>
   <string name="song_remove_failed_content">Tap here to retry</string>
   <string name="api_version_error_message">This Version of UDJ no longer works. Please download the latest update for it.</string>
-  <string name="event_label">Event:</string>
-  <string name="event_password">Event Password</string>
+  <string name="player_label">Player:</string>
+  <string name="player_password">Player Password</string>
   <string name="unknown_auth_error">We\'re currently having difficulties.</string>
   <string name="check_updates">Check For Updates</string>
   <string name="password_required">Password Required</string>
+  <string name="bad_player_password">Incorrect Password</string>
 
     <!-- Stuff for action bar compatibility -->
     <string name="alternate_title">An alternate title that is long</string>

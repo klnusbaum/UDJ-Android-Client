@@ -184,7 +184,7 @@ public class PlayerListFragment extends RefreshableListFragment implements
         restoreLastSearch(icicle);
       }
     }
-    setEmptyText(getActivity().getString(R.string.no_event_items));
+    setEmptyText(getActivity().getString(R.string.no_player_items));
     playerAdapter = new PlayerListAdapter(getActivity());
     setListAdapter(playerAdapter);
     setListShown(false);
@@ -525,6 +525,9 @@ public class PlayerListFragment extends RefreshableListFragment implements
         break;
       case NO_NETWORK_ERROR:
         message = getString(R.string.no_network_join_fail_message); 
+        break;
+      case PLAYER_PASSWORD_ERROR:
+        message = getString(R.string.bad_player_password);
         break;
       default:
         message = getString(R.string.unknown_error_message);
