@@ -393,7 +393,7 @@ public class ServerConnection{
     try{
       URI playersQuery = new URI(
         NETWORK_PROTOCOL, null, SERVER_HOST, SERVER_PORT, 
-        "/udj/players/",
+        "/udj/players",
         PARAM_PLAYER_NAME+"="+query, null);
       JSONArray players = new JSONArray(doSimpleGet(playersQuery, ticketHash));
       return Player.fromJSONArray(players);
@@ -485,6 +485,24 @@ public class ServerConnection{
     return null;
   }
 
+  public static List<String> getArtists(long playerId, String authToken)
+    throws JSONException, ParseException, IOException, AuthenticationException,
+    PlayerInactiveException, PlayerAuthException
+  {
+    try{
+      URI uri = new URI(
+        NETWORK_PROTOCOL, null, SERVER_HOST, SERVER_PORT,
+        "/udj/players/"+playerId+"/available_music/artists",
+        null, null);
+      JSONArray artists = new JSONArray(doPlayerRelatedGet(uri, authToken));
+      return toStringList(artists);
+    }
+    catch(URISyntaxException e){
+      //TODO inform caller that their query is bad 
+    }
+    return null;
+  }
+
   public static List<LibraryEntry> getRandomMusic(int max, long playerId, String authToken)
     throws JSONException, ParseException, IOException, AuthenticationException,
     PlayerInactiveException, PlayerAuthException
@@ -565,5 +583,15 @@ public class ServerConnection{
     catch(URISyntaxException e){
       //TODO inform caller that their query is bad 
     }
+  }
+
+  private static List<String> toStringList(final JSONArray array)
+    throws JSONException
+  {
+    ArrayList<String> toReturn = new ArrayList();
+    for(int i=0; i<array.length(); ++i){
+      toReturn.add(array.getString(i));
+    }
+    return toReturn;
   }
 }

@@ -75,7 +75,6 @@ public class PlayerSelectorActivity extends FragmentActivity{
     PlayerListFragment list= getPlayerList();
     list.setListShown(false);
       list.refreshList();
-      
       return true;
     case R.id.menu_search:
       startSearch(null, false, null, false);

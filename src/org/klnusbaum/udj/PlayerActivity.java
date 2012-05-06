@@ -18,6 +18,11 @@
  */
 package org.klnusbaum.udj;
 
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.Fragment;
+import android.support.v4.view.ViewPager;
+
 import android.os.Bundle;
 import android.accounts.AccountManager;
 import android.content.Intent;
@@ -29,78 +34,89 @@ import android.util.Log;
 
 import org.klnusbaum.udj.Constants;
 import org.klnusbaum.udj.network.PlaylistSyncService;
+import com.viewpagerindicator.TitlePageIndicator;
+import com.viewpagerindicator.TitleProvider;
 
 /**
  * The main activity display class.
  */
 public class PlayerActivity extends PlayerInactivityListenerActivity {
-	private static final String TAG = "PlayerActivity";
+  private static final String TAG = "PlayerActivity";
+
+  PlayerPagerAdapter pagerAdapter;
+  ViewPager pager;
 
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.player);
-		// TODO hanle if no player
-		getPlaylistFromServer();
-	}
+  @Override
+  protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.player);
+    getPlaylistFromServer();
 
-	public void getPlaylistFromServer() {
-		int playerState = Utils.getPlayerState(this, account);
-		if (playerState == Constants.IN_PLAYER) {
-			Intent getPlaylist = new Intent(Intent.ACTION_VIEW,
-					UDJPlayerProvider.PLAYLIST_URI, this,
-					PlaylistSyncService.class);
-			getPlaylist.putExtra(Constants.ACCOUNT_EXTRA, account);
-			startService(getPlaylist);
-		}
-	}
+    pagerAdapter = new PlayerPagerAdapter(getSupportFragmentManager());
+    pager = (ViewPager)findViewById(R.id.player_pager);
+    pager.setAdapter(pagerAdapter);
 
-	public boolean onCreateOptionsMenu(Menu menu) {
-		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.player, menu);
-		return true;
-	}
+    TitlePageIndicator titleIndicator = (TitlePageIndicator)findViewById(R.id.titles);
+    titleIndicator.setViewPager(pager);
+  }
 
-	private PlaylistFragment getPlaylist() {
-		return ((PlaylistFragment) getSupportFragmentManager()
-				.findFragmentById(R.id.playlist));
-	}
+  public void getPlaylistFromServer() {
+    int playerState = Utils.getPlayerState(this, account);
+    // TODO hanle if no player
+    if (playerState == Constants.IN_PLAYER) {
+      Intent getPlaylist = new Intent(Intent.ACTION_VIEW,
+          UDJPlayerProvider.PLAYLIST_URI, this,
+          PlaylistSyncService.class);
+      getPlaylist.putExtra(Constants.ACCOUNT_EXTRA, account);
+      startService(getPlaylist);
+    }
+  }
 
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-		case R.id.menu_refresh:
-			PlaylistFragment list = getPlaylist();
-			list.setListShown(false);
-			getPlaylistFromServer();
-			return true;
-		case R.id.menu_search:
-			startSearch(null, false, null, false);
-			return true;
-		case R.id.menu_random:
-			doRandomSearch();
-			return true;
-		default:
-			return super.onOptionsItemSelected(item);
-		}
-	}
+  public void onBackPressed(){
+      AccountManager am = AccountManager.get(this);
+      Utils.leavePlayer(am, account);
+      finish();
+  }
 
-	protected void onNewIntent(Intent intent) {
-		Log.d(TAG, "In on new intent");
-		if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-			intent.setClass(this, MusicSearchActivity.class);
-			startActivityForResult(intent, 0);
-		}
-	}
 
-	private void doRandomSearch() {
-		Intent randomIntent = new Intent(this, RandomSearchActivity.class);
-		startActivity(randomIntent);
-	}
-	
-	public void onBackPressed(){
-	    AccountManager am = AccountManager.get(this);
-	    Utils.leavePlayer(am, account);
-	    finish();
-	}
+
+  public static class PlayerPagerAdapter extends FragmentPagerAdapter implements TitleProvider{
+    public PlayerPagerAdapter(FragmentManager fm){
+      super(fm);
+    }
+
+    @Override
+    public int getCount(){
+      return 3;
+    }
+
+    public Fragment getItem(int position){
+      switch(position){
+        case 0:
+          return new PlaylistFragment();
+        case 1:
+          return new ArtistsDisplayFragment();
+        case 2:
+          return new RandomSearchFragment();
+        default:
+          return null;
+      }
+    }
+
+    public String getTitle(int position){
+      switch(position){
+        case 0:
+          return "Playlist";
+        case 1:
+          return "Artists";
+        case 2:
+          return "Random";
+        default:
+          return "Unknown";
+      }
+    }
+  }
+
+
 }
