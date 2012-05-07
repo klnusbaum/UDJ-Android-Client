@@ -28,10 +28,10 @@ import android.app.SearchManager;
 /**
  * An Activity which displays the results of a library search.
  */
-public class MusicSearchActivity extends PlayerInactivityListenerActivity{
+public class RegularSearchActivity extends PlayerInactivityListenerActivity{
 
   private static final String TAG = "MusicActivity";
-  private MusicSearchFragment searchFrag;
+  private RegularSearchFragment searchFrag;
 
   @Override
   public void onCreate(Bundle savedInstanceState){
@@ -40,7 +40,7 @@ public class MusicSearchActivity extends PlayerInactivityListenerActivity{
     //TODO before calling fragment, to get ID and give that to it.
     FragmentManager fm = getSupportFragmentManager();
     if(fm.findFragmentById(android.R.id.content) == null){
-      searchFrag = new MusicSearchFragment();
+      searchFrag = new RegularSearchFragment();
       fm.beginTransaction().add(android.R.id.content, searchFrag).commit();
     }
   }

@@ -134,5 +134,14 @@ public class PlayerActivity extends PlayerInactivityListenerActivity {
     return false;
   }
 
+  protected void onNewIntent(Intent intent){
+    if(Intent.ACTION_SEARCH.equals(intent.getAction())){
+      intent.setClass(this, RegularSearchActivity.class);
+      startActivityForResult(intent, 0);
+    }
+    else{
+      super.onNewIntent(intent);
+    }
+  }
 
 }

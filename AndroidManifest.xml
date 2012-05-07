@@ -77,8 +77,9 @@
           />
         </activity>
         <activity 
-          android:name="MusicSearchActivity"
+          android:name="RegularSearchActivity"
           android:launchMode="singleTop"
+          android:theme="@style/Theme.Sherlock"
         >
           <intent-filter>
             <action android:name="android.intent.action.SEARCH"/> 

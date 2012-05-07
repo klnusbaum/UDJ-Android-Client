@@ -23,7 +23,7 @@ import android.support.v4.content.Loader;
 import android.accounts.Account;
 import android.app.SearchManager;
 
-public class MusicSearchFragment extends SearchFragment{
+public class RegularSearchFragment extends SearchFragment{
 
   public Loader<MusicSearchLoader.MusicSearchResult> getLoader(Account account){
     String searchQuery = getActivity().getIntent().getStringExtra(SearchManager.QUERY);
