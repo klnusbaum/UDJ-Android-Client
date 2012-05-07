@@ -20,20 +20,22 @@ package org.klnusbaum.udj;
 
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
-
+import android.support.v4.widget.SearchViewCompat;
 
 import android.os.Bundle;
 import android.content.Intent;
 import android.app.SearchManager;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.MenuInflater;
+
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
+
+import com.actionbarsherlock.app.SherlockFragmentActivity;
 
 
 /**
  * Class used for displaying the contents of the Playlist.
  */
-public class PlayerSelectorActivity extends FragmentActivity{
+public class PlayerSelectorActivity extends SherlockFragmentActivity{
 
 
   @Override
@@ -52,6 +54,22 @@ public class PlayerSelectorActivity extends FragmentActivity{
       ((PlayerListFragment)getSupportFragmentManager().findFragmentById(android.R.id.content));
   }
 
+  public boolean onCreateOptionsMenu(Menu menu){
+    menu.add("Search")
+      .setIcon(R.drawable.ic_search)
+      .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+    return true;
+  }
+
+  public boolean onOptionsItemSelected(MenuItem item) {
+    if(item.getTitle().equals("Search")){
+      startSearch(null, false, null, false);
+      return true;
+    }
+    return false;
+  }
+
+
   protected void onNewIntent(Intent intent){
     if(Intent.ACTION_SEARCH.equals(intent.getAction())){
       PlayerListFragment list = getPlayerList();
@@ -63,26 +81,6 @@ public class PlayerSelectorActivity extends FragmentActivity{
     }
   }
 
-  public boolean onCreateOptionsMenu(Menu menu){
-    MenuInflater inflater = getMenuInflater();
-    inflater.inflate(R.menu.player_list, menu);
-    return true;
-  }
-
-  public boolean onOptionsItemSelected(MenuItem item){
-    switch (item.getItemId()) {
-    case R.id.menu_refresh:
-    PlayerListFragment list= getPlayerList();
-    list.setListShown(false);
-      list.refreshList();
-      return true;
-    case R.id.menu_search:
-      startSearch(null, false, null, false);
-      return true;
-    default:  
-      return super.onOptionsItemSelected(item);
-    }
-  }
 
   public void refreshList(){
     getPlayerList().refreshList();

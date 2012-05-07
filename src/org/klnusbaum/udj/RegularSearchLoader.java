@@ -51,7 +51,7 @@ public class RegularSearchLoader extends MusicSearchLoader{
     JSONException, ParseException, IOException, AuthenticationException, PlayerInactiveException,
     PlayerAuthException
   {
-    if(query != null){
+    if(query != null && query != ""){
         List<LibraryEntry> list = 
           ServerConnection.availableMusicQuery(query, playerId, authToken);
         return new MusicSearchResult(list);
