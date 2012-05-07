@@ -24,6 +24,10 @@ import android.widget.ArrayAdapter;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.LayoutInflater;
+import android.content.Intent;
+import android.app.SearchManager;
+import android.widget.ListView;
+import android.util.Log;
 
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -35,6 +39,8 @@ public class ArtistsDisplayFragment extends ListFragment
   implements LoaderManager.LoaderCallbacks<ArtistsLoader.ArtistsResult>
 {
   private static final int ARTISTS_LOADER_TAG = 0;
+
+  private static final String TAG = "ArtistDisplayFragment";
 
   //private ArtistsAdapter artistsAdapter;
   private ArrayAdapter<String> artistsAdapter;
@@ -94,6 +100,16 @@ public class ArtistsDisplayFragment extends ListFragment
 
   public void onLoaderReset(Loader<ArtistsLoader.ArtistsResult> loader){
     setListAdapter(null);
+  }
+
+  @Override
+  public void onListItemClick(ListView l, View v, int position, long id){
+    Log.d(TAG, "In on list item clicked");
+    final String artist = (String)artistsAdapter.getItem(position);
+    Intent artistIntent = new Intent(Intent.ACTION_SEARCH);
+    artistIntent.setClass(getActivity(), ArtistSearchActivity.class);
+    artistIntent.putExtra(SearchManager.QUERY, artist);
+    startActivityForResult(artistIntent, 0);
   }
 
 }

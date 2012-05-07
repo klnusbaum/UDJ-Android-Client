@@ -97,7 +97,14 @@
 
        <activity
          android:name="RandomSearchActivity"
+         android:theme="@style/Theme.Sherlock"
        />
+
+       <activity
+         android:name="ArtistSearchActivity"
+         android:theme="@style/Theme.Sherlock"
+       />
+
 
        <activity
          android:name="NeedUpdateActivity"

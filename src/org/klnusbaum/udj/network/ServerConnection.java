@@ -503,6 +503,26 @@ public class ServerConnection{
     return null;
   }
 
+  public static List<LibraryEntry> getSongsByArtists(
+    String artistQuery, long playerId, String authToken)
+    throws JSONException, ParseException, IOException, AuthenticationException,
+    PlayerInactiveException, PlayerAuthException
+  {
+    try{
+      URI uri = new URI(
+        NETWORK_PROTOCOL, null, SERVER_HOST, SERVER_PORT,
+        "/udj/players/"+playerId+"/available_music/artists/"+artistQuery,
+        null, null);
+      JSONArray libEntries = new JSONArray(doPlayerRelatedGet(uri, authToken));
+      return LibraryEntry.fromJSONArray(libEntries);
+    }
+    catch(URISyntaxException e){
+      //TODO inform caller that their query is bad 
+    }
+    return null;
+  }
+
+
   public static List<LibraryEntry> getRandomMusic(int max, long playerId, String authToken)
     throws JSONException, ParseException, IOException, AuthenticationException,
     PlayerInactiveException, PlayerAuthException
