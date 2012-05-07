@@ -36,7 +36,10 @@ import android.support.v4.app.DialogFragment;
 
 import org.klnusbaum.udj.network.PlayerCommService;
 
-public abstract class PlayerInactivityListenerActivity extends FragmentActivity{
+import com.actionbarsherlock.app.SherlockFragmentActivity;
+
+
+public abstract class PlayerInactivityListenerActivity extends SherlockFragmentActivity{
 
   private static final String PLAYER_INACTIVE_DIALOG = "player_inactive_dialog";
   private static final String TAG = "PlayerInactivityListenerActivity";

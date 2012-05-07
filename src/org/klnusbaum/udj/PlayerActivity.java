@@ -26,25 +26,26 @@ import android.support.v4.view.ViewPager;
 import android.os.Bundle;
 import android.accounts.AccountManager;
 import android.content.Intent;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.MenuInflater;
 import android.util.Log;
 
 
 import org.klnusbaum.udj.Constants;
 import org.klnusbaum.udj.network.PlaylistSyncService;
+
 import com.viewpagerindicator.TitlePageIndicator;
 import com.viewpagerindicator.TitleProvider;
 
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
 /**
  * The main activity display class.
  */
 public class PlayerActivity extends PlayerInactivityListenerActivity {
   private static final String TAG = "PlayerActivity";
 
-  PlayerPagerAdapter pagerAdapter;
-  ViewPager pager;
+  private PlayerPagerAdapter pagerAdapter;
+  private ViewPager pager;
 
 
   @Override
@@ -116,6 +117,21 @@ public class PlayerActivity extends PlayerInactivityListenerActivity {
           return "Unknown";
       }
     }
+  }
+
+  public boolean onCreateOptionsMenu(Menu menu){
+    menu.add("Search")
+      .setIcon(R.drawable.ic_search)
+      .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+    return true;
+  }
+
+  public boolean onOptionsItemSelected(MenuItem item) {
+    if(item.getTitle().equals("Search")){
+      startSearch(null, false, null, false);
+      return true;
+    }
+    return false;
   }
 
 
