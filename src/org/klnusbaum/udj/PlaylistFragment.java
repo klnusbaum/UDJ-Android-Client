@@ -21,6 +21,7 @@ package org.klnusbaum.udj;
 import org.klnusbaum.udj.PullToRefresh.RefreshableListFragment;
 import org.klnusbaum.udj.network.PlaylistSyncService;
 
+import android.widget.ImageButton;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.content.Context;
@@ -173,7 +174,28 @@ public class PlaylistFragment extends RefreshableListFragment implements
     toast.show();
   }
 
-  private void upVoteSong(int position) {
+  private void upVoteSong(long libId) {
+    voteOnSong(libId, 1);
+  }
+
+  private void downVoteSong(long libId) {
+    voteOnSong(libId, -1);
+  }
+
+  private void voteOnSong(long libId, int voteType) {
+    //int idIndex = song.getColumnIndex(UDJPlayerProvider.LIB_ID_COLUMN);
+    //long libId = song.getLong(idIndex);
+    Intent voteIntent = new Intent(Intent.ACTION_INSERT,
+        UDJPlayerProvider.VOTES_URI, getActivity(),
+        PlaylistSyncService.class);
+    voteIntent.putExtra(Constants.ACCOUNT_EXTRA, account);
+    voteIntent.putExtra(Constants.VOTE_WEIGHT_EXTRA, voteType);
+    voteIntent.putExtra(Constants.LIB_ID_EXTRA, libId);
+    getActivity().startService(voteIntent);
+
+  }
+
+  /*private void upVoteSong(int position) {
     voteOnSong(position, 1);
   }
 
@@ -193,7 +215,7 @@ public class PlaylistFragment extends RefreshableListFragment implements
     voteIntent.putExtra(Constants.LIB_ID_EXTRA, libId);
     getActivity().startService(voteIntent);
 
-  }
+  }*/
 
   public Loader<Cursor> onCreateLoader(int id, Bundle args) {
     switch (id) {
@@ -237,13 +259,23 @@ public class PlaylistFragment extends RefreshableListFragment implements
 
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
+      int idIndex = cursor.getColumnIndex(UDJPlayerProvider.LIB_ID_COLUMN);
+      final long libId = cursor.getLong(idIndex);
 
+      //Vote button reset
+      final ImageButton upButton = (ImageButton)view.findViewById(R.id.upvote_button);
+      final ImageButton downButton = (ImageButton)view.findViewById(R.id.downvote_button);
+      upButton.setVisibility(View.VISIBLE);
+      downButton.setVisibility(View.VISIBLE);
+      upButton.setEnabled(true);
+      downButton.setEnabled(true);
 
       TextView songName = (TextView) view
           .findViewById(R.id.playlistSongName);
       int titleIndex = cursor
           .getColumnIndex(UDJPlayerProvider.TITLE_COLUMN);
-      songName.setText(cursor.getString(titleIndex));
+      final String title = cursor.getString(titleIndex);
+      songName.setText(title);
 
       TextView artist = (TextView) view
           .findViewById(R.id.playlistArtistName);
@@ -264,6 +296,43 @@ public class PlaylistFragment extends RefreshableListFragment implements
             .getColumnIndex(UDJPlayerProvider.ADDER_USERNAME_COLUMN);
         addByUser.setText(getString(R.string.added_by) + " "
             + cursor.getString(adderUserNameIndex));
+      }
+
+
+      upButton.setOnClickListener(new View.OnClickListener(){
+        public void onClick(View v){
+          upVoteSong(libId);
+          Toast toast = Toast.makeText(getActivity(),
+            getString(R.string.voting_up_message) + " " + title, Toast.LENGTH_SHORT);
+          toast.show();
+        }
+      });
+
+      downButton.setOnClickListener(new View.OnClickListener(){
+        public void onClick(View v){
+          downVoteSong(libId);
+          Toast toast = Toast.makeText(getActivity(),
+            getString(R.string.voting_down_message) + " " + title, Toast.LENGTH_SHORT);
+          toast.show();
+        }
+      });
+
+      if(cursor.getInt(cursor.getColumnIndex(UDJPlayerProvider.IS_CURRENTLY_PLAYING_COLUMN)) ==1){
+        upButton.setVisibility(View.GONE);
+        downButton.setVisibility(View.GONE);
+      }
+      else if(cursor.getLong(cursor.getColumnIndex(UDJPlayerProvider.ADDER_ID_COLUMN)) ==userId){
+        upButton.setEnabled(false);
+        downButton.setEnabled(false);
+      }
+      else if (!cursor.isNull(cursor.getColumnIndex(UDJPlayerProvider.DID_VOTE_COLUMN))) {
+        int voteType = cursor.getInt(cursor.getColumnIndex(UDJPlayerProvider.DID_VOTE_COLUMN));
+        if(voteType == 1){
+          upButton.setEnabled(false);
+        }
+        else{
+          downButton.setEnabled(false);
+        }
       }
     }
 

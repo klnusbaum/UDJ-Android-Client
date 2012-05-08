@@ -80,6 +80,7 @@
     android:minWidth="40dp"
     android:src="@drawable/downarrow"
     android:layout_toLeftOf="@+id/upvote_button"
+    android:layout_centerVertical="true"
   />
   <ImageButton
     android:id="@id/upvote_button"
@@ -89,6 +90,7 @@
     android:minWidth="40dp"
     android:src="@drawable/uparrow"
     android:layout_alignParentRight="true"
+    android:layout_centerVertical="true"
   />
 
 </RelativeLayout>
