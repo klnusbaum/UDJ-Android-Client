@@ -86,6 +86,7 @@ public class PlaylistFragment extends RefreshableListFragment implements
   @Override
   public void onCreateContextMenu(ContextMenu menu, View v,
       ContextMenu.ContextMenuInfo menuInfo) {
+    /*
     AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
     Cursor song = (Cursor) playlistAdapter.getItem(info.position);
     MenuInflater inflater = getActivity().getMenuInflater();
@@ -113,7 +114,7 @@ public class PlaylistFragment extends RefreshableListFragment implements
       menu.findItem(R.id.remove_song).setEnabled(false);
     }
     int titleIndex = song.getColumnIndex(UDJPlayerProvider.TITLE_COLUMN);
-    menu.setHeaderTitle(song.getString(titleIndex));
+    menu.setHeaderTitle(song.getString(titleIndex));*/
   }
 
   @Override

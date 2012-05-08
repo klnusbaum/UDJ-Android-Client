@@ -57,6 +57,7 @@
     android:ellipsize="marquee"
     android:layout_below="@id/player_item_name"
     android:layout_toRightOf="@id/player_host_label"
+    android:layout_centerVertical="true"
   />
   <ImageView
     android:id="@+id/lock_icon"
@@ -67,5 +68,6 @@
     android:layout_alignParentRight="true"
     android:layout_alignParentTop="true"
     android:visibility="invisible"
+    android:layout_centerVertical="true"
   />
 </RelativeLayout>

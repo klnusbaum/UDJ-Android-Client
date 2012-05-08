@@ -39,6 +39,7 @@
     android:ellipsize="marquee"
     gravity="left"
     android:layout_alignParentLeft="true"
+    android:layout_toLeftOf="@+id/downvote_button"
   />
 
   <TextView
@@ -53,6 +54,7 @@
     android:ellipsize="marquee"
     gravity="left"
     android:layout_alignParentLeft="true"
+    android:layout_toLeftOf="@id/downvote_button"
   />
 
   <TextView
@@ -67,6 +69,26 @@
     android:ellipsize="marquee"
     gravity="left"
     android:layout_alignParentLeft="true"
+    android:layout_toLeftOf="@id/downvote_button"
+  />
+
+  <ImageButton
+    android:id="@id/downvote_button"
+    android:layout_height="wrap_content"
+    android:layout_width="wrap_content"
+    android:minHeight="40dp"
+    android:minWidth="40dp"
+    android:src="@drawable/downarrow"
+    android:layout_toLeftOf="@+id/upvote_button"
+  />
+  <ImageButton
+    android:id="@id/upvote_button"
+    android:layout_height="wrap_content"
+    android:layout_width="wrap_content"
+    android:minHeight="40dp"
+    android:minWidth="40dp"
+    android:src="@drawable/uparrow"
+    android:layout_alignParentRight="true"
   />
 
 </RelativeLayout>
