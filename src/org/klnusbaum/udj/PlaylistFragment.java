@@ -87,35 +87,21 @@ public class PlaylistFragment extends RefreshableListFragment implements
   @Override
   public void onCreateContextMenu(ContextMenu menu, View v,
       ContextMenu.ContextMenuInfo menuInfo) {
-    /*
+
     AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
     Cursor song = (Cursor) playlistAdapter.getItem(info.position);
     MenuInflater inflater = getActivity().getMenuInflater();
     inflater.inflate(R.menu.playlist_context, menu);
     if(song.getInt(song.getColumnIndex(UDJPlayerProvider.IS_CURRENTLY_PLAYING_COLUMN)) == 1){
-      menu.findItem(R.id.vote_up).setEnabled(false);
-      menu.findItem(R.id.vote_down).setEnabled(false);
       menu.findItem(R.id.remove_song).setEnabled(false);
     }
-    else if (song.getLong(song.getColumnIndex(UDJPlayerProvider.ADDER_ID_COLUMN)) == userId) {
-      menu.findItem(R.id.vote_up).setEnabled(false);
-      menu.findItem(R.id.vote_down).setEnabled(false);
-    } else if (!song.isNull(song
-        .getColumnIndex(UDJPlayerProvider.DID_VOTE_COLUMN))) {
-      int voteType = song.getInt(song
-          .getColumnIndex(UDJPlayerProvider.DID_VOTE_COLUMN));
-      if (voteType == 1) {
-        menu.findItem(R.id.vote_up).setEnabled(false);
-        menu.findItem(R.id.remove_song).setEnabled(false);
-      } else {
-        menu.findItem(R.id.vote_down).setEnabled(false);
-        menu.findItem(R.id.remove_song).setEnabled(false);
-      }
-    } else if(!Utils.isCurrentPlayerOwner(am, account)){
+    else if(!Utils.isCurrentPlayerOwner(am, account) && userId != 
+        song.getLong(song.getColumnIndex(UDJPlayerProvider.ADDER_ID_COLUMN)))
+    {
       menu.findItem(R.id.remove_song).setEnabled(false);
     }
     int titleIndex = song.getColumnIndex(UDJPlayerProvider.TITLE_COLUMN);
-    menu.setHeaderTitle(song.getString(titleIndex));*/
+    menu.setHeaderTitle(song.getString(titleIndex));
   }
 
   @Override
@@ -125,12 +111,6 @@ public class PlaylistFragment extends RefreshableListFragment implements
     switch (item.getItemId()) {
     case R.id.share:
       shareSong(info.position);
-      return true;
-    case R.id.vote_up:
-      upVoteSong(info.position);
-      return true;
-    case R.id.vote_down:
-      downVoteSong(info.position);
       return true;
     case R.id.remove_song:
       removeSong(info.position);
@@ -183,8 +163,6 @@ public class PlaylistFragment extends RefreshableListFragment implements
   }
 
   private void voteOnSong(long libId, int voteType) {
-    //int idIndex = song.getColumnIndex(UDJPlayerProvider.LIB_ID_COLUMN);
-    //long libId = song.getLong(idIndex);
     Intent voteIntent = new Intent(Intent.ACTION_INSERT,
         UDJPlayerProvider.VOTES_URI, getActivity(),
         PlaylistSyncService.class);
@@ -192,30 +170,7 @@ public class PlaylistFragment extends RefreshableListFragment implements
     voteIntent.putExtra(Constants.VOTE_WEIGHT_EXTRA, voteType);
     voteIntent.putExtra(Constants.LIB_ID_EXTRA, libId);
     getActivity().startService(voteIntent);
-
   }
-
-  /*private void upVoteSong(int position) {
-    voteOnSong(position, 1);
-  }
-
-  private void downVoteSong(int position) {
-    voteOnSong(position, -1);
-  }
-
-  private void voteOnSong(int position, int voteType) {
-    Cursor song = (Cursor) playlistAdapter.getItem(position);
-    int idIndex = song.getColumnIndex(UDJPlayerProvider.LIB_ID_COLUMN);
-    long libId = song.getLong(idIndex);
-    Intent voteIntent = new Intent(Intent.ACTION_INSERT,
-        UDJPlayerProvider.VOTES_URI, getActivity(),
-        PlaylistSyncService.class);
-    voteIntent.putExtra(Constants.ACCOUNT_EXTRA, account);
-    voteIntent.putExtra(Constants.VOTE_WEIGHT_EXTRA, voteType);
-    voteIntent.putExtra(Constants.LIB_ID_EXTRA, libId);
-    getActivity().startService(voteIntent);
-
-  }*/
 
   public Loader<Cursor> onCreateLoader(int id, Bundle args) {
     switch (id) {
@@ -261,6 +216,13 @@ public class PlaylistFragment extends RefreshableListFragment implements
     public void bindView(View view, Context context, Cursor cursor) {
       int idIndex = cursor.getColumnIndex(UDJPlayerProvider.LIB_ID_COLUMN);
       final long libId = cursor.getLong(idIndex);
+
+      view.setOnLongClickListener(new View.OnLongClickListener(){
+        public boolean onLongClick(View v){
+          getListView().showContextMenuForChild(v);
+          return true;
+        }
+      });
 
       //Vote button reset
       final ImageButton upButton = (ImageButton)view.findViewById(R.id.upvote_button);
