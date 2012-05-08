@@ -90,7 +90,12 @@ public class PlaylistFragment extends RefreshableListFragment implements
     Cursor song = (Cursor) playlistAdapter.getItem(info.position);
     MenuInflater inflater = getActivity().getMenuInflater();
     inflater.inflate(R.menu.playlist_context, menu);
-    if (song.getLong(song.getColumnIndex(UDJPlayerProvider.ADDER_ID_COLUMN)) == userId) {
+    if(song.getInt(song.getColumnIndex(UDJPlayerProvider.IS_CURRENTLY_PLAYING_COLUMN)) == 1){
+      menu.findItem(R.id.vote_up).setEnabled(false);
+      menu.findItem(R.id.vote_down).setEnabled(false);
+      menu.findItem(R.id.remove_song).setEnabled(false);
+    }
+    else if (song.getLong(song.getColumnIndex(UDJPlayerProvider.ADDER_ID_COLUMN)) == userId) {
       menu.findItem(R.id.vote_up).setEnabled(false);
       menu.findItem(R.id.vote_down).setEnabled(false);
     } else if (!song.isNull(song
@@ -104,7 +109,7 @@ public class PlaylistFragment extends RefreshableListFragment implements
         menu.findItem(R.id.vote_down).setEnabled(false);
         menu.findItem(R.id.remove_song).setEnabled(false);
       }
-    } else {
+    } else if(!Utils.isCurrentPlayerOwner(am, account)){
       menu.findItem(R.id.remove_song).setEnabled(false);
     }
     int titleIndex = song.getColumnIndex(UDJPlayerProvider.TITLE_COLUMN);

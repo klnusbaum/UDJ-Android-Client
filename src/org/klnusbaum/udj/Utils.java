@@ -72,4 +72,11 @@ public class Utils{
       String.valueOf(Constants.NOT_IN_PLAYER));
   }
 
+
+  public static boolean isCurrentPlayerOwner(AccountManager am, Account account){
+    long userId = Long.valueOf(am.getUserData(account, Constants.USER_ID_DATA));
+    long ownerId = Long.valueOf(am.getUserData(account, Constants.PLAYER_HOST_ID_DATA));
+    return userId==ownerId;
+  }
+
 }
