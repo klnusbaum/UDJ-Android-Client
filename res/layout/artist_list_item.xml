@@ -31,7 +31,9 @@
     android:layout_height="48dp"
     android:textAppearance="?android:attr/textAppearanceLarge"
     android:textStyle="bold"
-    android:singleLine="true"
+    android:ellipsize="marquee"
+    android:scrollHorizontally="true"
+    android:lines="1"
     android:layout_alignParentLeft="true"
   />
 

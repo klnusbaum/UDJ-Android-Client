@@ -34,8 +34,10 @@
     android:layout_height="wrap_content"
     android:textAppearance="?android:attr/textAppearanceMedium"
     android:textStyle="bold"
-    android:singleLine="true"
+    android:scrollHorizontally="true"
+    android:lines="1"
     android:ellipsize="marquee"
+    gravity="left"
     android:layout_alignParentLeft="true"
   />
 
@@ -46,6 +48,11 @@
     android:textAppearance="?android:attr/textAppearanceSmall"
     android:layout_below="@id/playlistSongName"
     android:paddingLeft="4dp"
+    android:scrollHorizontally="true"
+    android:lines="1"
+    android:ellipsize="marquee"
+    gravity="left"
+    android:layout_alignParentLeft="true"
   />
 
   <TextView
@@ -55,6 +62,11 @@
     android:textAppearance="?android:attr/textAppearanceSmall"
     android:layout_below="@id/playlistArtistName"
     android:paddingLeft="4dp"
+    android:scrollHorizontally="true"
+    android:lines="1"
+    android:ellipsize="marquee"
+    gravity="left"
+    android:layout_alignParentLeft="true"
   />
 
 </RelativeLayout>
