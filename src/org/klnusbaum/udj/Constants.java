@@ -82,4 +82,5 @@ public class Constants{
   /** Error constants */
   public static final int AUTH_API_VERSION_ERROR = 1;
 
+  public static final String ACTION_SET_CURRENT_SONG = "org.klnusbaum.udj.SetCurrentSong";
 }

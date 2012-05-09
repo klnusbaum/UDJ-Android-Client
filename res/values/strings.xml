@@ -87,6 +87,10 @@
   <string name="password_required">Password Required</string>
   <string name="bad_player_password">Incorrect Password</string>
   <string name="no_artists">No Artists</string>
+  <string name="set_current_song">Play Song Now</string>
+  <string name="setting_song">Changing Song</string>
+  <string name="song_set_failed_title">Changing Song Failed</string>
+  <string name="song_set_failed_content">Tap here to retry</string>
 
     <!-- Stuff for action bar compatibility -->
     <string name="alternate_title">An alternate title that is long</string>

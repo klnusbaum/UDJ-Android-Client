@@ -91,17 +91,33 @@ public class PlaylistFragment extends RefreshableListFragment implements
     AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
     Cursor song = (Cursor) playlistAdapter.getItem(info.position);
     MenuInflater inflater = getActivity().getMenuInflater();
-    inflater.inflate(R.menu.playlist_context, menu);
+
+    if(Utils.isCurrentPlayerOwner(am, account)){
+      setupOwnerContext(song, menu, inflater);
+    }
+    else{
+      setupRegularContext(song, menu, inflater);
+    }
+
+    int titleIndex = song.getColumnIndex(UDJPlayerProvider.TITLE_COLUMN);
+    menu.setHeaderTitle(song.getString(titleIndex));
+  }
+
+  private void setupOwnerContext(Cursor song, ContextMenu menu, MenuInflater inflater){
+    inflater.inflate(R.menu.owner_playlist_context, menu);
     if(song.getInt(song.getColumnIndex(UDJPlayerProvider.IS_CURRENTLY_PLAYING_COLUMN)) == 1){
+      menu.findItem(R.id.set_current_song).setEnabled(false);
       menu.findItem(R.id.remove_song).setEnabled(false);
     }
-    else if(!Utils.isCurrentPlayerOwner(am, account) && userId != 
-        song.getLong(song.getColumnIndex(UDJPlayerProvider.ADDER_ID_COLUMN)))
+  }
+
+  private void setupRegularContext(Cursor song, ContextMenu menu, MenuInflater inflater){
+    inflater.inflate(R.menu.playlist_context, menu);
+    if(userId != song.getLong(song.getColumnIndex(UDJPlayerProvider.ADDER_ID_COLUMN)) ||
+        song.getInt(song.getColumnIndex(UDJPlayerProvider.IS_CURRENTLY_PLAYING_COLUMN)) == 1)
     {
       menu.findItem(R.id.remove_song).setEnabled(false);
     }
-    int titleIndex = song.getColumnIndex(UDJPlayerProvider.TITLE_COLUMN);
-    menu.setHeaderTitle(song.getString(titleIndex));
   }
 
   @Override
@@ -114,6 +130,9 @@ public class PlaylistFragment extends RefreshableListFragment implements
       return true;
     case R.id.remove_song:
       removeSong(info.position);
+      return true;
+    case R.id.set_current_song:
+      setCurrentSong(info.position);
       return true;
     default:
       return super.onContextItemSelected(item);
@@ -133,6 +152,26 @@ public class PlaylistFragment extends RefreshableListFragment implements
             + ".");
     startActivity(Intent.createChooser(shareIntent,
         getString(R.string.share_via)));
+
+  }
+
+  private void setCurrentSong(int position){
+    Cursor toSet = (Cursor) playlistAdapter.getItem(position);
+    int idIndex = toSet.getColumnIndex(UDJPlayerProvider.LIB_ID_COLUMN);
+    Log.d(TAG, "Setting song with id " + toSet.getLong(idIndex));
+    Intent setSongIntent = new Intent(
+      Constants.ACTION_SET_CURRENT_SONG,
+      UDJPlayerProvider.PLAYLIST_URI,
+      getActivity(),
+      PlaylistSyncService.class);
+    setSongIntent.putExtra(Constants.ACCOUNT_EXTRA, account);
+    setSongIntent.putExtra(Constants.LIB_ID_EXTRA, toSet.getLong(idIndex));
+    getActivity().startService(setSongIntent);
+    Toast toast = Toast.makeText(getActivity(),
+        getString(R.string.setting_song), Toast.LENGTH_SHORT);
+    toast.show();
+
+
 
   }
 

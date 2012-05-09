@@ -295,7 +295,7 @@ public class ServerConnection{
     return response;
   }
 
-  public static HttpResponse doPost(URI uri, String authToken, String payload)
+  public static HttpResponse doPost(URI uri, String authToken, String payload, boolean isJSON)
     throws AuthenticationException, IOException
   {
     Log.d(TAG, "Doing post to uri: " + uri);
@@ -303,17 +303,19 @@ public class ServerConnection{
     final HttpPost post = new HttpPost(uri);
     if(payload != null){
       StringEntity entity = new StringEntity(payload);
-      entity.setContentType("text/json");
+      if(isJSON){
+        entity.setContentType("text/json");
+      }
       post.setEntity(entity);
     }
     post.addHeader(TICKET_HASH_HEADER, authToken);
     return getHttpClient().execute(post);
   }
 
-  public static String doSimplePost(URI uri, String authToken, String payload)
+  public static String doSimplePost(URI uri, String authToken, String payload, boolean isJSON)
     throws AuthenticationException, IOException
   {
-    final HttpResponse resp = doPost(uri, authToken, payload);
+    final HttpResponse resp = doPost(uri, authToken, payload, isJSON);
     final String response = EntityUtils.toString(resp.getEntity());
     Log.d(TAG, "Simple post response: " + resp.getStatusLine().getStatusCode() +
         "\"" + response +"\"");
@@ -322,10 +324,10 @@ public class ServerConnection{
   }
 
   public static String doPlayerRelatedPost(
-    URI uri, String authToken, String payload)
+    URI uri, String authToken, String payload, boolean isJSON)
     throws AuthenticationException, IOException, PlayerInactiveException, PlayerAuthException
   {
-    final HttpResponse resp = doPost(uri, authToken, payload);
+    final HttpResponse resp = doPost(uri, authToken, payload, isJSON);
     final String response = EntityUtils.toString(resp.getEntity());
     Log.d(TAG, "Player post response: " + resp.getStatusLine().getStatusCode() +
         "\"" + response +"\"");
@@ -564,20 +566,38 @@ public class ServerConnection{
     throws IOException, AuthenticationException, PlayerInactiveException, PlayerAuthException
   {
 
-  	try{
-  		URI uri = new URI(
-  				NETWORK_PROTOCOL, null, SERVER_HOST, SERVER_PORT,
-  				"/udj/players/"+playerId+"/active_playlist/songs/"+libId,
-  				null, null);
-  		Log.d(TAG, "Add remove song from active playlist: " + libId);
-  		doPlayerRelatedDelete(uri, authToken);
-  	}
-  	catch(URISyntaxException e){
-  		//TODO inform caller that their query is bad 
-  	}
+    try{
+      URI uri = new URI(
+          NETWORK_PROTOCOL, null, SERVER_HOST, SERVER_PORT,
+          "/udj/players/"+playerId+"/active_playlist/songs/"+libId,
+          null, null);
+      Log.d(TAG, "Add remove song from active playlist: " + libId);
+      doPlayerRelatedDelete(uri, authToken);
+    }
+    catch(URISyntaxException e){
+      //TODO inform caller that their query is bad 
+    }
   }
 
- 
+  public static void setCurrentSong(long playerId, long libId, String authToken)
+    throws IOException, AuthenticationException, PlayerInactiveException, PlayerAuthException
+  {
+    try{
+      URI uri = new URI(
+          NETWORK_PROTOCOL, null, SERVER_HOST, SERVER_PORT,
+          "/udj/players/"+playerId+"/current_song",
+          null, null);
+      Log.d(TAG, "Set current song to: " + libId);
+      doPlayerRelatedPost(uri, authToken, "lib_id="+String.valueOf(libId), false);
+    }
+    catch(URISyntaxException e){
+      //TODO inform caller that their query is bad 
+    }
+
+
+  }
+
+
   public static void voteOnSong(
     long playerId, long userId, long libId, int voteType, String authToken)
     throws IOException, AuthenticationException, PlayerInactiveException, PlayerAuthException
@@ -598,7 +618,7 @@ public class ServerConnection{
         "/udj/players/"+playerId+"/active_playlist/songs/" + libId + "/users/"+
           userId + "/" + voteString,
         null, null);
-      doPlayerRelatedPost(uri, authToken, null);
+      doPlayerRelatedPost(uri, authToken, null, false);
     }
     catch(URISyntaxException e){
       //TODO inform caller that their query is bad 
