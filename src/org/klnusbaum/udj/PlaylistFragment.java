@@ -299,6 +299,14 @@ public class PlaylistFragment extends RefreshableListFragment implements
             + cursor.getString(adderUserNameIndex));
       }
 
+      int upcountIndex = cursor.getColumnIndex(UDJPlayerProvider.UPCOUNT_COLUMN);
+      int downcountIndex = cursor.getColumnIndex(UDJPlayerProvider.DOWNCOUNT_COLUMN);
+      TextView upCount = (TextView) view.findViewById(R.id.upcount);
+      TextView downCount = (TextView) view.findViewById(R.id.downcount);
+      upCount.setText(cursor.isNull(upcountIndex) ? "0" : cursor.getString(upcountIndex));
+      downCount.setText(cursor.isNull(downcountIndex) ? "0" : cursor.getString(downcountIndex));
+
+
 
       upButton.setOnClickListener(new View.OnClickListener(){
         public void onClick(View v){
@@ -319,8 +327,8 @@ public class PlaylistFragment extends RefreshableListFragment implements
       });
 
       if(cursor.getInt(cursor.getColumnIndex(UDJPlayerProvider.IS_CURRENTLY_PLAYING_COLUMN)) ==1){
-        upButton.setVisibility(View.GONE);
-        downButton.setVisibility(View.GONE);
+        upButton.setVisibility(View.INVISIBLE);
+        downButton.setVisibility(View.INVISIBLE);
       }
       else if(cursor.getLong(cursor.getColumnIndex(UDJPlayerProvider.ADDER_ID_COLUMN)) ==userId){
         upButton.setEnabled(false);

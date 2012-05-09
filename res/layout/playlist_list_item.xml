@@ -40,7 +40,7 @@
     android:ellipsize="marquee"
     gravity="left"
     android:layout_alignParentLeft="true"
-    android:layout_toLeftOf="@+id/downvote_button"
+    android:layout_toLeftOf="@+id/downvoteStuff"
   />
 
   <TextView
@@ -55,7 +55,7 @@
     android:ellipsize="marquee"
     gravity="left"
     android:layout_alignParentLeft="true"
-    android:layout_toLeftOf="@id/downvote_button"
+    android:layout_toLeftOf="@id/downvoteStuff"
   />
 
   <TextView
@@ -70,28 +70,61 @@
     android:ellipsize="marquee"
     gravity="left"
     android:layout_alignParentLeft="true"
-    android:layout_toLeftOf="@id/downvote_button"
+    android:layout_toLeftOf="@id/downvoteStuff"
   />
 
-  <ImageButton
-    android:id="@id/downvote_button"
+  <RelativeLayout
+    android:id="@id/downvoteStuff"
     android:layout_height="wrap_content"
     android:layout_width="wrap_content"
-    android:minHeight="40dp"
-    android:minWidth="40dp"
-    android:src="@drawable/downarrow"
-    android:layout_toLeftOf="@+id/upvote_button"
-    android:layout_centerVertical="true"
-  />
-  <ImageButton
-    android:id="@id/upvote_button"
+    android:layout_toLeftOf="@+id/upvoteStuff"
+  >
+    <ImageButton
+      android:id="@+id/downvote_button"
+      android:layout_height="wrap_content"
+      android:layout_width="wrap_content"
+      android:minHeight="40dp"
+      android:minWidth="40dp"
+      android:src="@drawable/downarrow"
+      android:layout_centerHorizontal="true"
+    />
+    <TextView
+      android:id="@+id/downcount"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:textAppearance="?android:attr/textAppearanceSmall"
+      android:lines="1"
+      android:textColor="#CC0000"
+      android:layout_below="@id/downvote_button"
+      android:layout_centerHorizontal="true"
+    />
+  </RelativeLayout>
+  <RelativeLayout
+    android:id="@id/upvoteStuff"
     android:layout_height="wrap_content"
     android:layout_width="wrap_content"
-    android:minHeight="40dp"
-    android:minWidth="40dp"
-    android:src="@drawable/uparrow"
     android:layout_alignParentRight="true"
-    android:layout_centerVertical="true"
-  />
+  >
+    <ImageButton
+      android:id="@+id/upvote_button"
+      android:layout_height="wrap_content"
+      android:layout_width="wrap_content"
+      android:minHeight="40dp"
+      android:minWidth="40dp"
+      android:src="@drawable/uparrow"
+      android:layout_centerHorizontal="true"
+    />
+
+    <TextView
+      android:id="@+id/upcount"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:textAppearance="?android:attr/textAppearanceSmall"
+      android:lines="1"
+      android:textColor="#669900"
+      android:layout_centerHorizontal="true"
+      android:layout_below="@id/upvote_button"
+    />
+  </RelativeLayout>
 
 </RelativeLayout>
