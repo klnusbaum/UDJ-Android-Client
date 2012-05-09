@@ -20,10 +20,21 @@ package org.klnusbaum.udj;
 
 import android.support.v4.content.Loader;
 
+import android.os.Bundle;
 import android.accounts.Account;
 import android.app.SearchManager;
+import android.provider.SearchRecentSuggestions;
 
 public class RegularSearchFragment extends SearchFragment{
+
+  public void onCreate(Bundle icicle){
+    super.onCreate(icicle);
+    String query = getActivity().getIntent().getStringExtra(SearchManager.QUERY);
+    SearchRecentSuggestions suggestions = new SearchRecentSuggestions(getActivity(),
+      MusicSearchSuggestionProvider.AUTHORITY, MusicSearchSuggestionProvider.MODE);
+    suggestions.saveRecentQuery(query, null);
+
+  }
 
   public Loader<MusicSearchLoader.MusicSearchResult> getLoader(Account account){
     String searchQuery = getActivity().getIntent().getStringExtra(SearchManager.QUERY);

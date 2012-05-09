@@ -153,5 +153,8 @@
         <provider android:name=".UDJPlayerProvider"
           android:authorities="org.klnusbaum.udj"
         />
+        <provider android:name=".MusicSearchSuggestionProvider"
+          android:authorities="org.klnusbaum.udj.MusicSearchSuggestionProvider"
+        />
     </application>
 </manifest> 
