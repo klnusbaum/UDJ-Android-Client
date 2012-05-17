@@ -84,7 +84,7 @@ public class PlayerActivity extends PlayerInactivityListenerActivity {
 
   @Override
   protected void onPause(){
-    super.onResume();
+    super.onPause();
     unregisterReceiver(playbackStateChangedListener);
   }
 
