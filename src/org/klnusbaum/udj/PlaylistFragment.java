@@ -44,6 +44,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ImageView;
 
 /**
  * Class used for displaying the contents of the Playlist.
@@ -77,7 +78,6 @@ public class PlaylistFragment extends RefreshableListFragment implements
     setListShown(false);
     getLoaderManager().initLoader(PLAYLIST_LOADER_ID, null, this);
     registerForContextMenu(getListView());
-
   }
 
   public void onListItemClick(ListView l, View v, int position, long id) {
@@ -170,9 +170,6 @@ public class PlaylistFragment extends RefreshableListFragment implements
     Toast toast = Toast.makeText(getActivity(),
         getString(R.string.setting_song), Toast.LENGTH_SHORT);
     toast.show();
-
-
-
   }
 
   private void removeSong(int position) {
@@ -242,19 +239,29 @@ public class PlaylistFragment extends RefreshableListFragment implements
     }
   }
 
-  private class PlaylistAdapter extends CursorAdapter {
+  private class PlaylistAdapter extends CursorAdapter{
     private long userId;
     private static final String PLAYLIST_ADAPTER_TAG = "PlaylistAdapter";
 
-    public PlaylistAdapter(Context context, Cursor c, long userId) {
+    public PlaylistAdapter(Context context, Cursor c, long userId){
       super(context, c, 0);
       this.userId = userId;
     }
 
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
-      int idIndex = cursor.getColumnIndex(UDJPlayerProvider.LIB_ID_COLUMN);
+      final int idIndex = cursor.getColumnIndex(UDJPlayerProvider.LIB_ID_COLUMN);
       final long libId = cursor.getLong(idIndex);
+      final boolean isCurrentlyPlaying =
+        (cursor.getInt(cursor.getColumnIndex(UDJPlayerProvider.IS_CURRENTLY_PLAYING_COLUMN)) ==1);
+
+      final ImageView nowPlayingIcon = (ImageView)view.findViewById(R.id.now_playing_icon);
+      if(isCurrentlyPlaying){
+        nowPlayingIcon.setVisibility(View.VISIBLE);
+      }
+      else{
+        nowPlayingIcon.setVisibility(View.INVISIBLE);
+      }
 
       view.setOnLongClickListener(new View.OnLongClickListener(){
         public boolean onLongClick(View v){
@@ -271,38 +278,29 @@ public class PlaylistFragment extends RefreshableListFragment implements
       upButton.setEnabled(true);
       downButton.setEnabled(true);
 
-      TextView songName = (TextView) view
-          .findViewById(R.id.playlistSongName);
-      int titleIndex = cursor
-          .getColumnIndex(UDJPlayerProvider.TITLE_COLUMN);
+      final TextView songName = (TextView) view.findViewById(R.id.playlistSongName);
+      final int titleIndex = cursor.getColumnIndex(UDJPlayerProvider.TITLE_COLUMN);
       final String title = cursor.getString(titleIndex);
       songName.setText(title);
 
-      TextView artist = (TextView) view
-          .findViewById(R.id.playlistArtistName);
-      int artistIndex = cursor
-          .getColumnIndex(UDJPlayerProvider.ARTIST_COLUMN);
-      artist.setText(getString(R.string.by) + " "
-          + cursor.getString(artistIndex));
+      final TextView artist = (TextView) view.findViewById(R.id.playlistArtistName);
+      final int artistIndex = cursor.getColumnIndex(UDJPlayerProvider.ARTIST_COLUMN);
+      artist.setText(getString(R.string.by) + " " + cursor.getString(artistIndex));
 
-      TextView addByUser = (TextView) view
-          .findViewById(R.id.playlistAddedBy);
-      int adderIdIndex = cursor
-          .getColumnIndex(UDJPlayerProvider.ADDER_ID_COLUMN);
+      final TextView addByUser = (TextView) view.findViewById(R.id.playlistAddedBy);
+      int adderIdIndex = cursor.getColumnIndex(UDJPlayerProvider.ADDER_ID_COLUMN);
       if (cursor.getLong(adderIdIndex) == userId) {
-        addByUser.setText(getString(R.string.added_by) + " "
-            + getString(R.string.you));
-      } else {
-        int adderUserNameIndex = cursor
-            .getColumnIndex(UDJPlayerProvider.ADDER_USERNAME_COLUMN);
-        addByUser.setText(getString(R.string.added_by) + " "
-            + cursor.getString(adderUserNameIndex));
+        addByUser.setText(getString(R.string.added_by) + " " + getString(R.string.you));
+      }
+      else{
+        int adderUserNameIndex = cursor.getColumnIndex(UDJPlayerProvider.ADDER_USERNAME_COLUMN);
+        addByUser.setText(getString(R.string.added_by) + " " + cursor.getString(adderUserNameIndex));
       }
 
-      int upcountIndex = cursor.getColumnIndex(UDJPlayerProvider.UPCOUNT_COLUMN);
-      int downcountIndex = cursor.getColumnIndex(UDJPlayerProvider.DOWNCOUNT_COLUMN);
-      TextView upCount = (TextView) view.findViewById(R.id.upcount);
-      TextView downCount = (TextView) view.findViewById(R.id.downcount);
+      final int upcountIndex = cursor.getColumnIndex(UDJPlayerProvider.UPCOUNT_COLUMN);
+      final int downcountIndex = cursor.getColumnIndex(UDJPlayerProvider.DOWNCOUNT_COLUMN);
+      final TextView upCount = (TextView) view.findViewById(R.id.upcount);
+      final TextView downCount = (TextView) view.findViewById(R.id.downcount);
       upCount.setText(cursor.isNull(upcountIndex) ? "0" : cursor.getString(upcountIndex));
       downCount.setText(cursor.isNull(downcountIndex) ? "0" : cursor.getString(downcountIndex));
 
@@ -328,9 +326,9 @@ public class PlaylistFragment extends RefreshableListFragment implements
         }
       });
 
-      if(cursor.getInt(cursor.getColumnIndex(UDJPlayerProvider.IS_CURRENTLY_PLAYING_COLUMN)) ==1){
-        upButton.setVisibility(View.INVISIBLE);
-        downButton.setVisibility(View.INVISIBLE);
+      if(isCurrentlyPlaying){
+        upButton.setEnabled(false);
+        downButton.setEnabled(false);
       }
       else if(cursor.getLong(cursor.getColumnIndex(UDJPlayerProvider.ADDER_ID_COLUMN)) ==userId){
         upButton.setEnabled(false);

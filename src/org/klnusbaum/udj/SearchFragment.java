@@ -44,6 +44,11 @@ public abstract class SearchFragment extends RefreshableListFragment
     searchAdapter = new MusicSearchAdapter(getActivity(), account);
     setListAdapter(searchAdapter);
     setListShown(false);
+  }
+
+  @Override
+  public void onResume(){
+    super.onResume();
     getLoaderManager().initLoader(LIB_SEARCH_LOADER_TAG, null, this);
   }
 

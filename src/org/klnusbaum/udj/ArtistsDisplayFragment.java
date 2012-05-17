@@ -58,8 +58,14 @@ public class ArtistsDisplayFragment extends ListFragment
     setListAdapter(artistsAdapter);
     setListShown(false);
     getListView().setTextFilterEnabled(true);
+  }
+
+  @Override
+  public void onResume(){
+    super.onResume();
     getLoaderManager().initLoader(ARTISTS_LOADER_TAG, null, this);
   }
+
 
   public Loader<ArtistsLoader.ArtistsResult> onCreateLoader(
     int id, Bundle args)

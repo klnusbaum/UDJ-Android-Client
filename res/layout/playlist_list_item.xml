@@ -40,7 +40,7 @@
     android:ellipsize="marquee"
     gravity="left"
     android:layout_alignParentLeft="true"
-    android:layout_toLeftOf="@+id/downvoteStuff"
+    android:layout_toLeftOf="@+id/now_playing_icon"
   />
 
   <TextView
@@ -55,7 +55,7 @@
     android:ellipsize="marquee"
     gravity="left"
     android:layout_alignParentLeft="true"
-    android:layout_toLeftOf="@id/downvoteStuff"
+    android:layout_toLeftOf="@id/now_playing_icon"
   />
 
   <TextView
@@ -70,7 +70,18 @@
     android:ellipsize="marquee"
     gravity="left"
     android:layout_alignParentLeft="true"
-    android:layout_toLeftOf="@id/downvoteStuff"
+    android:layout_toLeftOf="@id/now_playing_icon"
+  />
+
+  <ImageView
+    android:id="@id/now_playing_icon"
+    android:src="@drawable/ic_nowplaying"
+    android:padding="2dp"
+    android:layout_width="24dp"
+    android:layout_height="24dp"
+    android:layout_centerVertical="true"
+    android:visibility="invisible"
+    android:layout_toLeftOf="@+id/downvoteStuff"
   />
 
   <RelativeLayout
