@@ -26,8 +26,11 @@ import android.support.v4.view.ViewPager;
 import android.os.Bundle;
 import android.accounts.AccountManager;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.view.MenuInflater;
 import android.util.Log;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 
 
 import org.klnusbaum.udj.Constants;
@@ -38,6 +41,7 @@ import com.viewpagerindicator.TitleProvider;
 
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
+
 /**
  * The main activity display class.
  */
@@ -46,6 +50,13 @@ public class PlayerActivity extends PlayerInactivityListenerActivity {
 
   private PlayerPagerAdapter pagerAdapter;
   private ViewPager pager;
+
+  private BroadcastReceiver playbackStateChangedListener = new BroadcastReceiver(){
+    public void onReceive(Context context, Intent intent){
+      Log.d(TAG, "Recieved playback changed broadcast");
+      invalidateOptionsMenu();
+    }
+  };
 
 
   @Override
@@ -60,6 +71,21 @@ public class PlayerActivity extends PlayerInactivityListenerActivity {
 
     TitlePageIndicator titleIndicator = (TitlePageIndicator)findViewById(R.id.titles);
     titleIndicator.setViewPager(pager);
+  }
+
+  @Override
+  protected void onResume(){
+    super.onResume();
+    registerReceiver(
+      playbackStateChangedListener,
+      new IntentFilter(Constants.BROADCAST_PLAYBACK_CHANGED)
+    );
+  }
+
+  @Override
+  protected void onPause(){
+    super.onResume();
+    unregisterReceiver(playbackStateChangedListener);
   }
 
   public void getPlaylistFromServer() {
@@ -120,6 +146,18 @@ public class PlayerActivity extends PlayerInactivityListenerActivity {
   }
 
   public boolean onCreateOptionsMenu(Menu menu){
+    AccountManager am = AccountManager.get(this);
+    if(Utils.isCurrentPlayerOwner(am, account)){
+      int playbackState = Utils.getPlaybackState(am, account);
+      if(playbackState == Constants.PLAYING_STATE){
+        menu.add("Pause")
+          .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+      }
+      else if(playbackState == Constants.PAUSED_STATE){
+        menu.add("Play")
+          .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+      }
+    }
     menu.add("Search")
       .setIcon(R.drawable.ic_search)
       .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
@@ -131,7 +169,31 @@ public class PlayerActivity extends PlayerInactivityListenerActivity {
       startSearch(null, false, null, false);
       return true;
     }
+    else if(item.getTitle().equals("Pause")){
+      setPlayback(Constants.PAUSED_STATE);
+    }
+    else if(item.getTitle().equals("Play")){
+      setPlayback(Constants.PLAYING_STATE);
+    }
     return false;
+  }
+
+  private void setPlayback(int newPlaybackState){
+    changePlaybackMenuOption(newPlaybackState);
+    Intent setPlaybackIntent = new Intent(
+      Constants.ACTION_SET_PLAYBACK,
+      Constants.PLAYER_URI,
+      this,
+      PlaylistSyncService.class);
+    setPlaybackIntent.putExtra(Constants.ACCOUNT_EXTRA, account);
+    setPlaybackIntent.putExtra(Constants.PLAYBACK_STATE_EXTRA, newPlaybackState);
+    startService(setPlaybackIntent);
+  }
+
+  private void changePlaybackMenuOption(int newPlaybackState){
+    AccountManager am = AccountManager.get(this);
+    am.setUserData(account, Constants.PLAYBACK_STATE_DATA, String.valueOf(newPlaybackState));
+    invalidateOptionsMenu();
   }
 
   protected void onNewIntent(Intent intent){

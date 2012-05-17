@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.ArrayList;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.ContentResolver;
 import android.content.ContentProviderOperation;
 import android.content.OperationApplicationException;
@@ -49,7 +50,6 @@ public class RESTProcessor{
     ArrayList<ContentProviderOperation> batchOps = new ArrayList<ContentProviderOperation>();
     JSONArray playlistEntries = activePlaylist.getJSONArray("active_playlist");
     JSONObject currentSong = activePlaylist.getJSONObject("current_song");
-
 
     clearPlaylistAndVotesTable(resolver);
 
@@ -122,4 +122,5 @@ public class RESTProcessor{
     }
     return toReturn;
   }
+
 }

@@ -45,6 +45,10 @@ public class Constants{
   public static final int LEAVING_PLAYER = 3;
   public static final int PLAYER_ENDED = 4;
 
+  public static final String PLAYBACK_STATE_DATA = "org.klnusbaum.udj.PlaybackState";
+  public static final int PLAYING_STATE = 0;
+  public static final int PAUSED_STATE = 1;
+
 
   /** Constants use for passing account related info in intents */
   public static final String ACCOUNT_EXTRA = "org.klnusbaum.udj.account";
@@ -83,4 +87,11 @@ public class Constants{
   public static final int AUTH_API_VERSION_ERROR = 1;
 
   public static final String ACTION_SET_CURRENT_SONG = "org.klnusbaum.udj.SetCurrentSong";
+
+  public static final String ACTION_SET_PLAYBACK = "org.klnusbaum.udj.SetPlayback";
+  public static final String BROADCAST_PLAYBACK_CHANGED = "org.klnusbaum.udj.PlaybackChanged";
+
+
+  public static final String PLAYBACK_STATE_EXTRA = "org.klnusbaum.udj.PlaybackState";
+
 }

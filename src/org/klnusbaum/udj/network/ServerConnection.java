@@ -62,6 +62,7 @@ import org.json.JSONObject;
 import org.json.JSONException;
 
 
+import org.klnusbaum.udj.Constants;
 import org.klnusbaum.udj.containers.LibraryEntry;
 import org.klnusbaum.udj.containers.Player;
 import org.klnusbaum.udj.exceptions.PlayerAuthException;
@@ -406,11 +407,11 @@ public class ServerConnection{
     }
   }
 
-  public static void joinPlayer(long eventId, long userId, String ticketHash)
+  public static void joinPlayer(long playerId, long userId, String ticketHash)
     throws IOException, AuthenticationException, PlayerInactiveException, 
     JSONException, ParseException, PlayerPasswordException
   {
-    joinPlayer(eventId, userId, "", ticketHash);
+    joinPlayer(playerId, userId, "", ticketHash);
   }
 
 
@@ -593,8 +594,30 @@ public class ServerConnection{
     catch(URISyntaxException e){
       //TODO inform caller that their query is bad 
     }
+  }
 
-
+  public static void setPlaybackState(long playerId, long userId, int desiredPlaybackState,
+      String authToken)
+    throws IOException, AuthenticationException, PlayerInactiveException, PlayerAuthException
+  {
+    try{
+      URI uri = new URI(
+          NETWORK_PROTOCOL, null, SERVER_HOST, SERVER_PORT,
+          "/udj/users/" + userId + "/players/"+playerId+"/state",
+          null, null);
+      Log.d(TAG, "Setintg playback state: " + desiredPlaybackState);
+      String plState = "";
+      if(desiredPlaybackState == Constants.PAUSED_STATE){
+        plState = "paused";
+      }
+      else if(desiredPlaybackState == Constants.PLAYING_STATE){
+        plState = "playing";
+      }
+      doPlayerRelatedPost(uri, authToken, "state="+plState, false);
+    }
+    catch(URISyntaxException e){
+      //TODO inform caller that their query is bad 
+    }
   }
 
 

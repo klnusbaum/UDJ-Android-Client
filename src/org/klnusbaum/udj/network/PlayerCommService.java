@@ -57,118 +57,118 @@ public class PlayerCommService extends IntentService{
     UNKNOWN_ERROR
   }
 
-  private static final String TAG = "EventCommService";
+  private static final String TAG = "PlayerCommService";
 
   public PlayerCommService(){
-    super("EventCommService");
+    super("PlayerCommService");
   }
 
   @Override
   public void onHandleIntent(Intent intent){
-    Log.d(TAG, "In Event Comm Service");
+    Log.d(TAG, "In Player Comm Service");
     AccountManager am = AccountManager.get(this);
     final Account account = 
       (Account)intent.getParcelableExtra(Constants.ACCOUNT_EXTRA);
     if(intent.getAction().equals(Intent.ACTION_INSERT)){
-      enterEvent(intent, am, account, true);
+      joinPlayer(intent, am, account, true);
     }
     else{
-      Log.d(TAG, "ACTION wasn't delete or insert, it was " + 
+      Log.d(TAG, "Unrecognized action of, it was " + 
         intent.getAction());
     } 
   }
 
-  private void enterEvent(
-  		Intent intent, AccountManager am, Account account, boolean attemptReauth)
+
+  private void joinPlayer(
+      Intent intent, AccountManager am, Account account, boolean attemptReauth)
   {
-  	if(!Utils.isNetworkAvailable(this)){
-  		doLoginFail(am, account, PlayerJoinError.NO_NETWORK_ERROR);
-  		return;
-  	}
+    if(!Utils.isNetworkAvailable(this)){
+      doLoginFail(am, account, PlayerJoinError.NO_NETWORK_ERROR);
+      return;
+    }
 
-  	long userId, eventId;
-  	String authToken;
-  	String password = "";
-  	boolean hasPassword = false;
-  	//TODO hanle error if account isn't provided
-  	try{
-  		userId = 
-  				Long.valueOf(am.getUserData(account, Constants.USER_ID_DATA));
-  		//TODO handle if event id isn't provided
-  		authToken = am.blockingGetAuthToken(account, "", true);  
-  		eventId = intent.getLongExtra(
-  				Constants.PLAYER_ID_EXTRA,
-  				Constants.NO_PLAYER_ID);
-  		if(intent.hasExtra(Constants.PLAYER_PASSWORD_EXTRA)){
-  			Log.d(TAG, "password given for event");
-  			hasPassword = true;
-  			password = intent.getStringExtra(Constants.PLAYER_PASSWORD_EXTRA);
-  		}
-  		else{
-  			Log.d(TAG, "No password given for event");
-  		}
-  	}
-  	catch(OperationCanceledException e){
-  		Log.e(TAG, "Operation canceled exception in EventCommService" );
-  		doLoginFail(am, account, PlayerJoinError.AUTHENTICATION_ERROR);
-  		return;
-  	}
-  	catch(AuthenticatorException e){
-  		Log.e(TAG, "Authenticator exception in EventCommService" );
-  		doLoginFail(am, account, PlayerJoinError.AUTHENTICATION_ERROR);
-  		return;
-  	}
-  	catch(IOException e){
-  		Log.e(TAG, "IO exception in EventCommService" );
-  		doLoginFail(am, account, PlayerJoinError.AUTHENTICATION_ERROR);
-  		return;
-  	}
+    long userId, playerId;
+    String authToken;
+    String password = "";
+    boolean hasPassword = false;
+    //TODO hanle error if account isn't provided
+    try{
+      userId = Long.valueOf(am.getUserData(account, Constants.USER_ID_DATA));
+      //TODO handle if player id isn't provided
+      authToken = am.blockingGetAuthToken(account, "", true);  
+      playerId = intent.getLongExtra(
+          Constants.PLAYER_ID_EXTRA,
+          Constants.NO_PLAYER_ID);
+      if(intent.hasExtra(Constants.PLAYER_PASSWORD_EXTRA)){
+        Log.d(TAG, "password given for player");
+        hasPassword = true;
+        password = intent.getStringExtra(Constants.PLAYER_PASSWORD_EXTRA);
+      }
+      else{
+        Log.d(TAG, "No password given for player");
+      }
+    }
+    catch(OperationCanceledException e){
+      Log.e(TAG, "Operation canceled exception" );
+      doLoginFail(am, account, PlayerJoinError.AUTHENTICATION_ERROR);
+      return;
+    }
+    catch(AuthenticatorException e){
+      Log.e(TAG, "Authenticator exception" );
+      doLoginFail(am, account, PlayerJoinError.AUTHENTICATION_ERROR);
+      return;
+    }
+    catch(IOException e){
+      Log.e(TAG, "IO exception" );
+      doLoginFail(am, account, PlayerJoinError.AUTHENTICATION_ERROR);
+      return;
+    }
 
-  	try{
-  		if(!hasPassword){
-  			ServerConnection.joinPlayer(eventId, userId, authToken);
-  		}
-  		else{
-  			ServerConnection.joinPlayer(eventId, userId, password, authToken);
-  		}
-  		setEventData(intent, am, account);
-  		ContentResolver cr = getContentResolver();
-  		UDJPlayerProvider.playerCleanup(cr);
-  		Intent joinedEventIntent = new Intent(Constants.JOINED_PLAYER_ACTION);
-  		am.setUserData(
-  				account, Constants.LAST_PLAYER_ID_DATA, String.valueOf(eventId));
-  		am.setUserData(
-  				account, 
-  				Constants.PLAYER_STATE_DATA, 
-  				String.valueOf(Constants.IN_PLAYER));
-  		Log.d(TAG, "Sending joined event broadcast");
-  		sendBroadcast(joinedEventIntent);
-  	}
-  	catch(IOException e){
-  		Log.e(TAG, "IO exception when joining event");
-  		Log.e(TAG, e.getMessage());
-  		doLoginFail(am, account, PlayerJoinError.SERVER_ERROR);
-  	}
-  	catch(JSONException e){
-  		Log.e(TAG, 
-  				"JSON exception when joining event");
-  		Log.e(TAG, e.getMessage());
-  		doLoginFail(am, account, PlayerJoinError.SERVER_ERROR);
-  	}
-  	catch(AuthenticationException e){
-  		handleLoginAuthException(intent, am, account, authToken, attemptReauth);
-  	}
-  	catch(PlayerInactiveException e){
-  		Log.e(TAG, "Player inactive Exception when joining player");
-  		doLoginFail(am, account, PlayerJoinError.PLAYER_INACTIVE_ERROR);
-  	} catch (ParseException e) {
-  		e.printStackTrace();
-  		doLoginFail(am, account, PlayerJoinError.SERVER_ERROR);
-  	} catch (PlayerPasswordException e) {
-  		Log.e(TAG, "Player Password Exception");
-  		e.printStackTrace();
-  		doLoginFail(am, account, PlayerJoinError.PLAYER_PASSWORD_ERROR);
-  	}
+    try{
+      if(!hasPassword){
+        ServerConnection.joinPlayer(playerId, userId, authToken);
+      }
+      else{
+        ServerConnection.joinPlayer(playerId, userId, password, authToken);
+      }
+      setPlayerData(intent, am, account);
+      ContentResolver cr = getContentResolver();
+      UDJPlayerProvider.playerCleanup(cr);
+      Intent joinedPlayerIntent = new Intent(Constants.JOINED_PLAYER_ACTION);
+      am.setUserData(
+          account, Constants.LAST_PLAYER_ID_DATA, String.valueOf(playerId));
+      am.setUserData(
+          account, 
+          Constants.PLAYER_STATE_DATA, 
+          String.valueOf(Constants.IN_PLAYER));
+      Log.d(TAG, "Sending joined player broadcast");
+      sendBroadcast(joinedPlayerIntent);
+    }
+    catch(IOException e){
+      Log.e(TAG, "IO exception when joining player");
+      Log.e(TAG, e.getMessage());
+      doLoginFail(am, account, PlayerJoinError.SERVER_ERROR);
+    }
+    catch(JSONException e){
+      Log.e(TAG, 
+          "JSON exception when joining player");
+      Log.e(TAG, e.getMessage());
+      doLoginFail(am, account, PlayerJoinError.SERVER_ERROR);
+    }
+    catch(AuthenticationException e){
+      handleLoginAuthException(intent, am, account, authToken, attemptReauth);
+    }
+    catch(PlayerInactiveException e){
+      Log.e(TAG, "Player inactive Exception when joining player");
+      doLoginFail(am, account, PlayerJoinError.PLAYER_INACTIVE_ERROR);
+    } catch (ParseException e) {
+      e.printStackTrace();
+      doLoginFail(am, account, PlayerJoinError.SERVER_ERROR);
+    } catch (PlayerPasswordException e) {
+      Log.e(TAG, "Player Password Exception");
+      e.printStackTrace();
+      doLoginFail(am, account, PlayerJoinError.PLAYER_PASSWORD_ERROR);
+    }
   }
 
   private void handleLoginAuthException(
@@ -177,13 +177,13 @@ public class PlayerCommService extends IntentService{
   {
     if(attemptReauth){
       Log.d(TAG, 
-        "Soft Authentication exception when joining event");
+        "Soft Authentication exception when joining player");
       am.invalidateAuthToken(Constants.ACCOUNT_TYPE, authToken);
-      enterEvent(intent, am, account, false);
+      joinPlayer(intent, am, account, false);
     }
     else{
       Log.e(TAG, 
-        "Hard Authentication exception when joining event");
+        "Hard Authentication exception when joining player");
       doLoginFail(am, account, PlayerJoinError.AUTHENTICATION_ERROR);
     }
   }
@@ -201,13 +201,13 @@ public class PlayerCommService extends IntentService{
       account, 
       Constants.PLAYER_JOIN_ERROR, 
       error.toString());
-    Intent eventJoinFailedIntent = 
+    Intent playerJoinFailedIntent = 
       new Intent(Constants.PLAYER_JOIN_FAILED_ACTION);
-    Log.d(TAG, "Sending event join failure broadcast");
-    sendBroadcast(eventJoinFailedIntent);
+    Log.d(TAG, "Sending player join failure broadcast");
+    sendBroadcast(playerJoinFailedIntent);
   }
 
-  private void setEventData(Intent intent, AccountManager am, Account account){
+  private void setPlayerData(Intent intent, AccountManager am, Account account){
     am.setUserData(
       account, 
       Constants.PLAYER_NAME_DATA, 

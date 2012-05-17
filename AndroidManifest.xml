@@ -63,10 +63,11 @@
             android:resource="@xml/player_searchable"
           />
         </activity>
-        <activity 
+        <activity
           android:name=".PlayerActivity"
           android:launchMode="singleTop"
           android:theme="@style/Theme.Sherlock"
+          uiOptions="splitActionBarWhenNarrow"
         >
           <intent-filter>
             <action android:name="android.intent.action.SEARCH"/> 
@@ -76,7 +77,7 @@
             android:resource="@xml/song_searchable"
           />
         </activity>
-        <activity 
+        <activity
           android:name="RegularSearchActivity"
           android:launchMode="singleTop"
           android:theme="@style/Theme.Sherlock"

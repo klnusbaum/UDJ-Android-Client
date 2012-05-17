@@ -59,6 +59,7 @@ public class PlaylistSyncService extends IntentService{
   private static final int SONG_ADD_EXCEPTION_ID = 1;
   private static final int SONG_REMOVE_EXCEPTION_ID = 2;
   private static final int SONG_SET_EXCEPTION_ID = 3;
+  private static final int PLAYBACK_STATE_SET_EXCEPTION_ID = 4;
 
   private static final String TAG = "PlaylistSyncService";
 
@@ -72,7 +73,7 @@ public class PlaylistSyncService extends IntentService{
       (Account)intent.getParcelableExtra(Constants.ACCOUNT_EXTRA);
     long playerId = Long.valueOf(AccountManager.get(this).getUserData(
       account, Constants.LAST_PLAYER_ID_DATA));
-    //TODO handle error if eventId is bad
+    //TODO handle error if playerId is bad
     if(intent.getAction().equals(Intent.ACTION_INSERT)){
       if(intent.getData().equals(UDJPlayerProvider.PLAYLIST_URI)){
         long libId = intent.getLongExtra(
@@ -108,6 +109,10 @@ public class PlaylistSyncService extends IntentService{
       setCurrentSong(account, playerId, libId, true, intent);
       updateActivePlaylist(account, playerId, true);
     }
+    else if(intent.getAction().equals(Constants.ACTION_SET_PLAYBACK)){
+      setPlaybackState(intent, account, playerId, true);
+      updateActivePlaylist(account, playerId, true);
+    }
   }
 
   private void updateActivePlaylist(
@@ -133,6 +138,7 @@ public class PlaylistSyncService extends IntentService{
     try{
       JSONObject activePlaylist =
         ServerConnection.getActivePlaylist(playerId, authToken);
+      checkPlaybackState(am, account, activePlaylist.getString("state"));
       RESTProcessor.setActivePlaylist(activePlaylist, this);
     }
     catch(JSONException e){
@@ -341,7 +347,6 @@ public class PlaylistSyncService extends IntentService{
       // TODO REAUTH AND THEN TRY AGAIN
       e.printStackTrace();
     }
-    
   }
 
   private void voteOnSong(Account account, long playerId, long libId, int voteWeight, boolean attemptReauth){
@@ -388,6 +393,72 @@ public class PlaylistSyncService extends IntentService{
       // TODO REAUTH AND THEN TRY AGAIN
       e.printStackTrace();
     }
+  }
+  private void setPlaybackState(
+    Intent intent, Account account, long playerId, boolean attemptReauth)
+  {
+    AccountManager am = AccountManager.get(this);
+    String authToken = "";
+    try{
+      authToken = am.blockingGetAuthToken(account, "", true);  
+    }
+    catch(OperationCanceledException e){
+      //TODO do something here?
+      Log.e(TAG, "Operation canceled exception in set playback" );
+      return;
+    }
+    catch(AuthenticatorException e){
+      //TODO do something here?
+      Log.e(TAG, "Authenticator exception in set playback" );
+      return;
+    }
+    catch(IOException e){
+      //TODO do something here?
+      Log.e(TAG, "IO exception in set playback" );
+      return;
+    }
+
+    int desiredPlaybackState = intent.getIntExtra(Constants.PLAYBACK_STATE_EXTRA, 0);
+    long userId = Long.valueOf(am.getUserData(account, Constants.USER_ID_DATA));
+    try{
+      ServerConnection.setPlaybackState(playerId, userId, desiredPlaybackState, authToken);
+    }
+    catch(IOException e){
+      Log.e(TAG, "IO exception in set playback" );
+      alertSetPlaybackException(account, intent);
+      return;
+    }
+    catch(AuthenticationException e){
+      if(attemptReauth){
+        Log.d(TAG, "Soft Authentication exception when setting playback state");
+        am.invalidateAuthToken(Constants.ACCOUNT_TYPE, authToken);
+        setPlaybackState(intent, account, playerId, false);
+      }
+      else{
+        Log.e(TAG, "Hard Authentication exception when setting playback state");
+        //TODO do something here?
+      }
+    }
+    catch(PlayerInactiveException e){
+      Log.e(TAG, "Player inactive exception in set playback" );
+      Utils.handleInactivePlayer(this, account);
+      return;
+    }
+    catch(PlayerAuthException e){
+      Log.e(TAG, "PlayerAuth exception in set playback" );
+      //TODO do something here?
+      return;
+    }
+  }
+
+  private void alertSetPlaybackException(Account account, Intent originalIntent){
+    alertException(
+      account,
+      originalIntent,
+      R.string.set_playback_failed_title,
+      R.string.set_playback_failed_content,
+      PLAYBACK_STATE_SET_EXCEPTION_ID
+    );
   }
 
 
@@ -437,6 +508,23 @@ public class PlaylistSyncService extends IntentService{
     NotificationManager nm = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
     nm.notify(notificationId, notification);
   }
+
+  private void checkPlaybackState(AccountManager am, Account account, String playbackState){
+    int plState = Constants.PLAYING_STATE;
+    if(playbackState.equals("playing")){
+      plState = Constants.PLAYING_STATE;
+    }
+    else if(playbackState.equals("paused")){
+      plState = Constants.PAUSED_STATE;
+    }
+    if(Utils.getPlaybackState(am, account) != plState){
+      am.setUserData(account, Constants.PLAYBACK_STATE_DATA, String.valueOf(plState));
+      Intent playbackStateChangedBroadcast = new Intent(Constants.BROADCAST_PLAYBACK_CHANGED);
+      playbackStateChangedBroadcast.putExtra(Constants.PLAYBACK_STATE_EXTRA, plState);
+      sendBroadcast(playbackStateChangedBroadcast);
+    }
+  }
+
 
 
 }

@@ -79,4 +79,13 @@ public class Utils{
     return userId==ownerId;
   }
 
+  public static int getPlaybackState(AccountManager am, Account account){
+    String playbackState = am.getUserData(account, Constants.PLAYBACK_STATE_DATA);
+    if(playbackState == null){
+      return Constants.PLAYING_STATE;
+    }
+    else{
+      return Integer.valueOf(playbackState);
+    }
+  }
 }

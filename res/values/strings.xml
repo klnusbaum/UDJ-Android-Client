@@ -91,6 +91,8 @@
   <string name="setting_song">Changing Song</string>
   <string name="song_set_failed_title">Changing Song Failed</string>
   <string name="song_set_failed_content">Tap here to retry</string>
+  <string name="set_playback_failed_title">Pause/Play Failed!</string>
+  <string name="set_playback_failed_content">Tap here to retry</string>
 
     <!-- Stuff for action bar compatibility -->
     <string name="alternate_title">An alternate title that is long</string>
