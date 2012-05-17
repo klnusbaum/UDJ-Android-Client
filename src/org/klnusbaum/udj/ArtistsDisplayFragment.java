@@ -42,6 +42,9 @@ public class ArtistsDisplayFragment extends ListFragment
 
   private static final String TAG = "ArtistDisplayFragment";
 
+  private int previousVisiblePosition;
+  private int previousVisibleIndex;
+
   //private ArtistsAdapter artistsAdapter;
   private ArrayAdapter<String> artistsAdapter;
   private Account account;
@@ -58,14 +61,25 @@ public class ArtistsDisplayFragment extends ListFragment
     setListAdapter(artistsAdapter);
     setListShown(false);
     getListView().setTextFilterEnabled(true);
+    previousVisiblePosition = -1;
   }
 
   @Override
   public void onResume(){
     super.onResume();
     getLoaderManager().initLoader(ARTISTS_LOADER_TAG, null, this);
+    if(previousVisiblePosition != -1){
+      getListView().setSelectionFromTop(previousVisibleIndex, previousVisiblePosition);
+    }
   }
 
+  @Override
+  public void onPause(){
+    super.onPause();
+    previousVisibleIndex = getListView().getFirstVisiblePosition();
+    View v = getListView().getChildAt(0);
+    previousVisiblePosition = (v == null) ? 0 : v.getTop();
+  }
 
   public Loader<ArtistsLoader.ArtistsResult> onCreateLoader(
     int id, Bundle args)
