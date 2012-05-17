@@ -310,6 +310,7 @@ public class PlaylistFragment extends RefreshableListFragment implements
 
       upButton.setOnClickListener(new View.OnClickListener(){
         public void onClick(View v){
+          v.setEnabled(false);
           upVoteSong(libId);
           Toast toast = Toast.makeText(getActivity(),
             getString(R.string.voting_up_message) + " " + title, Toast.LENGTH_SHORT);
@@ -319,6 +320,7 @@ public class PlaylistFragment extends RefreshableListFragment implements
 
       downButton.setOnClickListener(new View.OnClickListener(){
         public void onClick(View v){
+          v.setEnabled(false);
           downVoteSong(libId);
           Toast toast = Toast.makeText(getActivity(),
             getString(R.string.voting_down_message) + " " + title, Toast.LENGTH_SHORT);
