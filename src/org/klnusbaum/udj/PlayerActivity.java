@@ -38,7 +38,6 @@ import org.klnusbaum.udj.Constants;
 import org.klnusbaum.udj.network.PlaylistSyncService;
 
 import com.viewpagerindicator.TitlePageIndicator;
-import com.viewpagerindicator.TitleProvider;
 
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
@@ -109,7 +108,7 @@ public class PlayerActivity extends PlayerInactivityListenerActivity {
 
 
 
-  public static class PlayerPagerAdapter extends FragmentPagerAdapter implements TitleProvider{
+  public static class PlayerPagerAdapter extends FragmentPagerAdapter{
     public PlayerPagerAdapter(FragmentManager fm){
       super(fm);
     }
@@ -134,7 +133,7 @@ public class PlayerActivity extends PlayerInactivityListenerActivity {
       }
     }
 
-    public String getTitle(int position){
+    public String getPageTitle(int position){
       switch(position){
         case 0:
           return "Playlist";
