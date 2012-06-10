@@ -4,7 +4,4 @@
 /libs
 local.properties
 proguard-project.txt
-.project
-.classpath
 .DS_STORE
-project.properties
