@@ -113,11 +113,6 @@ public class PlaylistFragment extends RefreshableListFragment implements
 
   private void setupRegularContext(Cursor song, ContextMenu menu, MenuInflater inflater){
     inflater.inflate(R.menu.playlist_context, menu);
-    if(userId != song.getLong(song.getColumnIndex(UDJPlayerProvider.ADDER_ID_COLUMN)) ||
-        song.getInt(song.getColumnIndex(UDJPlayerProvider.IS_CURRENTLY_PLAYING_COLUMN)) == 1)
-    {
-      menu.findItem(R.id.remove_song).setEnabled(false);
-    }
   }
 
   @Override
@@ -330,11 +325,7 @@ public class PlaylistFragment extends RefreshableListFragment implements
         upButton.setEnabled(false);
         downButton.setEnabled(false);
       }
-      else if(cursor.getLong(cursor.getColumnIndex(UDJPlayerProvider.ADDER_ID_COLUMN)) ==userId){
-        upButton.setEnabled(false);
-        downButton.setEnabled(false);
-      }
-      else if (!cursor.isNull(cursor.getColumnIndex(UDJPlayerProvider.DID_VOTE_COLUMN))) {
+      else if (!cursor.isNull(cursor.getColumnIndex(UDJPlayerProvider.DID_VOTE_COLUMN))){
         int voteType = cursor.getInt(cursor.getColumnIndex(UDJPlayerProvider.DID_VOTE_COLUMN));
         if(voteType == 1){
           upButton.setEnabled(false);

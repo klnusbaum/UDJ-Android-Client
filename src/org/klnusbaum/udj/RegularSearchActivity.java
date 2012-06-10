@@ -49,6 +49,7 @@ public class RegularSearchActivity extends PlayerInactivityListenerActivity{
     Log.d(TAG, "In on new intent");
     if(Intent.ACTION_SEARCH.equals(intent.getAction())){
       String searchQuery = intent.getStringExtra(SearchManager.QUERY);
+      searchQuery = searchQuery.trim();
       getIntent().putExtra(SearchManager.QUERY, searchQuery);
       getSupportLoaderManager().restartLoader(
         SearchFragment.LIB_SEARCH_LOADER_TAG, null, searchFrag);

@@ -31,6 +31,7 @@ import android.view.MenuInflater;
 import android.util.Log;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.app.SearchManager;
 
 
 import org.klnusbaum.udj.Constants;
@@ -198,6 +199,9 @@ public class PlayerActivity extends PlayerInactivityListenerActivity {
 
   protected void onNewIntent(Intent intent){
     if(Intent.ACTION_SEARCH.equals(intent.getAction())){
+      String searchQuery = intent.getStringExtra(SearchManager.QUERY);
+      searchQuery = searchQuery.trim();
+      intent.putExtra(SearchManager.QUERY, searchQuery);
       intent.setClass(this, RegularSearchActivity.class);
       startActivityForResult(intent, 0);
     }
