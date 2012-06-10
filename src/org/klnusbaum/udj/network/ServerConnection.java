@@ -69,6 +69,7 @@ import org.klnusbaum.udj.exceptions.PlayerAuthException;
 import org.klnusbaum.udj.exceptions.PlayerInactiveException;
 import org.klnusbaum.udj.exceptions.APIVersionException;
 import org.klnusbaum.udj.exceptions.PlayerPasswordException;
+import org.klnusbaum.udj.exceptions.ConflictException;
 
 
 /**
@@ -181,6 +182,12 @@ public class ServerConnection{
     }
   }
 
+  private static void conflictErrorCheck(HttpResponse resp) throws ConflictException{
+    if(resp.getStatusLine().getStatusCode() == HttpStatus.SC_CONFLICT){
+      throw new ConflictException();
+    }
+  }
+
   private static void basicResponseErrorCheck(
     HttpResponse resp, 
     String response
@@ -285,7 +292,7 @@ public class ServerConnection{
   public static String doPlayerRelatedPut( 
     URI uri, String ticketHash, String payload)
     throws AuthenticationException, IOException, PlayerInactiveException, 
-    PlayerAuthException
+    PlayerAuthException, ConflictException
   {
     final HttpResponse resp = doPut(uri, ticketHash, payload);
     final String response = EntityUtils.toString(resp.getEntity());
@@ -293,6 +300,7 @@ public class ServerConnection{
     Log.d(TAG, "Player status code: \"" + resp.getStatusLine().getStatusCode());
     playerInactiveErrorCheck(resp);
     basicResponseErrorCheck(resp, response);
+    conflictErrorCheck(resp);
     return response;
   }
 
@@ -567,7 +575,7 @@ public class ServerConnection{
   public static void addSongToActivePlaylist(
     long playerId, long libId, String authToken)
     throws JSONException, ParseException, IOException, AuthenticationException,
-    PlayerInactiveException, PlayerAuthException
+    PlayerInactiveException, PlayerAuthException, ConflictException
   {
     try{
       URI uri = new URI(
@@ -652,7 +660,7 @@ public class ServerConnection{
       voteString = "downvote";
     }
     else{
-    	throw new IllegalArgumentException("Vote type must be either 1 or -1");
+      throw new IllegalArgumentException("Vote type must be either 1 or -1");
     }
     try{
       URI uri = new URI(

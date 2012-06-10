@@ -48,6 +48,7 @@ import org.klnusbaum.udj.UDJPlayerProvider;
 import org.klnusbaum.udj.R;
 import org.klnusbaum.udj.exceptions.PlayerAuthException;
 import org.klnusbaum.udj.exceptions.PlayerInactiveException;
+import org.klnusbaum.udj.exceptions.ConflictException;
 import org.klnusbaum.udj.Utils;
 
 
@@ -236,7 +237,13 @@ public class PlaylistSyncService extends IntentService{
 
 
 
-  private void addSongToPlaylist(Account account, long playerId, long libId, boolean attemptReauth, Intent originalIntent){
+  private void addSongToPlaylist(
+    Account account,
+    long playerId,
+    long libId,
+    boolean attemptReauth,
+    Intent originalIntent)
+  {
     String authToken = "";
     AccountManager am = AccountManager.get(this);
     try{
@@ -255,7 +262,7 @@ public class PlaylistSyncService extends IntentService{
       Log.e(TAG, "IO exception when geting authtoken for adding to playist");
       Log.e(TAG, e.getMessage());
     }
-    
+
     try{
       ServerConnection.addSongToActivePlaylist(
           playerId, libId, authToken);
@@ -287,13 +294,24 @@ public class PlaylistSyncService extends IntentService{
     catch(PlayerInactiveException e){
       Log.e(TAG, "Event over exceptoin when retreiving playlist");
       Utils.handleInactivePlayer(this, account);
-    } catch (PlayerAuthException e) {
+    }
+    catch (PlayerAuthException e) {
       //TODO REAUTH AND THEN TRY ADD AGAIN
       e.printStackTrace();
     }
-    
+    catch (ConflictException e){
+      Intent voteIntent = new Intent(Intent.ACTION_INSERT,
+        UDJPlayerProvider.VOTES_URI, this,
+        PlaylistSyncService.class);
+      voteIntent.putExtra(Constants.ACCOUNT_EXTRA, account);
+      voteIntent.putExtra(Constants.VOTE_WEIGHT_EXTRA, 1);
+      voteIntent.putExtra(Constants.LIB_ID_EXTRA, libId);
+      startService(voteIntent);
+    }
+
+
   }
-  
+
   private void removeSongFromPlaylist(
       Account account, long playerId, long libId, boolean attemptReauth, Intent originalIntent)
   {
@@ -387,7 +405,7 @@ public class PlaylistSyncService extends IntentService{
       }
     }
     catch(PlayerInactiveException e){
-      Log.e(TAG, "Event over exceptoin when retreiving playlist");
+      Log.e(TAG, "Event over exception when retreiving playlist");
       Utils.handleInactivePlayer(this, account);
     } catch (PlayerAuthException e) {
       // TODO REAUTH AND THEN TRY AGAIN
