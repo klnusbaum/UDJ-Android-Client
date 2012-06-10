@@ -544,6 +544,25 @@ public class ServerConnection{
     return null;
   }
 
+  public static List<LibraryEntry> getRecentlyPlayedLibEntries(int max, long playerId, String authToken)
+    throws JSONException, ParseException, IOException, AuthenticationException,
+    PlayerInactiveException, PlayerAuthException
+  {
+    try{
+      URI uri = new URI(
+        NETWORK_PROTOCOL, null, SERVER_HOST, SERVER_PORT,
+        "/udj/players/"+playerId+"/recently_played",
+        "max_songs="+String.valueOf(max), null);
+      JSONArray recentlyPlayedEntries = new JSONArray(doPlayerRelatedGet(uri, authToken));
+      return LibraryEntry.fromRecentlyPlayedJSONArray(recentlyPlayedEntries);
+    }
+    catch(URISyntaxException e){
+      //TODO inform caller that their query is bad 
+    }
+    return null;
+  }
+
+
 
   public static void addSongToActivePlaylist(
     long playerId, long libId, String authToken)

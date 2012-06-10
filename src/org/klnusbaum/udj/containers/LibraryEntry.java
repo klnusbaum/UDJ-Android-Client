@@ -93,6 +93,17 @@ public class LibraryEntry{
     return toReturn;
   }
 
+  public static ArrayList<LibraryEntry> fromRecentlyPlayedJSONArray(JSONArray array)
+    throws JSONException
+  {
+    ArrayList<LibraryEntry> toReturn = new ArrayList<LibraryEntry>();
+    for(int i=0; i<array.length(); i++){
+      toReturn.add(valueOf(array.getJSONObject(i).getJSONObject("song")));
+    }
+    return toReturn;
+
+  }
+
   public String toString(){
     return "Song name: " + getTitle();
   }

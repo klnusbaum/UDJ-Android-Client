@@ -116,7 +116,7 @@ public class PlayerActivity extends PlayerInactivityListenerActivity {
 
     @Override
     public int getCount(){
-      return 3;
+      return 4;
     }
 
     public Fragment getItem(int position){
@@ -126,6 +126,8 @@ public class PlayerActivity extends PlayerInactivityListenerActivity {
         case 1:
           return new ArtistsDisplayFragment();
         case 2:
+          return new RecentlyPlayedFragment();
+        case 3:
           return new RandomSearchFragment();
         default:
           return null;
@@ -139,6 +141,8 @@ public class PlayerActivity extends PlayerInactivityListenerActivity {
         case 1:
           return "Artists";
         case 2:
+          return "Recent";
+        case 3:
           return "Random";
         default:
           return "Unknown";
