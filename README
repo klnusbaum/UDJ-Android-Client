@@ -1,16 +1,33 @@
-Yea...this software isn't even alpha yet. It barely works as is. I
-promise to fill this with releavent information once UDJ is in some sort of
-a working state.
-KLN 02/07/2011
+#UDJ
 
-UDJ Algorithm:
-UDJ is a collaborative playlist generator. Let's say we're at a party and the host
-has his or her computer hooked up to their sound system. UDJ allows the host to
-share his or her library and let other clients (be they mobile or web based) add
-music from the library to the current playlist. Users can then "vote"
-on items in the playlist. If they vote it up, the song will be moved up in the queue
-and if they vote it down, the song will be moved down in the queue. All communication
-is done using a REST api. A webserver sits in the middle between all clients and the 
-party host. It coordinates all requests for playlist additions, votes, and anything else
-that might need to be done for the "party". The webserver can also inject content (be it music,
-advertisements, or anything else) into the playlist.
+UDJ is a social music player. It allows many people to control
+a single music player democratically. Checkout the
+[UDJ homepage][home] for more information. This is the official
+UDJ Android App. For more details on actually interacting with
+UDJ (so you can do something like creating your own client), see the [UDJ Server Repository][server].
+
+## Requirements
+The UDJ android app has a min-sdk version of 8. You'll also need to have/reference the
+[ActionBarSherlock][abs] and [ViewPageIndicator][vpi] library projects.
+
+
+## Who Are You?
+
+UDJ is a team effort lead by [Kurtis Nusbaum][kln].
+I really like computers and programming.
+
+## License
+UDJ is licensed under the [GPLv2][gpl].
+
+## Questions/Comments?
+
+If you have any questions or comments, feel free to post them to
+the [UDJ mailing list][mailing].
+
+[home]:https://www.udjplayer.com
+[server]:https://github.com/klnusbaum/UDJ
+[kln]:https://github.com/klnusbaum/
+[gpl]:https://github.com/klnusbaum/UDJ-Android-Client/blob/master/LICENSE
+[mailing]:mailto:udjdev@bazaarsolutions.com
+[abs]:http://actionbarsherlock.com/
+[vpi]:http://viewpagerindicator.com/
