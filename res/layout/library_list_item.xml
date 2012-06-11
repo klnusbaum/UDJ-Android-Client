@@ -24,6 +24,10 @@
   android:layout_height="fill_parent"
   android:padding="4dp"
 >
+<!--
+    android:scrollHorizontally="true"
+    android:lines="1"
+  -->
 
   <TextView 
     android:id="@+id/librarySongName"
@@ -31,9 +35,8 @@
     android:layout_height="wrap_content"
     android:textAppearance="?android:attr/textAppearanceMedium"
     android:textStyle="bold"
-    android:ellipsize="marquee"
-    android:scrollHorizontally="true"
-    android:lines="1"
+    android:ellipsize="middle"
+    android:singleLine="true"
     gravity="left"
     android:layout_toLeftOf="@+id/lib_add_button"
     android:layout_alignParentLeft="true"
@@ -47,9 +50,8 @@
     android:textAppearance="?android:attr/textAppearanceSmall"
     android:layout_below="@id/librarySongName"
     android:paddingLeft="4dp"
-    android:ellipsize="marquee"
-    android:scrollHorizontally="true"
-    android:lines="1"
+    android:ellipsize="middle"
+    android:singleLine="true"
     gravity="left"
     android:layout_toLeftOf="@+id/lib_add_button"
     android:layout_alignParentLeft="true"
