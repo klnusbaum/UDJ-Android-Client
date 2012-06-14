@@ -155,15 +155,17 @@ public class PlayerActivity extends PlayerInactivityListenerActivity {
       int playbackState = Utils.getPlaybackState(am, account);
       if(playbackState == Constants.PLAYING_STATE){
         menu.add("Pause")
+          .setIcon(R.drawable.ab_pause)
           .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
       }
       else if(playbackState == Constants.PAUSED_STATE){
         menu.add("Play")
+          .setIcon(R.drawable.ab_play)
           .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
       }
     }
     menu.add("Search")
-      .setIcon(R.drawable.ic_search)
+      .setIcon(R.drawable.ab_search_dark)
       .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
     return true;
   }
