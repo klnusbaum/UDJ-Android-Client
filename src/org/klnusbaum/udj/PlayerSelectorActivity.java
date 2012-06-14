@@ -56,7 +56,7 @@ public class PlayerSelectorActivity extends SherlockFragmentActivity{
 
   public boolean onCreateOptionsMenu(Menu menu){
     menu.add("Search")
-      .setIcon(R.drawable.ic_search)
+      .setIcon(R.drawable.ab_search_dark)
       .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
     return true;
   }
