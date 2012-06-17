@@ -53,7 +53,7 @@
     <string name="song_add_failed_title">Adding Song(s) Failed</string>
     <string name="song_add_failed_content">Tap here to retry</string>
     <string name="player_inactive_title">Player Inactive</string>
-    <string name="player_inactive_message">Player is now inactive</string>
+    <string name="player_inactive_message">Player no longer available</string>
     <string name="no_network_connection">No network connection available</string>
     <string name="player_join_fail_title">Joining Player Failed</string>
     <string name="unknown_error_message">Unknown error. Please contact developers.</string>
