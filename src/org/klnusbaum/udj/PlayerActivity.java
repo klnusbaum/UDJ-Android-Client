@@ -21,9 +21,11 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
+import android.support.v4.app.DialogFragment;
 
 import android.os.Bundle;
 import android.accounts.AccountManager;
+import android.accounts.Account;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.view.MenuInflater;
@@ -32,6 +34,12 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.app.SearchManager;
 import android.widget.Toast;
+import android.widget.AdapterView;
+import android.widget.Spinner;
+import android.widget.ArrayAdapter;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.LayoutInflater;
 
 
 import org.klnusbaum.udj.Constants;
@@ -209,6 +217,41 @@ public class PlayerActivity extends PlayerInactivityListenerActivity {
     }
     else{
       super.onNewIntent(intent);
+    }
+  }
+
+  private class SetVolumeFragment extends DialogFragment
+      implements AdapterView.OnItemSelectedListener
+  {
+
+    private Account getAccount(){
+      return (Account)getArguments().getParcelable(Constants.ACCOUNT_EXTRA);
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+        Bundle savedInstanceState) {
+      View v = inflater.inflate(R.layout.set_volume, container, false);
+      Spinner volumeSelector = (Spinner)v;
+      ArrayAdapter<CharSequence> volumeAdapter = ArrayAdapter.createFromResource(getActivity(),
+          R.array.volumes, android.R.layout.simple_spinner_item);
+      volumeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+      volumeSelector.setAdapter(volumeAdapter);
+      volumeSelector.setOnItemSelectedListener(this);
+      AccountManager am = AccountManager.get(getActivity());
+      volumeSelector.setSelection(Utils.getPlayerVolume(am, getAccount()));
+      return v;
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id){
+
+
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent){
+      dismiss();
     }
   }
 

@@ -88,4 +88,15 @@ public class Utils{
       return Integer.valueOf(playbackState);
     }
   }
+
+  public static int getPlayerVolume(AccountManager am, Account account){
+    String volume = am.getUserData(account, Constants.PLAYER_VOLUME_DATA);
+    if(volume == null){
+      return 0;
+    }
+    else{
+      return Integer.valueOf(volume);
+    }
+  }
+
 }

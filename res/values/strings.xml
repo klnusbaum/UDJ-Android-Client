@@ -99,14 +99,28 @@
   <string name="volume_mute">Mute</string>
   <string name="search">Search</string>
 
-    <string name="menu_refresh">Refresh</string>
-    <string name="menu_search">Search</string>
-    <string name="menu_share">Share</string>
+  <string name="menu_refresh">Refresh</string>
+  <string name="menu_search">Search</string>
+  <string name="menu_share">Share</string>
 
-    <!-- Pull to Refresh -->
-    <string name="pull_to_refresh_pull_label">Pull to refresh…</string>
-    <string name="pull_to_refresh_release_label">Release to refresh…</string>
-    <string name="pull_to_refresh_refreshing_label">Loading…</string>
-    <string name="pull_to_refresh_tap_label">Tap to refresh…</string>
+  <string-array name="volumes">
+      <item>Zero (mute)</item>
+      <item>One</item>
+      <item>Two</item>
+      <item>Three</item>
+      <item>Four</item>
+      <item>Five</item>
+      <item>Six</item>
+      <item>Seven</item>
+      <item>Eight</item>
+      <item>Nine</item>
+      <item>Ten</item>
+    </string-array>
+
+  <!-- Pull to Refresh -->
+  <string name="pull_to_refresh_pull_label">Pull to refresh…</string>
+  <string name="pull_to_refresh_release_label">Release to refresh…</string>
+  <string name="pull_to_refresh_refreshing_label">Loading…</string>
+  <string name="pull_to_refresh_tap_label">Tap to refresh…</string>
 
 </resources>

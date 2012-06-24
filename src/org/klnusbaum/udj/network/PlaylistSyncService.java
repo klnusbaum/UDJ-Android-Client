@@ -144,6 +144,7 @@ public class PlaylistSyncService extends IntentService{
       JSONObject activePlaylist =
         ServerConnection.getActivePlaylist(playerId, authToken);
       checkPlaybackState(am, account, activePlaylist.getString("state"));
+      checkVolume(am, account, activePlaylist.getInt("volume"));
       RESTProcessor.setActivePlaylist(activePlaylist, this);
     }
     catch(JSONException e){
@@ -443,6 +444,7 @@ public class PlaylistSyncService extends IntentService{
 
     int desiredVolume = intent.getIntExtra(Constants.PLAYER_VOLUME_EXTRA, 0);
     long userId = Long.valueOf(am.getUserData(account, Constants.USER_ID_DATA));
+    /*
     try{
       ServerConnection.setPlayerVolume(playerId, userId, desiredVolume, authToken);
     }
@@ -472,6 +474,7 @@ public class PlaylistSyncService extends IntentService{
       //TODO do something here?
       return;
     }
+    */
   }
 
 
@@ -603,6 +606,15 @@ public class PlaylistSyncService extends IntentService{
       Intent playbackStateChangedBroadcast = new Intent(Constants.BROADCAST_PLAYBACK_CHANGED);
       playbackStateChangedBroadcast.putExtra(Constants.PLAYBACK_STATE_EXTRA, plState);
       sendBroadcast(playbackStateChangedBroadcast);
+    }
+  }
+
+  private void checkVolume(AccountManager am, Account account, int volume){
+    if(Utils.getPlayerVolume(am, account) != volume){
+      am.setUserData(account, Constants.PLAYER_VOLUME_DATA, String.valueOf(volume));
+      Intent playerVolumeChangedBroadcast = new Intent(Constants.BROADCAST_VOLUME_CHANGED);
+      playerVolumeChangedBroadcast.putExtra(Constants.PLAYER_VOLUME_EXTRA, volume);
+      sendBroadcast(playerVolumeChangedBroadcast);
     }
   }
 

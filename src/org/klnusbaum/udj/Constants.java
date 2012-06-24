@@ -49,7 +49,7 @@ public class Constants{
   public static final int PLAYING_STATE = 0;
   public static final int PAUSED_STATE = 1;
 
-  public static final String VOLUME_DATA = "org.klnusbaum.udj.Volume";
+  public static final String PLAYER_VOLUME_DATA = "org.klnusbaum.udj.PlayerVolume";
 
   /** Constants use for passing account related info in intents */
   public static final String ACCOUNT_EXTRA = "org.klnusbaum.udj.account";
@@ -95,5 +95,6 @@ public class Constants{
 
   public static final String PLAYER_VOLUME_EXTRA = "org.klnusbaum.udj.PlaybackState";
   public static final String ACTION_SET_VOLUME = "org.klnusbaum.udj.SetVolume";
+  public static final String BROADCAST_VOLUME_CHANGED = "org.klnusbaum.udj.VolumeChanged";
 
 }
