@@ -132,6 +132,7 @@ public class PlayerListFragment extends RefreshableListFragment implements
   }
 
 
+
   private PlayerListAdapter playerAdapter;
   private LocationManager lm;
   private Location lastKnown = null;

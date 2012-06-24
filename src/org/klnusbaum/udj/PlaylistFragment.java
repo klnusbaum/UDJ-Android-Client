@@ -63,7 +63,7 @@ public class PlaylistFragment extends RefreshableListFragment implements
 
   @Override
   protected void doRefreshWork() {
-    ((PlayerActivity) getActivity()).getPlaylistFromServer();
+    updatePlaylist();
   }
 
   @Override
@@ -79,6 +79,25 @@ public class PlaylistFragment extends RefreshableListFragment implements
     getLoaderManager().initLoader(PLAYLIST_LOADER_ID, null, this);
     registerForContextMenu(getListView());
   }
+
+  public void updatePlaylist() {
+    int playerState = Utils.getPlayerState(getActivity(), account);
+    // TODO hanle if no player
+    if (playerState == Constants.IN_PLAYER) {
+      Intent getPlaylist = new Intent(Intent.ACTION_VIEW,
+          UDJPlayerProvider.PLAYLIST_URI, getActivity(),
+          PlaylistSyncService.class);
+      getPlaylist.putExtra(Constants.ACCOUNT_EXTRA, account);
+      getActivity().startService(getPlaylist);
+    }
+  }
+
+  @Override
+  public void onResume(){
+    super.onResume();
+    updatePlaylist();
+  }
+
 
   public void onListItemClick(ListView l, View v, int position, long id) {
     l.showContextMenuForChild(v);

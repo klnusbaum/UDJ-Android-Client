@@ -1,18 +1,17 @@
 /**
  * Copyright 2011 Kurtis L. Nusbaum
- * 
  * This file is part of UDJ.
- * 
+ *
  * UDJ is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * UDJ is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with UDJ.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -63,7 +62,6 @@ public class PlayerActivity extends PlayerInactivityListenerActivity {
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.player);
-    getPlaylistFromServer();
 
     pagerAdapter = new PlayerPagerAdapter(getSupportFragmentManager());
     pager = (ViewPager)findViewById(R.id.player_pager);
@@ -86,18 +84,6 @@ public class PlayerActivity extends PlayerInactivityListenerActivity {
   protected void onPause(){
     super.onPause();
     unregisterReceiver(playbackStateChangedListener);
-  }
-
-  public void getPlaylistFromServer() {
-    int playerState = Utils.getPlayerState(this, account);
-    // TODO hanle if no player
-    if (playerState == Constants.IN_PLAYER) {
-      Intent getPlaylist = new Intent(Intent.ACTION_VIEW,
-          UDJPlayerProvider.PLAYLIST_URI, this,
-          PlaylistSyncService.class);
-      getPlaylist.putExtra(Constants.ACCOUNT_EXTRA, account);
-      startService(getPlaylist);
-    }
   }
 
   public void onBackPressed(){
