@@ -18,14 +18,6 @@
   along with UDJ.  If not, see <http://www.gnu.org/licenses/>.
 -->
 <resources>
-
-    <item name="LIB_ENTRY_VIEW_TAG" type="id"/>
-    <item name="actionbar_compat" type="id"/>
-    <item name="actionbar_compat_title" type="id"/>
-    <item name="actionbar_compat_item_refresh_progress" type="id"/>
-    <item name="actionbar_compat_item_refresh" type="id"/>
-    <item name="menu_refresh" type="id"/>
-
     <!-- Pull to Refresh -->
     <item name="gridview" type="id"/>
     <item name="webview" type="id"/>

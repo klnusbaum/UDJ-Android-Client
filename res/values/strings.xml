@@ -94,9 +94,6 @@
   <string name="set_playback_failed_title">Pause/Play Failed!</string>
   <string name="set_playback_failed_content">Tap here to retry</string>
 
-    <!-- Stuff for action bar compatibility -->
-    <string name="alternate_title">An alternate title that is long</string>
-    <string name="toggle_title">Toggle title</string>
     <string name="menu_refresh">Refresh</string>
     <string name="menu_search">Search</string>
     <string name="menu_share">Share</string>
