@@ -24,7 +24,10 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.app.DialogFragment;
 
 import android.os.Bundle;
+import android.widget.SeekBar;
 import android.app.Dialog;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.accounts.AccountManager;
 import android.accounts.Account;
 import android.content.Intent;
@@ -35,9 +38,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.app.SearchManager;
 import android.widget.Toast;
-import android.widget.AdapterView;
-import android.widget.Spinner;
-import android.widget.ArrayAdapter;
+import android.widget.TextView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.LayoutInflater;
@@ -225,11 +226,23 @@ public class PlayerActivity extends PlayerInactivityListenerActivity {
     }
   }
 
+  private void setVolume(int newVolume){
+    Intent setPlaybackIntent = new Intent(
+      Constants.ACTION_SET_VOLUME,
+      Constants.PLAYER_URI,
+      this,
+      PlaylistSyncService.class);
+    setPlaybackIntent.putExtra(Constants.ACCOUNT_EXTRA, account);
+    setPlaybackIntent.putExtra(Constants.PLAYER_VOLUME_EXTRA, newVolume);
+    startService(setPlaybackIntent);
+  }
 
-  private class SetVolumeFragment extends DialogFragment
-      implements AdapterView.OnItemSelectedListener
+
+  public static class SetVolumeFragment extends DialogFragment
+    implements SeekBar.OnSeekBarChangeListener
   {
-    private boolean isFirstSelect = true;
+    private TextView volumeDisplay;
+    private SeekBar volumeBar;
 
     private Account getAccount(){
       return (Account)getArguments().getParcelable(Constants.ACCOUNT_EXTRA);
@@ -237,43 +250,46 @@ public class PlayerActivity extends PlayerInactivityListenerActivity {
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState){
-      Dialog toReturn = super.onCreateDialog(savedInstanceState);
-      toReturn.setTitle(R.string.volume_set);
+      AlertDialog toReturn = new AlertDialog.Builder(getActivity())
+        .setTitle(R.string.volume_set)
+        .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener(){
+          public void onClick(DialogInterface dialog, int whichButton){
+            int requestedVolume = volumeBar.getProgress();
+            Toast toast = Toast.makeText(
+              getActivity(),
+              "Setting Volume To " + String.valueOf(requestedVolume), Toast.LENGTH_SHORT);
+            toast.show();
+            dismiss();
+          }
+        })
+        .setOnCancelListener(new DialogInterface.OnCancelListener(){
+          public void onCancel(DialogInterface dialog){
+
+          }
+        })
+        .create();
+      LayoutInflater inflater = getActivity().getLayoutInflater();
+      View volumeEditor = inflater.inflate(R.layout.set_volume, null, false);
+      toReturn.setView(volumeEditor);
+
+      AccountManager am = AccountManager.get(getActivity());
+      volumeBar = (SeekBar)volumeEditor.findViewById(R.id.volume_selector);
+      volumeDisplay = (TextView)volumeEditor.findViewById(R.id.volume_display);
+      volumeBar.setMax(10);
+      volumeBar.setProgress(Utils.getPlayerVolume(am, getAccount()));
+      volumeBar.setPadding(volumeBar.getThumbOffset()+2, 2, volumeBar.getThumbOffset()+2, 2);
+      volumeDisplay.setText(String.valueOf(Utils.getPlayerVolume(am, getAccount())));
+      volumeBar.setOnSeekBarChangeListener(this);
+
       return toReturn;
     }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-        Bundle savedInstanceState) {
-      View v = inflater.inflate(R.layout.set_volume, container, false);
-      Spinner volumeSelector = (Spinner)v.findViewById(R.id.volume_selector);
-      ArrayAdapter<CharSequence> volumeAdapter = ArrayAdapter.createFromResource(getActivity(),
-          R.array.volumes, android.R.layout.simple_spinner_item);
-      volumeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-      volumeSelector.setAdapter(volumeAdapter);
-      AccountManager am = AccountManager.get(getActivity());
-      volumeSelector.setSelection(Utils.getPlayerVolume(am, getAccount()));
-      volumeSelector.setOnItemSelectedListener(this);
-      return v;
+    public void onProgressChanged(SeekBar seekbar, int progress, boolean fromUser){
+      volumeDisplay.setText(String.valueOf(progress));
     }
 
-    @Override
-    public void onItemSelected(AdapterView<?> parent, View view, int position, long id){
-      if(isFirstSelect){
-        isFirstSelect = false;
-        return;
-      }
-
-      Toast toast = Toast.makeText(getActivity(),
-        "Setting Volume To "+ String.valueOf(position), Toast.LENGTH_SHORT);
-      toast.show();
-      dismiss();
-    }
-
-    @Override
-    public void onNothingSelected(AdapterView<?> parent){
-      dismiss();
-    }
+    public void onStartTrackingTouch(SeekBar seekbar){}
+    public void onStopTrackingTouch(SeekBar seekbar){}
   }
 
 }
