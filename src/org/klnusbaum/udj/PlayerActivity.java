@@ -148,8 +148,7 @@ public class PlayerActivity extends PlayerInactivityListenerActivity {
         menu.add(getString(R.string.play))
           .setIcon(R.drawable.ab_play);
       }
-      menu.add(getString(R.string.volume_up));
-      menu.add(getString(R.string.volume_down));
+      menu.add(getString(R.string.volume_set));
       menu.add(getString(R.string.volume_mute));
     }
     menu.add(getString(R.string.search))
@@ -169,14 +168,9 @@ public class PlayerActivity extends PlayerInactivityListenerActivity {
     else if(item.getTitle().equals(getString(R.string.play))){
       setPlayback(Constants.PLAYING_STATE);
     }
-    else if(item.getTitle().equals(getString(R.string.volume_up))){
+    else if(item.getTitle().equals(getString(R.string.volume_set))){
       Toast toast = Toast.makeText(this,
-        "Volume Up", Toast.LENGTH_SHORT);
-      toast.show();
-    }
-    else if(item.getTitle().equals(getString(R.string.volume_down))){
-      Toast toast = Toast.makeText(this,
-        "Volume Down", Toast.LENGTH_SHORT);
+        "Set Volume", Toast.LENGTH_SHORT);
       toast.show();
     }
     else if(item.getTitle().equals(getString(R.string.volume_mute))){

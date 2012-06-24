@@ -114,6 +114,10 @@ public class PlaylistSyncService extends IntentService{
       setPlaybackState(intent, account, playerId, true);
       updateActivePlaylist(account, playerId, true);
     }
+    else if(intent.getAction().equals(Constants.ACTION_SET_VOLUME)){
+      setPlayerVolume(intent, account, playerId, true);
+      updateActivePlaylist(account, playerId, true);
+    }
   }
 
   private void updateActivePlaylist(
@@ -412,6 +416,65 @@ public class PlaylistSyncService extends IntentService{
       e.printStackTrace();
     }
   }
+
+  private void setPlayerVolume(
+    Intent intent, Account account, long playerId, boolean attemptReauth)
+  {
+    AccountManager am = AccountManager.get(this);
+    String authToken = "";
+    try{
+      authToken = am.blockingGetAuthToken(account, "", true);  
+    }
+    catch(OperationCanceledException e){
+      //TODO do something here?
+      Log.e(TAG, "Operation canceled exception in set playback" );
+      return;
+    }
+    catch(AuthenticatorException e){
+      //TODO do something here?
+      Log.e(TAG, "Authenticator exception in set playback" );
+      return;
+    }
+    catch(IOException e){
+      //TODO do something here?
+      Log.e(TAG, "IO exception in set playback" );
+      return;
+    }
+
+    int desiredVolume = intent.getIntExtra(Constants.PLAYER_VOLUME_EXTRA, 0);
+    long userId = Long.valueOf(am.getUserData(account, Constants.USER_ID_DATA));
+    try{
+      ServerConnection.setPlayerVolume(playerId, userId, desiredVolume, authToken);
+    }
+    catch(IOException e){
+      Log.e(TAG, "IO exception in set playback" );
+      alertSetVolumeException(account, intent);
+      return;
+    }
+    catch(AuthenticationException e){
+      if(attemptReauth){
+        Log.d(TAG, "Soft Authentication exception when setting playback state");
+        am.invalidateAuthToken(Constants.ACCOUNT_TYPE, authToken);
+        setPlayerVolume(intent, account, playerId, false);
+      }
+      else{
+        Log.e(TAG, "Hard Authentication exception when setting playback state");
+        //TODO do something here?
+      }
+    }
+    catch(PlayerInactiveException e){
+      Log.e(TAG, "Player inactive exception in set playback" );
+      Utils.handleInactivePlayer(this, account);
+      return;
+    }
+    catch(PlayerAuthException e){
+      Log.e(TAG, "PlayerAuth exception in set playback" );
+      //TODO do something here?
+      return;
+    }
+  }
+
+
   private void setPlaybackState(
     Intent intent, Account account, long playerId, boolean attemptReauth)
   {

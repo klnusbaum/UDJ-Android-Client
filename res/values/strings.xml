@@ -95,8 +95,7 @@
   <string name="set_playback_failed_content">Tap here to retry</string>
   <string name="pause">Pause</string>
   <string name="play">Play</string>
-  <string name="volume_up">Volume Up</string>
-  <string name="volume_down">Volume Down</string>
+  <string name="volume_set">Set Volume</string>
   <string name="volume_mute">Mute</string>
   <string name="search">Search</string>
 
