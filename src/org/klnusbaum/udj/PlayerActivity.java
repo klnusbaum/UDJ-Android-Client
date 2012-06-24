@@ -24,6 +24,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.app.DialogFragment;
 
 import android.os.Bundle;
+import android.app.Dialog;
 import android.accounts.AccountManager;
 import android.accounts.Account;
 import android.content.Intent;
@@ -48,6 +49,7 @@ import org.klnusbaum.udj.network.PlaylistSyncService;
 import com.viewpagerindicator.TitlePageIndicator;
 
 import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.SubMenu;
 import com.actionbarsherlock.view.MenuItem;
 
 /**
@@ -55,6 +57,7 @@ import com.actionbarsherlock.view.MenuItem;
  */
 public class PlayerActivity extends PlayerInactivityListenerActivity {
   private static final String TAG = "PlayerActivity";
+  private static final String VOLUME_FRAGMENT_TAG = "VolumeFragment";
 
   private PlayerPagerAdapter pagerAdapter;
   private ViewPager pager;
@@ -177,9 +180,11 @@ public class PlayerActivity extends PlayerInactivityListenerActivity {
       setPlayback(Constants.PLAYING_STATE);
     }
     else if(item.getTitle().equals(getString(R.string.volume_set))){
-      Toast toast = Toast.makeText(this,
-        "Set Volume", Toast.LENGTH_SHORT);
-      toast.show();
+      SetVolumeFragment volumeFragment = new SetVolumeFragment();
+      Bundle volumeArguments = new Bundle();
+      volumeArguments.putParcelable(Constants.ACCOUNT_EXTRA, account);
+      volumeFragment.setArguments(volumeArguments);
+      volumeFragment.show(getSupportFragmentManager(), VOLUME_FRAGMENT_TAG);
     }
     else if(item.getTitle().equals(getString(R.string.volume_mute))){
       Toast toast = Toast.makeText(this,
@@ -220,33 +225,49 @@ public class PlayerActivity extends PlayerInactivityListenerActivity {
     }
   }
 
+
   private class SetVolumeFragment extends DialogFragment
       implements AdapterView.OnItemSelectedListener
   {
+    private boolean isFirstSelect = true;
 
     private Account getAccount(){
       return (Account)getArguments().getParcelable(Constants.ACCOUNT_EXTRA);
     }
 
     @Override
+    public Dialog onCreateDialog(Bundle savedInstanceState){
+      Dialog toReturn = super.onCreateDialog(savedInstanceState);
+      toReturn.setTitle(R.string.volume_set);
+      return toReturn;
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
         Bundle savedInstanceState) {
       View v = inflater.inflate(R.layout.set_volume, container, false);
-      Spinner volumeSelector = (Spinner)v;
+      Spinner volumeSelector = (Spinner)v.findViewById(R.id.volume_selector);
       ArrayAdapter<CharSequence> volumeAdapter = ArrayAdapter.createFromResource(getActivity(),
           R.array.volumes, android.R.layout.simple_spinner_item);
       volumeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
       volumeSelector.setAdapter(volumeAdapter);
-      volumeSelector.setOnItemSelectedListener(this);
       AccountManager am = AccountManager.get(getActivity());
       volumeSelector.setSelection(Utils.getPlayerVolume(am, getAccount()));
+      volumeSelector.setOnItemSelectedListener(this);
       return v;
     }
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id){
+      if(isFirstSelect){
+        isFirstSelect = false;
+        return;
+      }
 
-
+      Toast toast = Toast.makeText(getActivity(),
+        "Setting Volume To "+ String.valueOf(position), Toast.LENGTH_SHORT);
+      toast.show();
+      dismiss();
     }
 
     @Override

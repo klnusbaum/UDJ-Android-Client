@@ -115,7 +115,7 @@
       <item>Eight</item>
       <item>Nine</item>
       <item>Ten</item>
-    </string-array>
+  </string-array>
 
   <!-- Pull to Refresh -->
   <string name="pull_to_refresh_pull_label">Pull to refresh…</string>
