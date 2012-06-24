@@ -31,6 +31,7 @@ import android.util.Log;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.app.SearchManager;
+import android.widget.Toast;
 
 
 import org.klnusbaum.udj.Constants;
@@ -140,32 +141,48 @@ public class PlayerActivity extends PlayerInactivityListenerActivity {
     if(Utils.isCurrentPlayerOwner(am, account)){
       int playbackState = Utils.getPlaybackState(am, account);
       if(playbackState == Constants.PLAYING_STATE){
-        menu.add("Pause")
-          .setIcon(R.drawable.ab_pause)
-          .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+        menu.add(getString(R.string.pause))
+          .setIcon(R.drawable.ab_pause);
       }
       else if(playbackState == Constants.PAUSED_STATE){
-        menu.add("Play")
-          .setIcon(R.drawable.ab_play)
-          .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+        menu.add(getString(R.string.play))
+          .setIcon(R.drawable.ab_play);
       }
+      menu.add(getString(R.string.volume_up));
+      menu.add(getString(R.string.volume_down));
+      menu.add(getString(R.string.volume_mute));
     }
-    menu.add("Search")
+    menu.add(getString(R.string.search))
       .setIcon(R.drawable.ab_search_dark)
       .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
     return true;
   }
 
   public boolean onOptionsItemSelected(MenuItem item) {
-    if(item.getTitle().equals("Search")){
+    if(item.getTitle().equals(getString(R.string.search))){
       startSearch(null, false, null, false);
       return true;
     }
-    else if(item.getTitle().equals("Pause")){
+    else if(item.getTitle().equals(getString(R.string.pause))){
       setPlayback(Constants.PAUSED_STATE);
     }
-    else if(item.getTitle().equals("Play")){
+    else if(item.getTitle().equals(getString(R.string.play))){
       setPlayback(Constants.PLAYING_STATE);
+    }
+    else if(item.getTitle().equals(getString(R.string.volume_up))){
+      Toast toast = Toast.makeText(this,
+        "Volume Up", Toast.LENGTH_SHORT);
+      toast.show();
+    }
+    else if(item.getTitle().equals(getString(R.string.volume_down))){
+      Toast toast = Toast.makeText(this,
+        "Volume Down", Toast.LENGTH_SHORT);
+      toast.show();
+    }
+    else if(item.getTitle().equals(getString(R.string.volume_mute))){
+      Toast toast = Toast.makeText(this,
+        "Mute", Toast.LENGTH_SHORT);
+      toast.show();
     }
     return false;
   }
