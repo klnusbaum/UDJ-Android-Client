@@ -422,6 +422,11 @@ public class PlaylistSyncService extends IntentService{
     Intent intent, Account account, long playerId, boolean attemptReauth)
   {
     AccountManager am = AccountManager.get(this);
+    int desiredVolume = intent.getIntExtra(Constants.PLAYER_VOLUME_EXTRA, 0);
+    long userId = Long.valueOf(am.getUserData(account, Constants.USER_ID_DATA));
+    Log.d(TAG, "proceeding to set volume of player to: " + String.valueOf(desiredVolume) + 
+        " on server");
+
     String authToken = "";
     try{
       authToken = am.blockingGetAuthToken(account, "", true);  
@@ -442,8 +447,6 @@ public class PlaylistSyncService extends IntentService{
       return;
     }
 
-    int desiredVolume = intent.getIntExtra(Constants.PLAYER_VOLUME_EXTRA, 0);
-    long userId = Long.valueOf(am.getUserData(account, Constants.USER_ID_DATA));
     /*
     try{
       ServerConnection.setPlayerVolume(playerId, userId, desiredVolume, authToken);

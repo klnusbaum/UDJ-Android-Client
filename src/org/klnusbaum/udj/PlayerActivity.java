@@ -188,8 +188,9 @@ public class PlayerActivity extends PlayerInactivityListenerActivity {
       volumeFragment.show(getSupportFragmentManager(), VOLUME_FRAGMENT_TAG);
     }
     else if(item.getTitle().equals(getString(R.string.volume_mute))){
+      setVolume(0);
       Toast toast = Toast.makeText(this,
-        "Mute", Toast.LENGTH_SHORT);
+        "Muting Player", Toast.LENGTH_SHORT);
       toast.show();
     }
     return false;
@@ -227,19 +228,23 @@ public class PlayerActivity extends PlayerInactivityListenerActivity {
   }
 
   private void setVolume(int newVolume){
+    PlayerActivity.setVolume(this, account, newVolume);
+  }
+
+  private static void setVolume(Context context, Account account, int newVolume){
     Intent setPlaybackIntent = new Intent(
       Constants.ACTION_SET_VOLUME,
       Constants.PLAYER_URI,
-      this,
+      context,
       PlaylistSyncService.class);
     setPlaybackIntent.putExtra(Constants.ACCOUNT_EXTRA, account);
     setPlaybackIntent.putExtra(Constants.PLAYER_VOLUME_EXTRA, newVolume);
-    startService(setPlaybackIntent);
+    context.startService(setPlaybackIntent);
   }
 
 
   public static class SetVolumeFragment extends DialogFragment
-    implements SeekBar.OnSeekBarChangeListener
+    implements SeekBar.OnSeekBarChangeListener, DialogInterface.OnClickListener
   {
     private TextView volumeDisplay;
     private SeekBar volumeBar;
@@ -248,25 +253,21 @@ public class PlayerActivity extends PlayerInactivityListenerActivity {
       return (Account)getArguments().getParcelable(Constants.ACCOUNT_EXTRA);
     }
 
+    public void onClick(DialogInterface dialog, int whichButton){
+      int requestedVolume = volumeBar.getProgress();
+      Toast toast = Toast.makeText(
+          getActivity(),
+          "Setting Volume To " + String.valueOf(requestedVolume), Toast.LENGTH_SHORT);
+      toast.show();
+      PlayerActivity.setVolume(getActivity(), getAccount(), requestedVolume);
+      dismiss();
+    }
+
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState){
       AlertDialog toReturn = new AlertDialog.Builder(getActivity())
         .setTitle(R.string.volume_set)
-        .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener(){
-          public void onClick(DialogInterface dialog, int whichButton){
-            int requestedVolume = volumeBar.getProgress();
-            Toast toast = Toast.makeText(
-              getActivity(),
-              "Setting Volume To " + String.valueOf(requestedVolume), Toast.LENGTH_SHORT);
-            toast.show();
-            dismiss();
-          }
-        })
-        .setOnCancelListener(new DialogInterface.OnCancelListener(){
-          public void onCancel(DialogInterface dialog){
-
-          }
-        })
+        .setPositiveButton(android.R.string.ok, this)
         .create();
       LayoutInflater inflater = getActivity().getLayoutInflater();
       View volumeEditor = inflater.inflate(R.layout.set_volume, null, false);
