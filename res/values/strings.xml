@@ -99,6 +99,7 @@
   <string name="play">Play</string>
   <string name="volume_set">Set Volume</string>
   <string name="search">Search</string>
+  <string name="muted">muted</string>
 
   <string name="menu_refresh">Refresh</string>
   <string name="menu_search">Search</string>

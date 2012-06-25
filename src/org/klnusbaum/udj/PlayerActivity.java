@@ -283,7 +283,12 @@ public class PlayerActivity extends PlayerInactivityListenerActivity {
     }
 
     public void onProgressChanged(SeekBar seekbar, int progress, boolean fromUser){
-      volumeDisplay.setText(String.valueOf(progress));
+      if(progress == 0){
+        volumeDisplay.setText("0 (" + getActivity().getString(R.string.muted) +")");
+      }
+      else{
+        volumeDisplay.setText(String.valueOf(progress));
+      }
     }
 
     public void onStartTrackingTouch(SeekBar seekbar){}
