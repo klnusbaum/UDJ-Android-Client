@@ -45,6 +45,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 
 /**
  * Class used for displaying the contents of the Playlist.
@@ -264,17 +265,42 @@ public class PlaylistFragment extends RefreshableListFragment implements
 
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
+      final int upcountIndex = cursor.getColumnIndex(UDJPlayerProvider.UPCOUNT_COLUMN);
+      final int downcountIndex = cursor.getColumnIndex(UDJPlayerProvider.DOWNCOUNT_COLUMN);
+
       final int idIndex = cursor.getColumnIndex(UDJPlayerProvider.LIB_ID_COLUMN);
       final long libId = cursor.getLong(idIndex);
       final boolean isCurrentlyPlaying =
         (cursor.getInt(cursor.getColumnIndex(UDJPlayerProvider.IS_CURRENTLY_PLAYING_COLUMN)) ==1);
 
-//      final ImageView nowPlayingIcon = (ImageView)view.findViewById(R.id.now_playing_icon);
+      final View nowPlayingStuff = view.findViewById(R.id.nowplaying_stuff);
+      final View upvoteStuff = view.findViewById(R.id.upvote_stuff);
+      final View downvoteStuff = view.findViewById(R.id.downvote_stuff);
+      final View songInfo = view.findViewById(R.id.song_info);
+      final RelativeLayout.LayoutParams songInfoParams =
+        new RelativeLayout.LayoutParams((RelativeLayout.LayoutParams)songInfo.getLayoutParams());
+
       if(isCurrentlyPlaying){
- //       nowPlayingIcon.setVisibility(View.VISIBLE);
+        songInfoParams.addRule(0, R.id.nowplaying_stuff);
+        ((RelativeLayout)view).updateViewLayout(songInfo, songInfoParams);
+        nowPlayingStuff.setVisibility(View.VISIBLE);
+        downvoteStuff.setVisibility(View.GONE);
+        upvoteStuff.setVisibility(View.GONE);
+        final TextView upCount = (TextView) view.findViewById(R.id.nowplaying_upcount);
+        final TextView downCount = (TextView) view.findViewById(R.id.nowplaying_downcount);
+        upCount.setText(cursor.isNull(upcountIndex) ? "0" : cursor.getString(upcountIndex));
+        downCount.setText(cursor.isNull(downcountIndex) ? "0" : cursor.getString(downcountIndex));
       }
       else{
-  //      nowPlayingIcon.setVisibility(View.INVISIBLE);
+        songInfoParams.addRule(0, R.id.downvote_stuff);
+        ((RelativeLayout)view).updateViewLayout(songInfo, songInfoParams);
+        nowPlayingStuff.setVisibility(View.GONE);
+        downvoteStuff.setVisibility(View.VISIBLE);
+        upvoteStuff.setVisibility(View.VISIBLE);
+        final TextView upCount = (TextView) view.findViewById(R.id.upcount);
+        final TextView downCount = (TextView) view.findViewById(R.id.downcount);
+        upCount.setText(cursor.isNull(upcountIndex) ? "0" : cursor.getString(upcountIndex));
+        downCount.setText(cursor.isNull(downcountIndex) ? "0" : cursor.getString(downcountIndex));
       }
 
       view.setOnLongClickListener(new View.OnLongClickListener(){
@@ -310,13 +336,6 @@ public class PlaylistFragment extends RefreshableListFragment implements
         int adderUserNameIndex = cursor.getColumnIndex(UDJPlayerProvider.ADDER_USERNAME_COLUMN);
         addByUser.setText(getString(R.string.added_by) + " " + cursor.getString(adderUserNameIndex));
       }
-
-      final int upcountIndex = cursor.getColumnIndex(UDJPlayerProvider.UPCOUNT_COLUMN);
-      final int downcountIndex = cursor.getColumnIndex(UDJPlayerProvider.DOWNCOUNT_COLUMN);
-      final TextView upCount = (TextView) view.findViewById(R.id.upcount);
-      final TextView downCount = (TextView) view.findViewById(R.id.downcount);
-      upCount.setText(cursor.isNull(upcountIndex) ? "0" : cursor.getString(upcountIndex));
-      downCount.setText(cursor.isNull(downcountIndex) ? "0" : cursor.getString(downcountIndex));
 
 
 
