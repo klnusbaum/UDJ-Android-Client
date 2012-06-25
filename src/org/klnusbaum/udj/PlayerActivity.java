@@ -70,7 +70,6 @@ public class PlayerActivity extends PlayerInactivityListenerActivity {
     }
   };
 
-
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -166,10 +165,6 @@ public class PlayerActivity extends PlayerInactivityListenerActivity {
       menu.add(getString(R.string.volume_set))
         .setIcon(R.drawable.ab_volume)
         .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
-
-      menu.add(getString(R.string.volume_mute))
-        .setIcon(R.drawable.ab_volume_muted)
-        .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
     }
     menu.add(getString(R.string.search))
       .setIcon(R.drawable.ab_search_dark)
@@ -194,12 +189,6 @@ public class PlayerActivity extends PlayerInactivityListenerActivity {
       volumeArguments.putParcelable(Constants.ACCOUNT_EXTRA, account);
       volumeFragment.setArguments(volumeArguments);
       volumeFragment.show(getSupportFragmentManager(), VOLUME_FRAGMENT_TAG);
-    }
-    else if(item.getTitle().equals(getString(R.string.volume_mute))){
-      setVolume(0);
-      Toast toast = Toast.makeText(this,
-        "Muting Player", Toast.LENGTH_SHORT);
-      toast.show();
     }
     return false;
   }
