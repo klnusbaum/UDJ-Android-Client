@@ -154,14 +154,22 @@ public class PlayerActivity extends PlayerInactivityListenerActivity {
       int playbackState = Utils.getPlaybackState(am, account);
       if(playbackState == Constants.PLAYING_STATE){
         menu.add(getString(R.string.pause))
-          .setIcon(R.drawable.ab_pause);
+          .setIcon(R.drawable.ab_pause)
+          .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
       }
       else if(playbackState == Constants.PAUSED_STATE){
         menu.add(getString(R.string.play))
-          .setIcon(R.drawable.ab_play);
+          .setIcon(R.drawable.ab_play)
+          .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
       }
-      menu.add(getString(R.string.volume_set));
-      menu.add(getString(R.string.volume_mute));
+
+      menu.add(getString(R.string.volume_set))
+        .setIcon(R.drawable.ab_volume)
+        .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+
+      menu.add(getString(R.string.volume_mute))
+        .setIcon(R.drawable.ab_volume_muted)
+        .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
     }
     menu.add(getString(R.string.search))
       .setIcon(R.drawable.ab_search_dark)
