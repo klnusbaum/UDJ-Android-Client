@@ -147,6 +147,8 @@
     android:layout_toRightOf="@id/playlistSongName"
     android:layout_alignParentRight="true"
     android:layout_weight="1"
+    android:paddingRight="3dp"
+    android:paddingTop="4dp"
   >
     <ImageView
       android:id="@+id/nowplaying_icon"
