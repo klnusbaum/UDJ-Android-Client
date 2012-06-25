@@ -93,6 +93,8 @@
   <string name="song_set_failed_content">Tap here to retry</string>
   <string name="set_playback_failed_title">Pause/Play Failed!</string>
   <string name="set_playback_failed_content">Tap here to retry</string>
+  <string name="set_volume_failed_title">Setting Volume Failed!</string>
+  <string name="set_volume_failed_content">Tap here to retry</string>
   <string name="pause">Pause</string>
   <string name="play">Play</string>
   <string name="volume_set">Set Volume</string>
@@ -103,19 +105,6 @@
   <string name="menu_search">Search</string>
   <string name="menu_share">Share</string>
 
-  <string-array name="volumes">
-      <item>Zero (mute)</item>
-      <item>One</item>
-      <item>Two</item>
-      <item>Three</item>
-      <item>Four</item>
-      <item>Five</item>
-      <item>Six</item>
-      <item>Seven</item>
-      <item>Eight</item>
-      <item>Nine</item>
-      <item>Ten</item>
-  </string-array>
 
   <!-- Pull to Refresh -->
   <string name="pull_to_refresh_pull_label">Pull to refresh…</string>

@@ -632,7 +632,7 @@ public class ServerConnection{
           NETWORK_PROTOCOL, null, SERVER_HOST, SERVER_PORT,
           "/udj/users/" + userId + "/players/"+playerId+"/state",
           null, null);
-      Log.d(TAG, "Setintg playback state: " + desiredPlaybackState);
+      Log.d(TAG, "Setting playback state: " + desiredPlaybackState);
       String plState = "";
       if(desiredPlaybackState == Constants.PAUSED_STATE){
         plState = "paused";
@@ -646,6 +646,24 @@ public class ServerConnection{
       //TODO inform caller that their query is bad 
     }
   }
+
+  public static void setPlayerVolume(long playerId, long userId, int desiredVolume,
+      String authToken)
+    throws IOException, AuthenticationException, PlayerInactiveException, PlayerAuthException
+  {
+    try{
+      URI uri = new URI(
+          NETWORK_PROTOCOL, null, SERVER_HOST, SERVER_PORT,
+          "/udj/users/" + userId + "/players/"+playerId+"/volume",
+          null, null);
+      Log.d(TAG, "Setting player volume: " + desiredVolume);
+      doPlayerRelatedPost(uri, authToken, "volume="+String.valueOf(desiredVolume), false);
+    }
+    catch(URISyntaxException e){
+      //TODO inform caller that their query is bad 
+    }
+  }
+
 
 
   public static void voteOnSong(

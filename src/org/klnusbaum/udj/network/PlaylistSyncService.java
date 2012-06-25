@@ -61,6 +61,7 @@ public class PlaylistSyncService extends IntentService{
   private static final int SONG_REMOVE_EXCEPTION_ID = 2;
   private static final int SONG_SET_EXCEPTION_ID = 3;
   private static final int PLAYBACK_STATE_SET_EXCEPTION_ID = 4;
+  private static final int PLAYER_VOLUME_SET_EXCEPTION_ID = 5;
 
   private static final String TAG = "PlaylistSyncService";
 
@@ -447,37 +448,35 @@ public class PlaylistSyncService extends IntentService{
       return;
     }
 
-    /*
     try{
       ServerConnection.setPlayerVolume(playerId, userId, desiredVolume, authToken);
     }
     catch(IOException e){
-      Log.e(TAG, "IO exception in set playback" );
+      Log.e(TAG, "IO exception in set volume" );
       alertSetVolumeException(account, intent);
       return;
     }
     catch(AuthenticationException e){
       if(attemptReauth){
-        Log.d(TAG, "Soft Authentication exception when setting playback state");
+        Log.d(TAG, "Soft Authentication exception when setting volume");
         am.invalidateAuthToken(Constants.ACCOUNT_TYPE, authToken);
         setPlayerVolume(intent, account, playerId, false);
       }
       else{
-        Log.e(TAG, "Hard Authentication exception when setting playback state");
+        Log.e(TAG, "Hard Authentication exception when setting volume");
         //TODO do something here?
       }
     }
     catch(PlayerInactiveException e){
-      Log.e(TAG, "Player inactive exception in set playback" );
+      Log.e(TAG, "Player inactive exception in set volume" );
       Utils.handleInactivePlayer(this, account);
       return;
     }
     catch(PlayerAuthException e){
-      Log.e(TAG, "PlayerAuth exception in set playback" );
+      Log.e(TAG, "PlayerAuth exception in set volume" );
       //TODO do something here?
       return;
     }
-    */
   }
 
 
@@ -538,6 +537,17 @@ public class PlaylistSyncService extends IntentService{
     }
   }
 
+  private void alertSetVolumeException(Account account, Intent originalIntent){
+    alertException(
+      account,
+      originalIntent,
+      R.string.set_volume_failed_title,
+      R.string.set_volume_failed_content,
+      PLAYBACK_STATE_SET_EXCEPTION_ID
+    );
+  }
+
+
   private void alertSetPlaybackException(Account account, Intent originalIntent){
     alertException(
       account,
@@ -591,6 +601,7 @@ public class PlaylistSyncService extends IntentService{
         getString(titleRes),
         getString(contentRes),
         pe);
+    notification.flags |= Notification.FLAG_AUTO_CANCEL;
 
     NotificationManager nm = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
     nm.notify(notificationId, notification);
