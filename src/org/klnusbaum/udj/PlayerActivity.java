@@ -75,7 +75,7 @@ public class PlayerActivity extends PlayerInactivityListenerActivity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.player);
 
-    pagerAdapter = new PlayerPagerAdapter(getSupportFragmentManager());
+    pagerAdapter = new PlayerPagerAdapter(getSupportFragmentManager(), account);
     pager = (ViewPager)findViewById(R.id.player_pager);
     pager.setAdapter(pagerAdapter);
 
@@ -107,8 +107,10 @@ public class PlayerActivity extends PlayerInactivityListenerActivity {
 
 
   public static class PlayerPagerAdapter extends FragmentPagerAdapter{
-    public PlayerPagerAdapter(FragmentManager fm){
+    private Account account;
+    public PlayerPagerAdapter(FragmentManager fm, Account account){
       super(fm);
+      this.account = account;
     }
 
     @Override
@@ -121,7 +123,11 @@ public class PlayerActivity extends PlayerInactivityListenerActivity {
         case 0:
           return new PlaylistFragment();
         case 1:
-          return new ArtistsDisplayFragment();
+           ArtistsDisplayFragment toReturn = new ArtistsDisplayFragment();
+           Bundle artistDisplayArguments = new Bundle();
+           artistDisplayArguments.putParcelable(Constants.ACCOUNT_EXTRA, account);
+           toReturn.setArguments(artistDisplayArguments);
+           return toReturn;
         case 2:
           return new RecentlyPlayedFragment();
         case 3:

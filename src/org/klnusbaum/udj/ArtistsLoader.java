@@ -76,6 +76,7 @@ public class ArtistsLoader
   }
 
   public ArtistsResult loadInBackground(){
+
     return attemptLoad(true);
   }
 

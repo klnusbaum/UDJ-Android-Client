@@ -28,64 +28,60 @@ import android.content.Intent;
 import android.app.SearchManager;
 import android.widget.ListView;
 import android.util.Log;
+import android.app.Activity;
+import android.accounts.Account;
 
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.app.ListFragment;
 
-import android.accounts.Account;
+
+import java.util.List;
 
 public class ArtistsDisplayFragment extends ListFragment
   implements LoaderManager.LoaderCallbacks<ArtistsLoader.ArtistsResult>
 {
   private static final int ARTISTS_LOADER_TAG = 0;
 
-  private static final String TAG = "ArtistDisplayFragment";
+  private static final String TAG = "ArtistsDisplayFragment";
 
   private int previousVisiblePosition;
   private int previousVisibleIndex;
+  private List<String> currentArtistsList;
 
   //private ArtistsAdapter artistsAdapter;
   private ArrayAdapter<String> artistsAdapter;
-  private Account account;
+
+  private Account getAccount(){
+    return (Account)getArguments().getParcelable(Constants.ACCOUNT_EXTRA);
+  }
+
+  @Override
+  public void onAttach(Activity activity){
+    super.onAttach(activity);
+    Log.d(TAG, "Attaching artist view");
+    artistsAdapter =
+      new ArrayAdapter<String>(getActivity(), R.layout.artist_list_item, R.id.artist_name);
+    getLoaderManager().initLoader(ARTISTS_LOADER_TAG, null, this);
+    setListAdapter(artistsAdapter);
+  }
 
   @Override
   public void onActivityCreated(Bundle savedInstanceState){
     super.onActivityCreated(savedInstanceState);
 
-    account = Utils.basicGetUdjAccount(getActivity());
     setEmptyText(getActivity().getString(R.string.no_artists));
 
-    artistsAdapter =
-      new ArrayAdapter<String>(getActivity(), R.layout.artist_list_item, R.id.artist_name);
-    setListAdapter(artistsAdapter);
     setListShown(false);
     getListView().setTextFilterEnabled(true);
-    previousVisiblePosition = -1;
-  }
-
-  @Override
-  public void onResume(){
-    super.onResume();
-    getLoaderManager().initLoader(ARTISTS_LOADER_TAG, null, this);
-    if(previousVisiblePosition != -1){
-      getListView().setSelectionFromTop(previousVisibleIndex, previousVisiblePosition);
-    }
-  }
-
-  @Override
-  public void onPause(){
-    super.onPause();
-    previousVisibleIndex = getListView().getFirstVisiblePosition();
-    View v = getListView().getChildAt(0);
-    previousVisiblePosition = (v == null) ? 0 : v.getTop();
   }
 
   public Loader<ArtistsLoader.ArtistsResult> onCreateLoader(
     int id, Bundle args)
   {
+    Log.d(TAG, "In creation of loader");
     if(id == ARTISTS_LOADER_TAG){
-      return new ArtistsLoader(getActivity(), account);
+      return new ArtistsLoader(getActivity(), getAccount());
     }
     return null;
   }
@@ -94,17 +90,17 @@ public class ArtistsDisplayFragment extends ListFragment
     Loader<ArtistsLoader.ArtistsResult> loader,
     ArtistsLoader.ArtistsResult data)
   {
+    Log.d(TAG, "In loader finshed");
     if(data.error == ArtistsLoader.ArtistsError.NO_ERROR){
-      artistsAdapter = new ArrayAdapter<String>(
-        getActivity(),
-        R.layout.artist_list_item,
-        R.id.artist_name,
-        data.res
-        );
-      setListAdapter(artistsAdapter);
+      if(currentArtistsList == null || !currentArtistsList.equals(data.res)){
+        Log.d(TAG, "Changing artist list");
+        currentArtistsList = data.res;
+        artistsAdapter.clear();
+        artistsAdapter.addAll(data.res);
+      }
     }
     else if(data.error == ArtistsLoader.ArtistsError.PLAYER_INACTIVE_ERROR){
-      Utils.handleInactivePlayer(getActivity(), account);
+      Utils.handleInactivePlayer(getActivity(), getAccount());
     }
     else if(data.error == ArtistsLoader.ArtistsError.PLAYER_AUTH_ERROR){
       //TODO REAUTH AND TRY AGAIN
@@ -119,6 +115,7 @@ public class ArtistsDisplayFragment extends ListFragment
   }
 
   public void onLoaderReset(Loader<ArtistsLoader.ArtistsResult> loader){
+    Log.d(TAG, "Loader Was reset");
     setListAdapter(null);
   }
 
