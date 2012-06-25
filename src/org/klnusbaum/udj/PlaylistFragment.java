@@ -269,12 +269,12 @@ public class PlaylistFragment extends RefreshableListFragment implements
       final boolean isCurrentlyPlaying =
         (cursor.getInt(cursor.getColumnIndex(UDJPlayerProvider.IS_CURRENTLY_PLAYING_COLUMN)) ==1);
 
-      final ImageView nowPlayingIcon = (ImageView)view.findViewById(R.id.now_playing_icon);
+//      final ImageView nowPlayingIcon = (ImageView)view.findViewById(R.id.now_playing_icon);
       if(isCurrentlyPlaying){
-        nowPlayingIcon.setVisibility(View.VISIBLE);
+ //       nowPlayingIcon.setVisibility(View.VISIBLE);
       }
       else{
-        nowPlayingIcon.setVisibility(View.INVISIBLE);
+  //      nowPlayingIcon.setVisibility(View.INVISIBLE);
       }
 
       view.setOnLongClickListener(new View.OnLongClickListener(){

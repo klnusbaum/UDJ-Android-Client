@@ -65,9 +65,17 @@
     android:padding="2dp"
     android:layout_width="24dp"
     android:layout_height="24dp"
-    android:layout_alignParentRight="true"
     android:layout_alignParentTop="true"
     android:visibility="invisible"
     android:layout_centerVertical="true"
+    android:layout_toLeftOf="@+id/ic_join_player"
+  />
+  <ImageView
+    android:id="@id/ic_join_player"
+    android:src="@drawable/ic_join_player"
+    android:padding="2dp"
+    android:layout_width="48dp"
+    android:layout_height="48dp"
+    android:layout_alignParentRight="true"
   />
 </RelativeLayout>
