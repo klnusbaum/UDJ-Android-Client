@@ -96,7 +96,11 @@ public class ArtistsDisplayFragment extends ListFragment
         Log.d(TAG, "Changing artist list");
         currentArtistsList = data.res;
         artistsAdapter.clear();
-        artistsAdapter.addAll(data.res);
+        //Add all not available until API 11, oh well
+        //artistsAdapter.addAll(data.res);
+        for(String artist : data.res){
+          artistsAdapter.add(artist);
+        }
       }
     }
     else if(data.error == ArtistsLoader.ArtistsError.PLAYER_INACTIVE_ERROR){
