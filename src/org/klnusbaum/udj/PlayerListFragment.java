@@ -383,7 +383,9 @@ public class PlayerListFragment extends RefreshableListFragment implements
       Constants.PLAYER_LONG_EXTRA,
       toJoin.getLongitude());
     joinPlayerIntent.putExtra(Constants.ACCOUNT_EXTRA, account);
-    joinPlayerIntent.putExtra(Constants.PLAYER_PASSWORD_EXTRA, password);
+    if(!password.equals("")){
+      joinPlayerIntent.putExtra(Constants.PLAYER_PASSWORD_EXTRA, password);
+    }
     getActivity().startService(joinPlayerIntent);
   }
 

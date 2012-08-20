@@ -178,7 +178,7 @@ public class ServerConnection{
       JSONObject authResponse = new JSONObject(response);
       return new AuthResult(
         authResponse.getString("ticket_hash"),
-        authResponse.getLong("user_id"));
+        authResponse.getString("user_id"));
     }
   }
 
@@ -203,6 +203,7 @@ public class ServerConnection{
       resp.getStatusLine().getStatusCode() >= 500)
     {
       //TODO this should just be "General server error"
+      Log.e(TAG, "Basic Response Error Check got an error code: " + resp.getStatusLine().getStatusCode());
       throw new IOException(response);
     }
   }

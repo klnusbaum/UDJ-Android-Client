@@ -232,9 +232,9 @@ public class AuthActivity extends AccountAuthenticatorActivity{
             mAccountManager.setPassword(account, mPassword);
         }
         mAccountManager.setUserData(account, Constants.USER_ID_DATA, 
-          Long.toString(authResult.userId));
+          authResult.userId);
         mAccountManager.setUserData(account, Constants.LAST_PLAYER_ID_DATA, 
-          Long.toString(Constants.NO_PLAYER_ID));
+          Constants.NO_PLAYER_ID);
         mAccountManager.setUserData(account, Constants.PLAYER_STATE_DATA, 
           Integer.toString(Constants.NOT_IN_PLAYER));
         final Intent intent = new Intent();

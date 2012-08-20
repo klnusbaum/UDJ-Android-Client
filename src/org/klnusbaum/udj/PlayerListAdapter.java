@@ -84,9 +84,9 @@ public class PlayerListAdapter implements ListAdapter{
 
   public long getItemId(int position){
     if(players != null){
-      return players.get(position).getPlayerId();
+      return position;
     }
-    return 0; 
+    return -1;
   }
 
   public int getItemViewType(int position){

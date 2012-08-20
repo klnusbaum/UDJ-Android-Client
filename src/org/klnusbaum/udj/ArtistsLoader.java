@@ -101,8 +101,7 @@ public class ArtistsLoader
     }
 
     try{
-      long playerId = 
-        Long.valueOf(am.getUserData(account, Constants.LAST_PLAYER_ID_DATA));
+      String playerId = am.getUserData(account, Constants.LAST_PLAYER_ID_DATA);
       return getArtists(playerId, authToken);
     }
     catch(JSONException e){
@@ -138,7 +137,7 @@ public class ArtistsLoader
     forceLoad();
   }
 
-  protected ArtistsResult getArtists(long playerId, String authToken) throws
+  protected ArtistsResult getArtists(String playerId, String authToken) throws
     JSONException, ParseException, IOException, AuthenticationException,
     PlayerInactiveException, PlayerAuthException
   {

@@ -78,14 +78,12 @@ public class PlaylistSyncService extends IntentService{
     //TODO handle error if playerId is bad
     if(intent.getAction().equals(Intent.ACTION_INSERT)){
       if(intent.getData().equals(UDJPlayerProvider.PLAYLIST_URI)){
-        String libId = intent.getStringExtra(
-          Constants.LIB_ID_EXTRA, 
-          UDJPlayerProvider.INVALID_LIB_ID);
+        String libId = intent.getStringExtra(Constants.LIB_ID_EXTRA);
         addSongToPlaylist(account, playerId, libId, true, intent);
       }
       else if(intent.getData().equals(UDJPlayerProvider.VOTES_URI)){
         //TODO handle if lib id is bad
-        String libId = intent.getStringExtra(Constants.LIB_ID_EXTRA, "");
+        String libId = intent.getStringExtra(Constants.LIB_ID_EXTRA);
         //TODO handle if votetype is bad
         int voteWeight = intent.getIntExtra(Constants.VOTE_WEIGHT_EXTRA,0); 
         voteOnSong(account, playerId, libId, voteWeight, true);
@@ -100,14 +98,14 @@ public class PlaylistSyncService extends IntentService{
       if(intent.getData().equals(UDJPlayerProvider.PLAYLIST_URI)){
         Log.d(TAG, "In plalist syncservice, about to insert song into remove requests");
         //TODO handle if Playlist id is bad.
-        String libId = intent.getStringExtra(Constants.LIB_ID_EXTRA, "");
+        String libId = intent.getStringExtra(Constants.LIB_ID_EXTRA);
         removeSongFromPlaylist(account, playerId, libId, true, intent);
       }
       updateActivePlaylist(account, playerId, true);
     }
     else if(intent.getAction().equals(Constants.ACTION_SET_CURRENT_SONG)){
       Log.d(TAG, "Handling setting current song");
-      String libId = intent.getLongExtra(Constants.LIB_ID_EXTRA, "");
+      String libId = intent.getStringExtra(Constants.LIB_ID_EXTRA);
       setCurrentSong(account, playerId, libId, true, intent);
       updateActivePlaylist(account, playerId, true);
     }

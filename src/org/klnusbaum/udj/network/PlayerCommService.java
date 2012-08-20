@@ -87,17 +87,21 @@ public class PlayerCommService extends IntentService{
       return;
     }
 
-    String playerId;
+    String userId = am.getUserData(account, Constants.USER_ID_DATA);
+    String playerId = intent.getStringExtra(Constants.PLAYER_ID_EXTRA);
+    String ownerId = intent.getStringExtra(Constants.PLAYER_OWNER_ID_EXTRA);
+    if(userId.equals(ownerId)){
+      setLoggedInToPlayer(intent, am, account, playerId);
+      return;
+    }
+
     String authToken;
     String password = "";
     boolean hasPassword = false;
     //TODO hanle error if account isn't provided
     try{
       //TODO handle if player id isn't provided
-      authToken = am.blockingGetAuthToken(account, "", true);  
-      playerId = intent.getStringExtra(
-          Constants.PLAYER_ID_EXTRA,
-          Constants.NO_PLAYER_ID);
+      authToken = am.blockingGetAuthToken(account, "", true);
       if(intent.hasExtra(Constants.PLAYER_PASSWORD_EXTRA)){
         Log.d(TAG, "password given for player");
         hasPassword = true;
@@ -130,18 +134,7 @@ public class PlayerCommService extends IntentService{
       else{
         ServerConnection.joinPlayer(playerId, password, authToken);
       }
-      setPlayerData(intent, am, account);
-      ContentResolver cr = getContentResolver();
-      UDJPlayerProvider.playerCleanup(cr);
-      Intent joinedPlayerIntent = new Intent(Constants.JOINED_PLAYER_ACTION);
-      am.setUserData(
-          account, Constants.LAST_PLAYER_ID_DATA, playerId);
-      am.setUserData(
-          account, 
-          Constants.PLAYER_STATE_DATA, 
-          String.valueOf(Constants.IN_PLAYER));
-      Log.d(TAG, "Sending joined player broadcast");
-      sendBroadcast(joinedPlayerIntent);
+      setLoggedInToPlayer(intent, am, account, playerId);
     }
     catch(IOException e){
       Log.e(TAG, "IO exception when joining player");
@@ -168,6 +161,21 @@ public class PlayerCommService extends IntentService{
       e.printStackTrace();
       doLoginFail(am, account, PlayerJoinError.PLAYER_PASSWORD_ERROR);
     }
+  }
+
+  private void setLoggedInToPlayer(Intent joinPlayerIntent, AccountManager am, Account account, String playerId){
+    setPlayerData(joinPlayerIntent, am, account);
+    ContentResolver cr = getContentResolver();
+    UDJPlayerProvider.playerCleanup(cr);
+    am.setUserData(
+        account, Constants.LAST_PLAYER_ID_DATA, playerId);
+    am.setUserData(
+        account, 
+        Constants.PLAYER_STATE_DATA, 
+        String.valueOf(Constants.IN_PLAYER));
+    Log.d(TAG, "Sending joined player broadcast");
+    Intent playerJoinedBroadcast = new Intent(Constants.JOINED_PLAYER_ACTION);
+    sendBroadcast(playerJoinedBroadcast);
   }
 
   private void handleLoginAuthException(
@@ -218,7 +226,7 @@ public class PlayerCommService extends IntentService{
     am.setUserData(
       account,
       Constants.PLAYER_HOST_ID_DATA,
-      String.valueOf(intent.getStringExtra(Constants.PLAYER_OWNER_ID_EXTRA,"")));
+      intent.getStringExtra(Constants.PLAYER_OWNER_ID_EXTRA));
     am.setUserData(
       account,
       Constants.PLAYER_LAT_DATA,

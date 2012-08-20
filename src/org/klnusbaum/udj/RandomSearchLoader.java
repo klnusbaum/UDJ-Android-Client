@@ -43,7 +43,7 @@ public class RandomSearchLoader extends MusicSearchLoader{
   }
 
   @Override
-  protected MusicSearchResult doSearch(long playerId, String authToken) throws
+  protected MusicSearchResult doSearch(String playerId, String authToken) throws
     JSONException, ParseException, IOException,
     AuthenticationException, PlayerInactiveException, PlayerAuthException
   {

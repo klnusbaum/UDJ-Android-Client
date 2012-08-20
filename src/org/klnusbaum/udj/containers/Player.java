@@ -31,11 +31,13 @@ import android.os.Bundle;
 public class Player{
   public static final String ID_PARAM ="id";
   public static final String NAME_PARAM="name";
-  public static final String OWNER_NAME_PARAM="owner_username";
-  public static final String OWNER_ID_PARAM="owner_id";
+  public static final String OWNER_NAME_PARAM="username";
+  public static final String OWNER_ID_PARAM="id";
+  public static final String LOCATION_PARAM="location";
   public static final String LATITUDE_PARAM="latitude";
   public static final String LONGITUDE_PARAM="longitude";
   public static final String HAS_PASSWORD_PARAM="has_password";
+  public static final String OWNER_PARAM = "owner";
 
   private String playerId;
   private String name;
@@ -95,13 +97,15 @@ public class Player{
   public static Player valueOf(JSONObject jObj)
     throws JSONException 
   {
+    JSONObject ownerObject = jObj.getJSONObject(OWNER_PARAM);
+    JSONObject locationObject = jObj.optJSONObject(LOCATION_PARAM);
     return new Player(
       jObj.getString(ID_PARAM),
       jObj.getString(NAME_PARAM),
-      jObj.getString(OWNER_NAME_PARAM),
-      jObj.getString(OWNER_ID_PARAM),
-      jObj.optDouble(LATITUDE_PARAM, -100.0),
-      jObj.optDouble(LONGITUDE_PARAM, -100.0),
+      ownerObject.getString(OWNER_NAME_PARAM),
+      ownerObject.getString(OWNER_ID_PARAM),
+      locationObject != null ? locationObject.optDouble(LATITUDE_PARAM, -100.0) :  -100.0,
+      locationObject != null ? locationObject.optDouble(LONGITUDE_PARAM, -100.0) : -100.0,
       jObj.getBoolean(HAS_PASSWORD_PARAM));
   }
 
@@ -153,10 +157,10 @@ public class Player{
 
   public static Player unbundle(Bundle toUnbundle){
     return new Player(
-      toUnbundle.putString(ID_PARAM),
+      toUnbundle.getString(ID_PARAM),
       toUnbundle.getString(NAME_PARAM),
       toUnbundle.getString(OWNER_NAME_PARAM),
-      toUnbundle.putString(OWNER_ID_PARAM),
+      toUnbundle.getString(OWNER_ID_PARAM),
       toUnbundle.getDouble(LATITUDE_PARAM),
       toUnbundle.getDouble(LONGITUDE_PARAM),
       toUnbundle.getBoolean(HAS_PASSWORD_PARAM));

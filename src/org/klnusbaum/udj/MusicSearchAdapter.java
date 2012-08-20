@@ -90,7 +90,7 @@ public class MusicSearchAdapter implements ListAdapter{
 
   public long getItemId(int position){
     if(entries != null){
-      return entries.get(position).getLibId();
+      return position;
     }
     return -1; 
   }

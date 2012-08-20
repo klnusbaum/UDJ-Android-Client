@@ -184,11 +184,11 @@ public class UDJPlayerProvider extends ContentProvider{
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion){
       if(oldVersion == 1 && newVersion == 2){
         final String PLAYLIST_TEMP_TABLE = "PLAYLIST_TEMP";
-        db.execSQL("DROP VIEW + " PLAYLIST_VIEW_NAME + ";");
-        db.execSQL("DROP VIEW + " UPVOTES_VIEW_NAME + ";");
-        db.execSQL("DROP VIEW + " DOWNVOTES_VIEW_NAME + ";");
-        db.execSQL("DROP TABLE + " VOTES_TABLE_NAME + ";");
-        db.execSQL("DROP TABLE + " PLAYLIST_TABLE_NAME + ";");
+        db.execSQL("DROP VIEW " + PLAYLIST_VIEW_NAME + ";");
+        db.execSQL("DROP VIEW " + UPVOTES_VIEW_NAME + ";");
+        db.execSQL("DROP VIEW " + DOWNVOTES_VIEW_NAME + ";");
+        db.execSQL("DROP TABLE " + VOTES_TABLE_NAME + ";");
+        db.execSQL("DROP TABLE " + PLAYLIST_TABLE_NAME + ";");
         db.execSQL(PLAYLIST_TABLE_CREATE);
         db.execSQL(VOTES_TABLE_CREATE);
         db.execSQL(UPVOTES_VIEW_CREATE);

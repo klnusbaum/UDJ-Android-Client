@@ -56,6 +56,7 @@ public class PlaylistFragment extends RefreshableListFragment implements
   private static final int PLAYLIST_LOADER_ID = 0;
   private Account account;
   private AccountManager am;
+  private String userId;
   /**
    * Adapter used to help display the contents of the playlist.
    */
@@ -73,7 +74,7 @@ public class PlaylistFragment extends RefreshableListFragment implements
     am = AccountManager.get(getActivity());
     userId = am.getUserData(account, Constants.USER_ID_DATA);
     setEmptyText(getActivity().getString(R.string.no_playlist_items));
-    playlistAdapter = new PlaylistAdapter(getActivity(), null);
+    playlistAdapter = new PlaylistAdapter(getActivity(), null, this, userId, account);
     setListAdapter(playlistAdapter);
     setListShown(false);
     getLoaderManager().initLoader(PLAYLIST_LOADER_ID, null, this);
@@ -204,24 +205,6 @@ public class PlaylistFragment extends RefreshableListFragment implements
     toast.show();
   }
 
-  private void upVoteSong(String libId) {
-    voteOnSong(libId, 1);
-  }
-
-  private void downVoteSong(String libId) {
-    voteOnSong(libId, -1);
-  }
-
-  private void voteOnSong(String libId, int voteType) {
-    Intent voteIntent = new Intent(Intent.ACTION_INSERT,
-        UDJPlayerProvider.VOTES_URI, getActivity(),
-        PlaylistSyncService.class);
-    voteIntent.putExtra(Constants.ACCOUNT_EXTRA, account);
-    voteIntent.putExtra(Constants.VOTE_WEIGHT_EXTRA, voteType);
-    voteIntent.putExtra(Constants.LIB_ID_EXTRA, libId);
-    getActivity().startService(voteIntent);
-  }
-
   public Loader<Cursor> onCreateLoader(int id, Bundle args) {
     switch (id) {
     case PLAYLIST_LOADER_ID:
@@ -253,11 +236,19 @@ public class PlaylistFragment extends RefreshableListFragment implements
     }
   }
 
-  private class PlaylistAdapter extends CursorAdapter{
+  private static class PlaylistAdapter extends CursorAdapter{
     private static final String PLAYLIST_ADAPTER_TAG = "PlaylistAdapter";
+    private String userId;
+    private Context context;
+    private final PlaylistFragment plFrag;
+    private Account account;
 
-    public PlaylistAdapter(Context context, Cursor c){
+    public PlaylistAdapter(Context context, Cursor c, PlaylistFragment plFrag, String userId, Account account){
       super(context, c, 0);
+      this.userId = userId;
+      this.context = context;
+      this.plFrag = plFrag;
+      this.account = account;
     }
 
     @Override
@@ -302,7 +293,7 @@ public class PlaylistFragment extends RefreshableListFragment implements
 
       view.setOnLongClickListener(new View.OnLongClickListener(){
         public boolean onLongClick(View v){
-          getListView().showContextMenuForChild(v);
+          plFrag.getListView().showContextMenuForChild(v);
           return true;
         }
       });
@@ -322,37 +313,35 @@ public class PlaylistFragment extends RefreshableListFragment implements
 
       final TextView artist = (TextView) view.findViewById(R.id.playlistArtistName);
       final int artistIndex = cursor.getColumnIndex(UDJPlayerProvider.ARTIST_COLUMN);
-      artist.setText(getString(R.string.by) + " " + cursor.getString(artistIndex));
+      artist.setText(context.getString(R.string.by) + " " + cursor.getString(artistIndex));
 
       final TextView addByUser = (TextView) view.findViewById(R.id.playlistAddedBy);
       int adderIdIndex = cursor.getColumnIndex(UDJPlayerProvider.ADDER_ID_COLUMN);
       if (cursor.getString(adderIdIndex) == userId) {
-        addByUser.setText(getString(R.string.added_by) + " " + getString(R.string.you));
+        addByUser.setText(context.getString(R.string.added_by) + " " + context.getString(R.string.you));
       }
       else{
         int adderUserNameIndex = cursor.getColumnIndex(UDJPlayerProvider.ADDER_USERNAME_COLUMN);
-        addByUser.setText(getString(R.string.added_by) + " " + cursor.getString(adderUserNameIndex));
+        addByUser.setText(context.getString(R.string.added_by) + " " + cursor.getString(adderUserNameIndex));
       }
 
-
-
+      final Toast upVoteToast = Toast.makeText(context,
+            context.getString(R.string.voting_up_message)+ " " + title, Toast.LENGTH_SHORT);
       upButton.setOnClickListener(new View.OnClickListener(){
         public void onClick(View v){
           v.setEnabled(false);
           upVoteSong(libId);
-          Toast toast = Toast.makeText(getActivity(),
-            getString(R.string.voting_up_message) + " " + title, Toast.LENGTH_SHORT);
-          toast.show();
+          upVoteToast.show();
         }
       });
 
+      final Toast downVoteToast = Toast.makeText(context,
+            context.getString(R.string.voting_down_message)+ " " + title, Toast.LENGTH_SHORT);
       downButton.setOnClickListener(new View.OnClickListener(){
         public void onClick(View v){
           v.setEnabled(false);
           downVoteSong(libId);
-          Toast toast = Toast.makeText(getActivity(),
-            getString(R.string.voting_down_message) + " " + title, Toast.LENGTH_SHORT);
-          toast.show();
+          downVoteToast.show();
         }
       });
 
@@ -378,6 +367,25 @@ public class PlaylistFragment extends RefreshableListFragment implements
       View itemView = inflater.inflate(R.layout.playlist_list_item, null);
       return itemView;
     }
+
+    private void upVoteSong(String libId) {
+      voteOnSong(libId, 1);
+    }
+
+    private void downVoteSong(String libId) {
+      voteOnSong(libId, -1);
+    }
+
+    private void voteOnSong(String libId, int voteType) {
+      Intent voteIntent = new Intent(Intent.ACTION_INSERT,
+          UDJPlayerProvider.VOTES_URI, context,
+          PlaylistSyncService.class);
+      voteIntent.putExtra(Constants.ACCOUNT_EXTRA, account);
+      voteIntent.putExtra(Constants.VOTE_WEIGHT_EXTRA, voteType);
+      voteIntent.putExtra(Constants.LIB_ID_EXTRA, libId);
+      context.startService(voteIntent);
+    }
+
 
   }
 
