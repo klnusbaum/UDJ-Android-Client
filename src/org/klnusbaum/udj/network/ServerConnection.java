@@ -96,7 +96,7 @@ public class ServerConnection{
    * h = 7  % 10 = 7
    * Port 4897, the Keith Nusbaum Memorial Port
    */
-  private static final int SERVER_PORT = 4898;
+  private static final int SERVER_PORT = 4897;
 
   private static final String NETWORK_PROTOCOL = "https";
 
@@ -136,9 +136,9 @@ public class ServerConnection{
 
   public static class AuthResult{
     public String ticketHash;
-    public long userId;
+    public String userId;
 
-    public AuthResult(String ticketHash, long userId){
+    public AuthResult(String ticketHash, String userId){
       this.ticketHash = ticketHash;
       this.userId = userId;
     }
@@ -151,7 +151,7 @@ public class ServerConnection{
     try{
       AUTH_URI = new URI(
         NETWORK_PROTOCOL, null,
-        SERVER_HOST, SERVER_PORT, "/udj/auth", null, null);
+        SERVER_HOST, SERVER_PORT, "/udj/0_6/auth", null, null);
     }
     catch(URISyntaxException e){
       //TODO should never get here but I should do something if it does.
@@ -385,7 +385,7 @@ public class ServerConnection{
     try{
       URI playersQuery = new URI(
         NETWORK_PROTOCOL, null, SERVER_HOST, SERVER_PORT, 
-        "/udj/players/" + location.getLatitude() + "/" + location.getLongitude(),
+        "/udj/0_6/players/" + location.getLatitude() + "/" + location.getLongitude(),
         null, null);
       JSONArray players = new JSONArray(doSimpleGet(playersQuery, ticketHash));
       return Player.fromJSONArray(players);
@@ -404,7 +404,7 @@ public class ServerConnection{
     try{
       URI playersQuery = new URI(
         NETWORK_PROTOCOL, null, SERVER_HOST, SERVER_PORT, 
-        "/udj/players",
+        "/udj/0_6/players",
         PARAM_PLAYER_NAME+"="+query, null);
       JSONArray players = new JSONArray(doSimpleGet(playersQuery, ticketHash));
       return Player.fromJSONArray(players);
@@ -415,22 +415,22 @@ public class ServerConnection{
     }
   }
 
-  public static void joinPlayer(long playerId, long userId, String ticketHash)
+  public static void joinPlayer(String playerId, String ticketHash)
     throws IOException, AuthenticationException, PlayerInactiveException, 
     JSONException, ParseException, PlayerPasswordException
   {
-    joinPlayer(playerId, userId, "", ticketHash);
+    joinPlayer(playerId, "", ticketHash);
   }
 
 
-  public static void joinPlayer(long playerId, long userId, String password, String ticketHash)
+  public static void joinPlayer(String playerId, String password, String ticketHash)
     throws IOException, AuthenticationException, PlayerInactiveException,
     JSONException, ParseException, PlayerPasswordException
   {
     try{
       URI uri  = new URI(
         NETWORK_PROTOCOL, null, SERVER_HOST, SERVER_PORT, 
-        "/udj/players/" + playerId + "/users/"+userId,
+        "/udj/0_6/players/" + playerId + "/users/user",
         null, null);
       final HttpResponse resp;
       if(password == null || password.equals("")){
@@ -458,7 +458,7 @@ public class ServerConnection{
     }
   }
 
-  public static JSONObject getActivePlaylist(long playerId, 
+  public static JSONObject getActivePlaylist(String playerId, 
     String authToken)
     throws JSONException, ParseException, IOException, AuthenticationException,
     PlayerInactiveException, PlayerAuthException
@@ -466,7 +466,7 @@ public class ServerConnection{
     try{
       URI uri = new URI(
         NETWORK_PROTOCOL, null, SERVER_HOST, SERVER_PORT, 
-        "/udj/players/"+playerId+"/active_playlist",
+        "/udj/0_6/players/"+playerId+"/active_playlist",
         null, null);
       return new JSONObject(doPlayerRelatedGet(uri, authToken));
     }
@@ -478,14 +478,14 @@ public class ServerConnection{
 
 
   public static List<LibraryEntry> availableMusicQuery(
-    String query, long playerId, String authToken)
+    String query, String playerId, String authToken)
     throws JSONException, ParseException, IOException, AuthenticationException,
     PlayerInactiveException, PlayerAuthException
   {
     try{
       URI uri = new URI(
         NETWORK_PROTOCOL, null, SERVER_HOST, SERVER_PORT,
-        "/udj/players/"+playerId+"/available_music",
+        "/udj/0_6/players/"+playerId+"/available_music",
         "query="+query, null);
       JSONArray libEntries = new JSONArray(doPlayerRelatedGet(uri, authToken));
       return LibraryEntry.fromJSONArray(libEntries);
@@ -496,14 +496,14 @@ public class ServerConnection{
     return null;
   }
 
-  public static List<String> getArtists(long playerId, String authToken)
+  public static List<String> getArtists(String playerId, String authToken)
     throws JSONException, ParseException, IOException, AuthenticationException,
     PlayerInactiveException, PlayerAuthException
   {
     try{
       URI uri = new URI(
         NETWORK_PROTOCOL, null, SERVER_HOST, SERVER_PORT,
-        "/udj/players/"+playerId+"/available_music/artists",
+        "/udj/0_6/players/"+playerId+"/available_music/artists",
         null, null);
       JSONArray artists = new JSONArray(doPlayerRelatedGet(uri, authToken));
       return toStringList(artists);
@@ -515,14 +515,14 @@ public class ServerConnection{
   }
 
   public static List<LibraryEntry> getSongsByArtists(
-    String artistQuery, long playerId, String authToken)
+    String artistQuery, String playerId, String authToken)
     throws JSONException, ParseException, IOException, AuthenticationException,
     PlayerInactiveException, PlayerAuthException
   {
     try{
       URI uri = new URI(
         NETWORK_PROTOCOL, null, SERVER_HOST, SERVER_PORT,
-        "/udj/players/"+playerId+"/available_music/artists/"+artistQuery,
+        "/udj/0_6/players/"+playerId+"/available_music/artists/"+artistQuery,
         null, null);
       JSONArray libEntries = new JSONArray(doPlayerRelatedGet(uri, authToken));
       return LibraryEntry.fromJSONArray(libEntries);
@@ -534,14 +534,14 @@ public class ServerConnection{
   }
 
 
-  public static List<LibraryEntry> getRandomMusic(int max, long playerId, String authToken)
+  public static List<LibraryEntry> getRandomMusic(int max, String playerId, String authToken)
     throws JSONException, ParseException, IOException, AuthenticationException,
     PlayerInactiveException, PlayerAuthException
   {
     try{
       URI uri = new URI(
         NETWORK_PROTOCOL, null, SERVER_HOST, SERVER_PORT,
-        "/udj/players/"+playerId+"/available_music/random_songs",
+        "/udj/0_6/players/"+playerId+"/available_music/random_songs",
         "max_randoms="+String.valueOf(max), null);
       JSONArray libEntries = new JSONArray(doPlayerRelatedGet(uri, authToken));
       return LibraryEntry.fromJSONArray(libEntries);
@@ -552,14 +552,14 @@ public class ServerConnection{
     return null;
   }
 
-  public static List<LibraryEntry> getRecentlyPlayedLibEntries(int max, long playerId, String authToken)
+  public static List<LibraryEntry> getRecentlyPlayedLibEntries(int max, String playerId, String authToken)
     throws JSONException, ParseException, IOException, AuthenticationException,
     PlayerInactiveException, PlayerAuthException
   {
     try{
       URI uri = new URI(
         NETWORK_PROTOCOL, null, SERVER_HOST, SERVER_PORT,
-        "/udj/players/"+playerId+"/recently_played",
+        "/udj/0_6/players/"+playerId+"/recently_played",
         "max_songs="+String.valueOf(max), null);
       JSONArray recentlyPlayedEntries = new JSONArray(doPlayerRelatedGet(uri, authToken));
       return LibraryEntry.fromRecentlyPlayedJSONArray(recentlyPlayedEntries);
@@ -573,14 +573,14 @@ public class ServerConnection{
 
 
   public static void addSongToActivePlaylist(
-    long playerId, long libId, String authToken)
+    String playerId, String libId, String authToken)
     throws JSONException, ParseException, IOException, AuthenticationException,
     PlayerInactiveException, PlayerAuthException, ConflictException
   {
     try{
       URI uri = new URI(
         NETWORK_PROTOCOL, null, SERVER_HOST, SERVER_PORT,
-        "/udj/players/"+playerId+"/active_playlist/songs/"+String.valueOf(libId),
+        "/udj/0_6/players/"+playerId+"/active_playlist/songs/"+libId,
         null, null);
       Log.d(TAG, "Add song to active playlist: " + libId);
       doPlayerRelatedPut(uri, authToken, ""); 
@@ -590,14 +590,14 @@ public class ServerConnection{
     }
   }
 
-  public static void removeSongFromActivePlaylist(long playerId, long libId, String authToken)
+  public static void removeSongFromActivePlaylist(String playerId, String libId, String authToken)
     throws IOException, AuthenticationException, PlayerInactiveException, PlayerAuthException
   {
 
     try{
       URI uri = new URI(
           NETWORK_PROTOCOL, null, SERVER_HOST, SERVER_PORT,
-          "/udj/players/"+playerId+"/active_playlist/songs/"+libId,
+          "/udj/0_6/players/"+playerId+"/active_playlist/songs/"+libId,
           null, null);
       Log.d(TAG, "Add remove song from active playlist: " + libId);
       doPlayerRelatedDelete(uri, authToken);
@@ -607,30 +607,30 @@ public class ServerConnection{
     }
   }
 
-  public static void setCurrentSong(long playerId, long libId, String authToken)
+  public static void setCurrentSong(String playerId, String libId, String authToken)
     throws IOException, AuthenticationException, PlayerInactiveException, PlayerAuthException
   {
     try{
       URI uri = new URI(
           NETWORK_PROTOCOL, null, SERVER_HOST, SERVER_PORT,
-          "/udj/players/"+playerId+"/current_song",
+          "/udj/0_6/players/"+playerId+"/current_song",
           null, null);
       Log.d(TAG, "Set current song to: " + libId);
-      doPlayerRelatedPost(uri, authToken, "lib_id="+String.valueOf(libId), false);
+      doPlayerRelatedPost(uri, authToken, "lib_id="+libId, false);
     }
     catch(URISyntaxException e){
       //TODO inform caller that their query is bad 
     }
   }
 
-  public static void setPlaybackState(long playerId, long userId, int desiredPlaybackState,
+  public static void setPlaybackState(String playerId, int desiredPlaybackState,
       String authToken)
     throws IOException, AuthenticationException, PlayerInactiveException, PlayerAuthException
   {
     try{
       URI uri = new URI(
           NETWORK_PROTOCOL, null, SERVER_HOST, SERVER_PORT,
-          "/udj/users/" + userId + "/players/"+playerId+"/state",
+          "/udj/0_6/players/"+playerId+"/state",
           null, null);
       Log.d(TAG, "Setting playback state: " + desiredPlaybackState);
       String plState = "";
@@ -647,14 +647,14 @@ public class ServerConnection{
     }
   }
 
-  public static void setPlayerVolume(long playerId, long userId, int desiredVolume,
+  public static void setPlayerVolume(String playerId, int desiredVolume,
       String authToken)
     throws IOException, AuthenticationException, PlayerInactiveException, PlayerAuthException
   {
     try{
       URI uri = new URI(
           NETWORK_PROTOCOL, null, SERVER_HOST, SERVER_PORT,
-          "/udj/users/" + userId + "/players/"+playerId+"/volume",
+          "/udj/0_6/players/"+playerId+"/volume",
           null, null);
       Log.d(TAG, "Setting player volume: " + desiredVolume);
       doPlayerRelatedPost(uri, authToken, "volume="+String.valueOf(desiredVolume), false);
@@ -667,7 +667,7 @@ public class ServerConnection{
 
 
   public static void voteOnSong(
-    long playerId, long userId, long libId, int voteType, String authToken)
+    String playerId, String libId, int voteType, String authToken)
     throws IOException, AuthenticationException, PlayerInactiveException, PlayerAuthException
   {
     String voteString = null;
@@ -683,8 +683,7 @@ public class ServerConnection{
     try{
       URI uri = new URI(
         NETWORK_PROTOCOL, null, SERVER_HOST, SERVER_PORT,
-        "/udj/players/"+playerId+"/active_playlist/songs/" + libId + "/users/"+
-          userId + "/" + voteString,
+        "/udj/0_6/players/"+playerId+"/active_playlist/songs/" + libId +"/" + voteString,
         null, null);
       doPlayerRelatedPost(uri, authToken, null, false);
     }

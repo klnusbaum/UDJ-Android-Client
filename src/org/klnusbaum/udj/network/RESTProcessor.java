@@ -89,7 +89,7 @@ public class RESTProcessor{
     JSONObject adder = entry.getJSONObject("adder");
     final ContentProviderOperation.Builder songInsertOp = 
       ContentProviderOperation.newInsert(UDJPlayerProvider.PLAYLIST_URI)
-      .withValue(UDJPlayerProvider.LIB_ID_COLUMN, song.getInt("id"))
+      .withValue(UDJPlayerProvider.LIB_ID_COLUMN, song.getString("id"))
       .withValue(UDJPlayerProvider.TIME_ADDED_COLUMN, 
           entry.getString("time_added"))
       .withValue(UDJPlayerProvider.PRIORITY_COLUMN, priority)
@@ -97,7 +97,7 @@ public class RESTProcessor{
       .withValue(UDJPlayerProvider.ARTIST_COLUMN, song.getString("artist"))
       .withValue(UDJPlayerProvider.ALBUM_COLUMN, song.getString("album"))
       .withValue(UDJPlayerProvider.DURATION_COLUMN, song.getInt("duration"))
-      .withValue(UDJPlayerProvider.ADDER_ID_COLUMN, adder.getLong("id"))
+      .withValue(UDJPlayerProvider.ADDER_ID_COLUMN, adder.getString("id"))
       .withValue(UDJPlayerProvider.ADDER_USERNAME_COLUMN, adder.getString("username"))
       .withValue(UDJPlayerProvider.IS_CURRENTLY_PLAYING_COLUMN, isCurrentSong ? 1 : 0);
     ArrayList<ContentProviderOperation> toReturn = new ArrayList<ContentProviderOperation>();
@@ -106,18 +106,18 @@ public class RESTProcessor{
     for(int i=0; i<upVoters.length(); ++i){
       final ContentProviderOperation.Builder voteInsertOp = 
         ContentProviderOperation.newInsert(UDJPlayerProvider.VOTES_URI)
-        .withValue(UDJPlayerProvider.LIB_ID_COLUMN, song.getInt("id"))
+        .withValue(UDJPlayerProvider.LIB_ID_COLUMN, song.getString("id"))
         .withValue(UDJPlayerProvider.VOTE_WEIGHT_COLUMN, 1)
-        .withValue(UDJPlayerProvider.VOTER_ID_COLUMN, upVoters.getJSONObject(i).getInt("id"));
+        .withValue(UDJPlayerProvider.VOTER_ID_COLUMN, upVoters.getJSONObject(i).getString("id"));
       toReturn.add(voteInsertOp.build());
     }
     JSONArray downVoters = entry.getJSONArray("downvoters");
     for(int i=0; i<downVoters.length(); ++i){
       final ContentProviderOperation.Builder voteInsertOp = 
         ContentProviderOperation.newInsert(UDJPlayerProvider.VOTES_URI)
-        .withValue(UDJPlayerProvider.LIB_ID_COLUMN, song.getInt("id"))
+        .withValue(UDJPlayerProvider.LIB_ID_COLUMN, song.getString("id"))
         .withValue(UDJPlayerProvider.VOTE_WEIGHT_COLUMN, -1)
-        .withValue(UDJPlayerProvider.VOTER_ID_COLUMN, downVoters.getJSONObject(i).getInt("id"));
+        .withValue(UDJPlayerProvider.VOTER_ID_COLUMN, downVoters.getJSONObject(i).getString("id"));
       toReturn.add(voteInsertOp.build());
     }
     return toReturn;

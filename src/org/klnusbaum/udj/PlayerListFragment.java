@@ -415,7 +415,7 @@ public class PlayerListFragment extends RefreshableListFragment implements
     refreshDone();
     switch(data.getError()){
     case NO_ERROR:
-      playerAdapter = 
+      playerAdapter =
         new PlayerListAdapter(getActivity(), data.getPlayers());
       setListAdapter(playerAdapter);
       break;

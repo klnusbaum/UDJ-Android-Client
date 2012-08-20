@@ -32,15 +32,15 @@ public class LibraryEntry{
   public static final String ALBUM_PARAM = "album";
   public static final String DURATION_PARAM = "duration";
 
-  private long libId; 
+  private String libId;
   private String title;
   private String artist;
   private String album;
   private int duration;
 
   public LibraryEntry(
-    long libId, 
-    String title, 
+    String libId,
+    String title,
     String artist,
     String album,
     int duration)
@@ -52,22 +52,22 @@ public class LibraryEntry{
     this.duration = duration;
   }
 
-  public long getLibId(){
+  public String getLibId(){
     return libId;
   }
-  
+
   public String getTitle(){
     return title;
   }
-  
+
   public String getArtist(){
     return artist;
   }
-  
+
   public String getAlbum(){
     return album;
   }
-  
+
   public int getDuration(){
     return duration;
   }
@@ -76,7 +76,7 @@ public class LibraryEntry{
     throws JSONException 
   {
     return new LibraryEntry(
-      jObj.getLong(ID_PARAM), 
+      jObj.getString(ID_PARAM), 
       jObj.getString(TITLE_PARAM),
       jObj.getString(ARTIST_PARAM),
       jObj.getString(ALBUM_PARAM),
@@ -107,5 +107,5 @@ public class LibraryEntry{
   public String toString(){
     return "Song name: " + getTitle();
   }
-  
+
 }

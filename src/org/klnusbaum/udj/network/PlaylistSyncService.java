@@ -73,19 +73,19 @@ public class PlaylistSyncService extends IntentService{
   public void onHandleIntent(Intent intent){
     final Account account =
       (Account)intent.getParcelableExtra(Constants.ACCOUNT_EXTRA);
-    long playerId = Long.valueOf(AccountManager.get(this).getUserData(
-      account, Constants.LAST_PLAYER_ID_DATA));
+    String playerId = AccountManager.get(this).getUserData(
+      account, Constants.LAST_PLAYER_ID_DATA);
     //TODO handle error if playerId is bad
     if(intent.getAction().equals(Intent.ACTION_INSERT)){
       if(intent.getData().equals(UDJPlayerProvider.PLAYLIST_URI)){
-        long libId = intent.getLongExtra(
+        String libId = intent.getStringExtra(
           Constants.LIB_ID_EXTRA, 
           UDJPlayerProvider.INVALID_LIB_ID);
         addSongToPlaylist(account, playerId, libId, true, intent);
       }
       else if(intent.getData().equals(UDJPlayerProvider.VOTES_URI)){
         //TODO handle if lib id is bad
-        long libId = intent.getLongExtra(Constants.LIB_ID_EXTRA, -1);
+        String libId = intent.getStringExtra(Constants.LIB_ID_EXTRA, "");
         //TODO handle if votetype is bad
         int voteWeight = intent.getIntExtra(Constants.VOTE_WEIGHT_EXTRA,0); 
         voteOnSong(account, playerId, libId, voteWeight, true);
@@ -100,14 +100,14 @@ public class PlaylistSyncService extends IntentService{
       if(intent.getData().equals(UDJPlayerProvider.PLAYLIST_URI)){
         Log.d(TAG, "In plalist syncservice, about to insert song into remove requests");
         //TODO handle if Playlist id is bad.
-        long libId = intent.getLongExtra(Constants.LIB_ID_EXTRA, -1);
+        String libId = intent.getStringExtra(Constants.LIB_ID_EXTRA, "");
         removeSongFromPlaylist(account, playerId, libId, true, intent);
       }
       updateActivePlaylist(account, playerId, true);
     }
     else if(intent.getAction().equals(Constants.ACTION_SET_CURRENT_SONG)){
       Log.d(TAG, "Handling setting current song");
-      long libId = intent.getLongExtra(Constants.LIB_ID_EXTRA, -1);
+      String libId = intent.getLongExtra(Constants.LIB_ID_EXTRA, "");
       setCurrentSong(account, playerId, libId, true, intent);
       updateActivePlaylist(account, playerId, true);
     }
@@ -122,7 +122,7 @@ public class PlaylistSyncService extends IntentService{
   }
 
   private void updateActivePlaylist(
-    Account account, long playerId, boolean attemptReauth)
+    Account account, String playerId, boolean attemptReauth)
   {
     Log.d(TAG, "updating active playlist");
     AccountManager am = AccountManager.get(this);
@@ -179,9 +179,9 @@ public class PlaylistSyncService extends IntentService{
       Utils.handleInactivePlayer(this, account);
     }
     catch (PlayerAuthException e) {
-    //TODO REAUTH AND THEN TRY GETTING PLAYLIST AGAIN
-    e.printStackTrace();
-  }
+      //TODO REAUTH AND THEN TRY GETTING PLAYLIST AGAIN
+      e.printStackTrace();
+    }
     //TODO This point of the app seems very dangerous as there are so many
     // exceptions that could occuer. Need to pay special attention to this.
 
@@ -189,8 +189,8 @@ public class PlaylistSyncService extends IntentService{
 
   private void setCurrentSong(
     Account account,
-    long playerId,
-    long libId,
+    String playerId,
+    String libId,
     boolean attemptReauth,
     Intent originalIntent)
   {
@@ -245,8 +245,8 @@ public class PlaylistSyncService extends IntentService{
 
   private void addSongToPlaylist(
     Account account,
-    long playerId,
-    long libId,
+    String playerId,
+    String libId,
     boolean attemptReauth,
     Intent originalIntent)
   {
@@ -319,7 +319,7 @@ public class PlaylistSyncService extends IntentService{
   }
 
   private void removeSongFromPlaylist(
-      Account account, long playerId, long libId, boolean attemptReauth, Intent originalIntent)
+      Account account, String playerId, String libId, boolean attemptReauth, Intent originalIntent)
   {
     String authToken = "";
     AccountManager am = AccountManager.get(this);
@@ -373,7 +373,7 @@ public class PlaylistSyncService extends IntentService{
     }
   }
 
-  private void voteOnSong(Account account, long playerId, long libId, int voteWeight, boolean attemptReauth){
+  private void voteOnSong(Account account, String playerId, String libId, int voteWeight, boolean attemptReauth){
     AccountManager am = AccountManager.get(this);
     String authToken = "";
     try{
@@ -390,9 +390,7 @@ public class PlaylistSyncService extends IntentService{
     }
 
     try{
-      Long userId = 
-          Long.valueOf(am.getUserData(account, Constants.USER_ID_DATA));
-      ServerConnection.voteOnSong(playerId, userId, libId, voteWeight, authToken);
+      ServerConnection.voteOnSong(playerId, libId, voteWeight, authToken);
     }
     catch(ParseException e){
       Log.e(TAG, "Parse exception when retreiving playist");
@@ -420,11 +418,10 @@ public class PlaylistSyncService extends IntentService{
   }
 
   private void setPlayerVolume(
-    Intent intent, Account account, long playerId, boolean attemptReauth)
+    Intent intent, Account account, String playerId, boolean attemptReauth)
   {
     AccountManager am = AccountManager.get(this);
     int desiredVolume = intent.getIntExtra(Constants.PLAYER_VOLUME_EXTRA, 0);
-    long userId = Long.valueOf(am.getUserData(account, Constants.USER_ID_DATA));
     Log.d(TAG, "proceeding to set volume of player to: " + String.valueOf(desiredVolume) + 
         " on server");
 
@@ -449,7 +446,7 @@ public class PlaylistSyncService extends IntentService{
     }
 
     try{
-      ServerConnection.setPlayerVolume(playerId, userId, desiredVolume, authToken);
+      ServerConnection.setPlayerVolume(playerId, desiredVolume, authToken);
     }
     catch(IOException e){
       Log.e(TAG, "IO exception in set volume" );
@@ -481,7 +478,7 @@ public class PlaylistSyncService extends IntentService{
 
 
   private void setPlaybackState(
-    Intent intent, Account account, long playerId, boolean attemptReauth)
+    Intent intent, Account account, String playerId, boolean attemptReauth)
   {
     AccountManager am = AccountManager.get(this);
     String authToken = "";
@@ -505,9 +502,8 @@ public class PlaylistSyncService extends IntentService{
     }
 
     int desiredPlaybackState = intent.getIntExtra(Constants.PLAYBACK_STATE_EXTRA, 0);
-    long userId = Long.valueOf(am.getUserData(account, Constants.USER_ID_DATA));
     try{
-      ServerConnection.setPlaybackState(playerId, userId, desiredPlaybackState, authToken);
+      ServerConnection.setPlaybackState(playerId, desiredPlaybackState, authToken);
     }
     catch(IOException e){
       Log.e(TAG, "IO exception in set playback" );

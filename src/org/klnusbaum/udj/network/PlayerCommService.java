@@ -87,16 +87,15 @@ public class PlayerCommService extends IntentService{
       return;
     }
 
-    long userId, playerId;
+    String playerId;
     String authToken;
     String password = "";
     boolean hasPassword = false;
     //TODO hanle error if account isn't provided
     try{
-      userId = Long.valueOf(am.getUserData(account, Constants.USER_ID_DATA));
       //TODO handle if player id isn't provided
       authToken = am.blockingGetAuthToken(account, "", true);  
-      playerId = intent.getLongExtra(
+      playerId = intent.getStringExtra(
           Constants.PLAYER_ID_EXTRA,
           Constants.NO_PLAYER_ID);
       if(intent.hasExtra(Constants.PLAYER_PASSWORD_EXTRA)){
@@ -126,17 +125,17 @@ public class PlayerCommService extends IntentService{
 
     try{
       if(!hasPassword){
-        ServerConnection.joinPlayer(playerId, userId, authToken);
+        ServerConnection.joinPlayer(playerId, authToken);
       }
       else{
-        ServerConnection.joinPlayer(playerId, userId, password, authToken);
+        ServerConnection.joinPlayer(playerId, password, authToken);
       }
       setPlayerData(intent, am, account);
       ContentResolver cr = getContentResolver();
       UDJPlayerProvider.playerCleanup(cr);
       Intent joinedPlayerIntent = new Intent(Constants.JOINED_PLAYER_ACTION);
       am.setUserData(
-          account, Constants.LAST_PLAYER_ID_DATA, String.valueOf(playerId));
+          account, Constants.LAST_PLAYER_ID_DATA, playerId);
       am.setUserData(
           account, 
           Constants.PLAYER_STATE_DATA, 
@@ -176,21 +175,21 @@ public class PlayerCommService extends IntentService{
     String authToken, boolean attemptReauth)
   {
     if(attemptReauth){
-      Log.d(TAG, 
+      Log.d(TAG,
         "Soft Authentication exception when joining player");
       am.invalidateAuthToken(Constants.ACCOUNT_TYPE, authToken);
       joinPlayer(intent, am, account, false);
     }
     else{
-      Log.e(TAG, 
+      Log.e(TAG,
         "Hard Authentication exception when joining player");
       doLoginFail(am, account, PlayerJoinError.AUTHENTICATION_ERROR);
     }
   }
 
   private void doLoginFail(
-    AccountManager am, 
-    Account account, 
+    AccountManager am,
+    Account account,
     PlayerJoinError error)
   {
     am.setUserData(
@@ -198,10 +197,10 @@ public class PlayerCommService extends IntentService{
       Constants.PLAYER_STATE_DATA,
       String.valueOf(Constants.PLAYER_JOIN_FAILED));
     am.setUserData(
-      account, 
-      Constants.PLAYER_JOIN_ERROR, 
+      account,
+      Constants.PLAYER_JOIN_ERROR,
       error.toString());
-    Intent playerJoinFailedIntent = 
+    Intent playerJoinFailedIntent =
       new Intent(Constants.PLAYER_JOIN_FAILED_ACTION);
     Log.d(TAG, "Sending player join failure broadcast");
     sendBroadcast(playerJoinFailedIntent);
@@ -209,25 +208,25 @@ public class PlayerCommService extends IntentService{
 
   private void setPlayerData(Intent intent, AccountManager am, Account account){
     am.setUserData(
-      account, 
-      Constants.PLAYER_NAME_DATA, 
+      account,
+      Constants.PLAYER_NAME_DATA,
       intent.getStringExtra(Constants.PLAYER_NAME_EXTRA));
     am.setUserData(
-      account, 
-      Constants.PLAYER_HOSTNAME_DATA, 
+      account,
+      Constants.PLAYER_HOSTNAME_DATA,
       intent.getStringExtra(Constants.PLAYER_OWNER_EXTRA));
     am.setUserData(
-      account, 
-      Constants.PLAYER_HOST_ID_DATA, 
-      String.valueOf(intent.getLongExtra(Constants.PLAYER_OWNER_ID_EXTRA,-1)));
+      account,
+      Constants.PLAYER_HOST_ID_DATA,
+      String.valueOf(intent.getStringExtra(Constants.PLAYER_OWNER_ID_EXTRA,"")));
     am.setUserData(
-      account, 
-      Constants.PLAYER_LAT_DATA, 
+      account,
+      Constants.PLAYER_LAT_DATA,
       String.valueOf(intent.getDoubleExtra(Constants.PLAYER_LAT_EXTRA, -100.0))
     );
     am.setUserData(
-      account, 
-      Constants.PLAYER_LONG_DATA, 
+      account,
+      Constants.PLAYER_LONG_DATA,
       String.valueOf(intent.getDoubleExtra(Constants.PLAYER_LONG_EXTRA, -100.0))
     );
   }

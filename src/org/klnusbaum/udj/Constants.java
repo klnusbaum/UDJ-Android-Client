@@ -35,7 +35,7 @@ public class Constants{
 
 
   public static final String PLAYER_HOST_ID_DATA = "org.klnusbaum.udj.PlayerOwnerId";
-  public static final long NO_PLAYER_ID = -1;
+  public static final String NO_PLAYER_ID = "";
 
   public static final String PLAYER_STATE_DATA = "org.klusbaum.udj.PlayerState";
   public static final int PLAYER_JOIN_FAILED = -1;

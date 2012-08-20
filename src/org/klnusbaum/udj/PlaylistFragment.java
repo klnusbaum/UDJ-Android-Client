@@ -55,7 +55,6 @@ public class PlaylistFragment extends RefreshableListFragment implements
   private static final String TAG = "PlaylistFragment";
   private static final int PLAYLIST_LOADER_ID = 0;
   private Account account;
-  private long userId;
   private AccountManager am;
   /**
    * Adapter used to help display the contents of the playlist.
@@ -72,9 +71,9 @@ public class PlaylistFragment extends RefreshableListFragment implements
     super.onActivityCreated(savedInstanceState);
     account = Utils.basicGetUdjAccount(getActivity());
     am = AccountManager.get(getActivity());
-    userId = Long.valueOf(am.getUserData(account, Constants.USER_ID_DATA));
+    userId = am.getUserData(account, Constants.USER_ID_DATA);
     setEmptyText(getActivity().getString(R.string.no_playlist_items));
-    playlistAdapter = new PlaylistAdapter(getActivity(), null, userId);
+    playlistAdapter = new PlaylistAdapter(getActivity(), null);
     setListAdapter(playlistAdapter);
     setListShown(false);
     getLoaderManager().initLoader(PLAYLIST_LOADER_ID, null, this);
@@ -173,14 +172,14 @@ public class PlaylistFragment extends RefreshableListFragment implements
   private void setCurrentSong(int position){
     Cursor toSet = (Cursor) playlistAdapter.getItem(position);
     int idIndex = toSet.getColumnIndex(UDJPlayerProvider.LIB_ID_COLUMN);
-    Log.d(TAG, "Setting song with id " + toSet.getLong(idIndex));
+    Log.d(TAG, "Setting song with id " + toSet.getString(idIndex));
     Intent setSongIntent = new Intent(
       Constants.ACTION_SET_CURRENT_SONG,
       UDJPlayerProvider.PLAYLIST_URI,
       getActivity(),
       PlaylistSyncService.class);
     setSongIntent.putExtra(Constants.ACCOUNT_EXTRA, account);
-    setSongIntent.putExtra(Constants.LIB_ID_EXTRA, toSet.getLong(idIndex));
+    setSongIntent.putExtra(Constants.LIB_ID_EXTRA, toSet.getString(idIndex));
     getActivity().startService(setSongIntent);
     Toast toast = Toast.makeText(getActivity(),
         getString(R.string.setting_song), Toast.LENGTH_SHORT);
@@ -191,29 +190,29 @@ public class PlaylistFragment extends RefreshableListFragment implements
     Cursor toRemove = (Cursor) playlistAdapter.getItem(position);
     int idIndex = toRemove
         .getColumnIndex(UDJPlayerProvider.LIB_ID_COLUMN);
-    Log.d(TAG, "Removing song with id " + toRemove.getLong(idIndex));
+    Log.d(TAG, "Removing song with id " + toRemove.getString(idIndex));
     Intent removeSongIntent = new Intent(
       Intent.ACTION_DELETE,
       UDJPlayerProvider.PLAYLIST_URI,
       getActivity(),
       PlaylistSyncService.class);
     removeSongIntent.putExtra(Constants.ACCOUNT_EXTRA, account);
-    removeSongIntent.putExtra(Constants.LIB_ID_EXTRA, toRemove.getLong(idIndex));
+    removeSongIntent.putExtra(Constants.LIB_ID_EXTRA, toRemove.getString(idIndex));
     getActivity().startService(removeSongIntent);
     Toast toast = Toast.makeText(getActivity(),
         getString(R.string.removing_song), Toast.LENGTH_SHORT);
     toast.show();
   }
 
-  private void upVoteSong(long libId) {
+  private void upVoteSong(String libId) {
     voteOnSong(libId, 1);
   }
 
-  private void downVoteSong(long libId) {
+  private void downVoteSong(String libId) {
     voteOnSong(libId, -1);
   }
 
-  private void voteOnSong(long libId, int voteType) {
+  private void voteOnSong(String libId, int voteType) {
     Intent voteIntent = new Intent(Intent.ACTION_INSERT,
         UDJPlayerProvider.VOTES_URI, getActivity(),
         PlaylistSyncService.class);
@@ -227,7 +226,7 @@ public class PlaylistFragment extends RefreshableListFragment implements
     switch (id) {
     case PLAYLIST_LOADER_ID:
       Uri playlistUri = UDJPlayerProvider.PLAYLIST_URI.buildUpon().appendQueryParameter(
-          UDJPlayerProvider.USER_ID_PARAM, String.valueOf(userId)).build();
+          UDJPlayerProvider.USER_ID_PARAM, userId).build();
       return new CursorLoader(getActivity(),
           playlistUri, null, null, null,
           UDJPlayerProvider.PRIORITY_COLUMN);
@@ -255,12 +254,10 @@ public class PlaylistFragment extends RefreshableListFragment implements
   }
 
   private class PlaylistAdapter extends CursorAdapter{
-    private long userId;
     private static final String PLAYLIST_ADAPTER_TAG = "PlaylistAdapter";
 
-    public PlaylistAdapter(Context context, Cursor c, long userId){
+    public PlaylistAdapter(Context context, Cursor c){
       super(context, c, 0);
-      this.userId = userId;
     }
 
     @Override
@@ -269,7 +266,7 @@ public class PlaylistFragment extends RefreshableListFragment implements
       final int downcountIndex = cursor.getColumnIndex(UDJPlayerProvider.DOWNCOUNT_COLUMN);
 
       final int idIndex = cursor.getColumnIndex(UDJPlayerProvider.LIB_ID_COLUMN);
-      final long libId = cursor.getLong(idIndex);
+      final String libId = cursor.getString(idIndex);
       final boolean isCurrentlyPlaying =
         (cursor.getInt(cursor.getColumnIndex(UDJPlayerProvider.IS_CURRENTLY_PLAYING_COLUMN)) ==1);
 
@@ -329,7 +326,7 @@ public class PlaylistFragment extends RefreshableListFragment implements
 
       final TextView addByUser = (TextView) view.findViewById(R.id.playlistAddedBy);
       int adderIdIndex = cursor.getColumnIndex(UDJPlayerProvider.ADDER_ID_COLUMN);
-      if (cursor.getLong(adderIdIndex) == userId) {
+      if (cursor.getString(adderIdIndex) == userId) {
         addByUser.setText(getString(R.string.added_by) + " " + getString(R.string.you));
       }
       else{

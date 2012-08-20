@@ -95,7 +95,7 @@ public class Authenticator extends AbstractAccountAuthenticator{
           ServerConnection.authenticate(account.name, password);
         if(!TextUtils.isEmpty(authResult.ticketHash)) {
           am.setUserData(
-            account, Constants.USER_ID_DATA, Long.toString(authResult.userId));
+            account, Constants.USER_ID_DATA, authResult.userId);
           return bundleUpAuthToken(account, authResult.ticketHash);
         }
       }

@@ -37,20 +37,20 @@ public class Player{
   public static final String LONGITUDE_PARAM="longitude";
   public static final String HAS_PASSWORD_PARAM="has_password";
 
-  private long playerId;
+  private String playerId;
   private String name;
   private String ownerName;
-  private long ownerId;
+  private String ownerId;
   private double latitude;
   private double longitude;
   private boolean hasPassword;
 
 
   public Player(
-    long playerId, 
+    String playerId, 
     String name, 
     String ownerName,
-    long ownerId, 
+    String ownerId, 
     double latitude, 
     double longitude,
     boolean hasPassword)
@@ -64,7 +64,7 @@ public class Player{
     this.hasPassword = hasPassword;
   }
 
-  public long getPlayerId(){
+  public String getPlayerId(){
     return playerId;
   }
 
@@ -76,7 +76,7 @@ public class Player{
     return ownerName;
   }
 
-  public long getOwnerId(){
+  public String getOwnerId(){
     return ownerId;
   }
 
@@ -96,10 +96,10 @@ public class Player{
     throws JSONException 
   {
     return new Player(
-      jObj.getLong(ID_PARAM),
+      jObj.getString(ID_PARAM),
       jObj.getString(NAME_PARAM),
       jObj.getString(OWNER_NAME_PARAM),
-      jObj.getLong(OWNER_ID_PARAM),
+      jObj.getString(OWNER_ID_PARAM),
       jObj.optDouble(LATITUDE_PARAM, -100.0),
       jObj.optDouble(LONGITUDE_PARAM, -100.0),
       jObj.getBoolean(HAS_PASSWORD_PARAM));
@@ -141,10 +141,10 @@ public class Player{
 
   public Bundle bundleUp(){
     Bundle toReturn = new Bundle();
-    toReturn.putLong(ID_PARAM, getPlayerId());
+    toReturn.putString(ID_PARAM, getPlayerId());
     toReturn.putString(NAME_PARAM, getName());
     toReturn.putString(OWNER_NAME_PARAM, getOwnerName());
-    toReturn.putLong(OWNER_ID_PARAM, getOwnerId());
+    toReturn.putString(OWNER_ID_PARAM, getOwnerId());
     toReturn.putDouble(LATITUDE_PARAM, getLatitude());
     toReturn.putDouble(LONGITUDE_PARAM, getLongitude());
     toReturn.putBoolean(HAS_PASSWORD_PARAM, getHasPassword());
@@ -153,10 +153,10 @@ public class Player{
 
   public static Player unbundle(Bundle toUnbundle){
     return new Player(
-      toUnbundle.getLong(ID_PARAM),
+      toUnbundle.putString(ID_PARAM),
       toUnbundle.getString(NAME_PARAM),
       toUnbundle.getString(OWNER_NAME_PARAM),
-      toUnbundle.getLong(OWNER_ID_PARAM),
+      toUnbundle.putString(OWNER_ID_PARAM),
       toUnbundle.getDouble(LATITUDE_PARAM),
       toUnbundle.getDouble(LONGITUDE_PARAM),
       toUnbundle.getBoolean(HAS_PASSWORD_PARAM));

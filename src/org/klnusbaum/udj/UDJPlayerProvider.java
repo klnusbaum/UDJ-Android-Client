@@ -38,7 +38,7 @@ public class UDJPlayerProvider extends ContentProvider{
   /** Name of the database */
   private static final String DATABASE_NAME = "player.db";
   /** Database version number */
-  private static final int DATABASE_VERSION = 1;
+  private static final int DATABASE_VERSION = 2;
 
   /** URI for the playlist */
   public static final Uri PLAYLIST_URI = 
@@ -56,7 +56,7 @@ public class UDJPlayerProvider extends ContentProvider{
   private static final String PLAYLIST_TABLE_NAME = "playlist";
 
   /** Used to identify bad library ids */
-  public static final long INVALID_LIB_ID = -1;
+  public static final String INVALID_LIB_ID = "";
 
   /** Constants used for various Playlist column names */
   public static final String PLAYLIST_ID_COLUMN = "_id";
@@ -76,14 +76,14 @@ public class UDJPlayerProvider extends ContentProvider{
   private static final String PLAYLIST_TABLE_CREATE = 
     "CREATE TABLE " + PLAYLIST_TABLE_NAME + "("+
     PLAYLIST_ID_COLUMN + " INTEGER PRIMARY KEY , " +
-    LIB_ID_COLUMN + " INTEGER NOT NULL UNIQUE, "  +
+    LIB_ID_COLUMN + " TEXT NOT NULL, "  +
     PRIORITY_COLUMN + " INTEGER NOT NULL, "  +
     TIME_ADDED_COLUMN + " TEXT NOT NULL, " +
     DURATION_COLUMN + " INTEGER NOT NULL, " +
     TITLE_COLUMN + " TEXT NOT NULL, " +
     ARTIST_COLUMN + " TEXT NOT NULL, " + 
     ALBUM_COLUMN + " TEXT NOT NULL, " +
-    ADDER_ID_COLUMN + " INTEGER NOT NULL, " +
+    ADDER_ID_COLUMN + " TEXT NOT NULL, " +
     ADDER_USERNAME_COLUMN + " STRING NOT NULL, " +
     IS_CURRENTLY_PLAYING_COLUMN + " INTEGER NOT NULL DEFAULT 0);";
 
@@ -105,7 +105,7 @@ public class UDJPlayerProvider extends ContentProvider{
     VOTE_ID_COLUMN + " INTEGER PRIMARY KEY AUTOINCREMENT, " + 
     VOTE_LIB_ID_COLUMN + " INTEGER NOT NULL, " +
     VOTE_WEIGHT_COLUMN + " INTEGER NOT NULL, " + 
-    VOTER_ID_COLUMN + " INTEGER NOT NULL);";
+    VOTER_ID_COLUMN + " TEXT NOT NULL);";
   
   /** UPVOTES View */
   /** Name of upvotes view */
@@ -182,7 +182,19 @@ public class UDJPlayerProvider extends ContentProvider{
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion){
-    
+      if(oldVersion == 1 && newVersion == 2){
+        final String PLAYLIST_TEMP_TABLE = "PLAYLIST_TEMP";
+        db.execSQL("DROP VIEW + " PLAYLIST_VIEW_NAME + ";");
+        db.execSQL("DROP VIEW + " UPVOTES_VIEW_NAME + ";");
+        db.execSQL("DROP VIEW + " DOWNVOTES_VIEW_NAME + ";");
+        db.execSQL("DROP TABLE + " VOTES_TABLE_NAME + ";");
+        db.execSQL("DROP TABLE + " PLAYLIST_TABLE_NAME + ";");
+        db.execSQL(PLAYLIST_TABLE_CREATE);
+        db.execSQL(VOTES_TABLE_CREATE);
+        db.execSQL(UPVOTES_VIEW_CREATE);
+        db.execSQL(DOWNVOTES_VIEW_CREATE);
+        db.execSQL(PLAYLIST_VIEW_CREATE);
+      }
     }
   }
 
