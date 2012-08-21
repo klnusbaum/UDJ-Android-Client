@@ -26,7 +26,7 @@ If you have any questions or comments, feel free to post them to
 the [UDJ mailing list][mailing].
 
 [home]:https://www.udjplayer.com
-[server]:https://github.com/klnusbaum/UDJ
+[server]:https://github.com/klnusbaum/UDJ-Server
 [kln]:https://github.com/klnusbaum/
 [gpl]:https://github.com/klnusbaum/UDJ-Android-Client/blob/master/LICENSE
 [mailing]:mailto:udjdev@bazaarsolutions.com
