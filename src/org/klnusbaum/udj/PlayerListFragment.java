@@ -532,6 +532,9 @@ public class PlayerListFragment extends RefreshableListFragment implements
       case PLAYER_PASSWORD_ERROR:
         message = getString(R.string.bad_player_password);
         break;
+      case PLAYER_FULL_ERROR:
+        message = getString(R.string.player_full);
+        break;
       default:
         message = getString(R.string.unknown_error_message);
       }

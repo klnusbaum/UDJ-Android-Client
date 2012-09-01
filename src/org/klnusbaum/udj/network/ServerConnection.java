@@ -65,6 +65,7 @@ import org.json.JSONException;
 import org.klnusbaum.udj.Constants;
 import org.klnusbaum.udj.containers.LibraryEntry;
 import org.klnusbaum.udj.containers.Player;
+import org.klnusbaum.udj.exceptions.PlayerFullException;
 import org.klnusbaum.udj.exceptions.PlayerAuthException;
 import org.klnusbaum.udj.exceptions.PlayerInactiveException;
 import org.klnusbaum.udj.exceptions.APIVersionException;
@@ -107,6 +108,7 @@ public class ServerConnection{
   private static final String MISSING_RESOURCE_HEADER = "X-Udj-Missing-Resource";
   private static final String MISSING_RESOURCE_REASON_HEADER = "X-Udj-Missing-Reason";
   private static final String WWW_AUTH_HEADER = "WWW-Authenticate";
+  private static final String FORBIDDEN_REASON_HEADER = "X-Udj-Forbidden-Reason";
 
   private static final String PLAYER_PASSWORD_HEADER = "X-Udj-Player-Password";
 
@@ -418,7 +420,7 @@ public class ServerConnection{
 
   public static void joinPlayer(String playerId, String ticketHash)
     throws IOException, AuthenticationException, PlayerInactiveException, 
-    JSONException, ParseException, PlayerPasswordException
+    JSONException, ParseException, PlayerPasswordException, PlayerFullException
   {
     joinPlayer(playerId, "", ticketHash);
   }
@@ -426,7 +428,7 @@ public class ServerConnection{
 
   public static void joinPlayer(String playerId, String password, String ticketHash)
     throws IOException, AuthenticationException, PlayerInactiveException,
-    JSONException, ParseException, PlayerPasswordException
+    JSONException, ParseException, PlayerPasswordException, PlayerFullException
   {
     try{
       URI uri  = new URI(
@@ -451,6 +453,13 @@ public class ServerConnection{
         && resp.getFirstHeader(WWW_AUTH_HEADER).getValue().equals("player-password"))
       {
         throw new PlayerPasswordException();
+      }
+      if(
+        resp.getStatusLine().getStatusCode() == HttpStatus.SC_FORBIDDEN
+        && resp.containsHeader(FORBIDDEN_REASON_HEADER)
+        && resp.getFirstHeader(FORBIDDEN_REASON_HEADER).getValue().equals("player-full"))
+      {
+        throw new PlayerFullException();
       }
       basicResponseErrorCheck(resp, response);
     }

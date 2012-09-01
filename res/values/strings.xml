@@ -52,14 +52,14 @@
     <string name="song_added_notification_content">Tap to dismiss</string>
     <string name="song_add_failed_title">Adding Song(s) Failed</string>
     <string name="song_add_failed_content">Tap here to retry</string>
-    <string name="player_inactive_title">Player Inactive</string>
-    <string name="player_inactive_message">Player no longer available</string>
-    <string name="no_network_connection">No network connection available</string>
+    <string name="player_inactive_title">Player Offline</string>
+    <string name="player_inactive_message">Player is now offline.</string>
+    <string name="no_network_connection">No network connection available.</string>
     <string name="player_join_fail_title">Joining Player Failed</string>
     <string name="unknown_error_message">Unknown error. Please contact developers.</string>
     <string name="server_join_fail_message">We couldn\'t reach the player</string>
     <string name="auth_join_fail_message">Username and password didn\'t work</string>
-    <string name="player_inactive_join_fail_message">Player currently inactive </string>
+    <string name="player_inactive_join_fail_message">Player currently offline</string>
     <string name="no_network_join_fail_message">No internet connection</string>
     <string name="player_owner_label">Owner:</string>
     <string name="voting_up_message">Voting up</string>
@@ -104,6 +104,7 @@
   <string name="menu_refresh">Refresh</string>
   <string name="menu_search">Search</string>
   <string name="menu_share">Share</string>
+  <string name="player_full">Player is full. Contact owner.</string>
 
 
   <!-- Pull to Refresh -->

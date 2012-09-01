@@ -40,6 +40,7 @@ import org.klnusbaum.udj.Utils;
 import org.klnusbaum.udj.UDJPlayerProvider;
 import org.klnusbaum.udj.exceptions.PlayerInactiveException;
 import org.klnusbaum.udj.exceptions.PlayerPasswordException;
+import org.klnusbaum.udj.exceptions.PlayerFullException;
 
 
 /**
@@ -54,6 +55,7 @@ public class PlayerCommService extends IntentService{
     PLAYER_INACTIVE_ERROR,
     NO_NETWORK_ERROR,
     PLAYER_PASSWORD_ERROR,
+    PLAYER_FULL_ERROR,
     UNKNOWN_ERROR
   }
 
@@ -160,6 +162,11 @@ public class PlayerCommService extends IntentService{
       Log.e(TAG, "Player Password Exception");
       e.printStackTrace();
       doLoginFail(am, account, PlayerJoinError.PLAYER_PASSWORD_ERROR);
+    }
+    catch(PlayerFullException e){
+      Log.e(TAG, "Player Password Exception");
+      e.printStackTrace();
+      doLoginFail(am, account, PlayerJoinError.PLAYER_FULL_ERROR);
     }
   }
 
