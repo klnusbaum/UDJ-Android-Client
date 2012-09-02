@@ -38,6 +38,7 @@ import org.apache.http.ParseException;
 import org.klnusbaum.udj.containers.LibraryEntry;
 import org.klnusbaum.udj.exceptions.NoLongerInPlayerException;
 import org.klnusbaum.udj.exceptions.PlayerInactiveException;
+import org.klnusbaum.udj.exceptions.KickedException;
 
 public abstract class MusicSearchLoader 
   extends AsyncTaskLoader<MusicSearchLoader.MusicSearchResult>
@@ -49,7 +50,8 @@ public abstract class MusicSearchLoader
     NO_SEARCH_ERROR,
     SERVER_ERROR,
     AUTHENTICATION_ERROR,
-    NO_LONGER_IN_PLAYER_ERROR
+    NO_LONGER_IN_PLAYER_ERROR,
+    KICKED_ERROR
   };
   private static final String TAG = "MusicSearchLoader";
 
@@ -134,9 +136,13 @@ public abstract class MusicSearchLoader
     }
     catch(PlayerInactiveException e){
       return new MusicSearchResult(null, MusicSearchError.PLAYER_INACTIVE_ERROR);
-    } catch (NoLongerInPlayerException e) {
-        return new MusicSearchResult(null, MusicSearchError.NO_LONGER_IN_PLAYER_ERROR);
-	  }
+    }
+    catch (NoLongerInPlayerException e) {
+      return new MusicSearchResult(null, MusicSearchError.NO_LONGER_IN_PLAYER_ERROR);
+    }
+    catch (KickedException e){
+      return new MusicSearchResult(null, MusicSearchError.KICKED_ERROR);
+    }
   }
 
   @Override
@@ -146,5 +152,5 @@ public abstract class MusicSearchLoader
 
   protected abstract MusicSearchResult doSearch(String playerId, String authToken) throws
     JSONException, ParseException, IOException, AuthenticationException,
-    PlayerInactiveException, NoLongerInPlayerException;
+    PlayerInactiveException, NoLongerInPlayerException, KickedException;
 }

@@ -36,6 +36,7 @@ import org.apache.http.auth.AuthenticationException;
 import org.apache.http.ParseException;
 
 import org.klnusbaum.udj.exceptions.NoLongerInPlayerException;
+import org.klnusbaum.udj.exceptions.KickedException;
 import org.klnusbaum.udj.exceptions.PlayerInactiveException;
 import org.klnusbaum.udj.network.ServerConnection;
 
@@ -48,7 +49,8 @@ public class ArtistsLoader
     PLAYER_INACTIVE_ERROR,
     SERVER_ERROR,
     AUTHENTICATION_ERROR,
-    NO_LONGER_IN_PLAYER_ERROR
+    NO_LONGER_IN_PLAYER_ERROR,
+    KICKED_ERROR
   };
   private static final String TAG = "ArtistsLoader";
 
@@ -127,9 +129,14 @@ public class ArtistsLoader
     }
     catch(PlayerInactiveException e){
       return new ArtistsResult(null, ArtistsError.PLAYER_INACTIVE_ERROR);
-    } catch (NoLongerInPlayerException e) {
+    }
+    catch (NoLongerInPlayerException e) {
       return new ArtistsResult(null, ArtistsError.NO_LONGER_IN_PLAYER_ERROR);
     }
+    catch (KickedException e){
+      return new ArtistsResult(null, ArtistsError.KICKED_ERROR);
+    }
+
   }
 
   @Override
@@ -139,7 +146,7 @@ public class ArtistsLoader
 
   protected ArtistsResult getArtists(String playerId, String authToken) throws
     JSONException, ParseException, IOException, AuthenticationException,
-    PlayerInactiveException, NoLongerInPlayerException
+    PlayerInactiveException, NoLongerInPlayerException, KickedException
   {
     List<String> list =
         ServerConnection.getArtists(playerId, authToken);

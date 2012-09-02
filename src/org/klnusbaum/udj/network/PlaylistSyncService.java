@@ -49,6 +49,7 @@ import org.klnusbaum.udj.R;
 import org.klnusbaum.udj.exceptions.NoLongerInPlayerException;
 import org.klnusbaum.udj.exceptions.PlayerInactiveException;
 import org.klnusbaum.udj.exceptions.ConflictException;
+import org.klnusbaum.udj.exceptions.KickedException;
 import org.klnusbaum.udj.Utils;
 
 
@@ -179,6 +180,9 @@ public class PlaylistSyncService extends IntentService{
     catch (NoLongerInPlayerException e) {
       Utils.handleNoLongerInPlayer(this, account);
     }
+    catch(KickedException e){
+      Utils.handleKickedFromPlayer(this, account);
+    }
     //TODO This point of the app seems very dangerous as there are so many
     // exceptions that could occuer. Need to pay special attention to this.
 
@@ -234,6 +238,9 @@ public class PlaylistSyncService extends IntentService{
       Utils.handleInactivePlayer(this, account);
     } catch (NoLongerInPlayerException e) {
       Utils.handleNoLongerInPlayer(this, account);
+    }
+    catch(KickedException e){
+      Utils.handleKickedFromPlayer(this, account);
     }
   }
 
@@ -309,6 +316,9 @@ public class PlaylistSyncService extends IntentService{
       voteIntent.putExtra(Constants.LIB_ID_EXTRA, libId);
       startService(voteIntent);
     }
+    catch(KickedException e){
+      Utils.handleKickedFromPlayer(this, account);
+    }
 
 
   }
@@ -365,6 +375,9 @@ public class PlaylistSyncService extends IntentService{
     } catch (NoLongerInPlayerException e) {
       Utils.handleNoLongerInPlayer(this, account);
     }
+    catch(KickedException e){
+      Utils.handleKickedFromPlayer(this, account);
+    }
   }
 
   private void voteOnSong(Account account, String playerId, String libId, int voteWeight, boolean attemptReauth){
@@ -407,6 +420,9 @@ public class PlaylistSyncService extends IntentService{
       Utils.handleInactivePlayer(this, account);
     } catch (NoLongerInPlayerException e) {
       Utils.handleNoLongerInPlayer(this, account);
+    }
+    catch(KickedException e){
+      Utils.handleKickedFromPlayer(this, account);
     }
   }
 
@@ -466,6 +482,9 @@ public class PlaylistSyncService extends IntentService{
       Utils.handleNoLongerInPlayer(this, account);
       return;
     }
+    catch(KickedException e){
+      Utils.handleKickedFromPlayer(this, account);
+    }
   }
 
 
@@ -521,6 +540,9 @@ public class PlaylistSyncService extends IntentService{
     catch(NoLongerInPlayerException e){
       Utils.handleNoLongerInPlayer(this, account);
       return;
+    }
+    catch(KickedException e){
+      Utils.handleKickedFromPlayer(this, account);
     }
   }
 

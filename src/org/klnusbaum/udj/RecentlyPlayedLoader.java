@@ -34,6 +34,7 @@ import org.klnusbaum.udj.network.ServerConnection;
 import org.klnusbaum.udj.containers.LibraryEntry;
 import org.klnusbaum.udj.exceptions.NoLongerInPlayerException;
 import org.klnusbaum.udj.exceptions.PlayerInactiveException;
+import org.klnusbaum.udj.exceptions.KickedException;
 
 public class RecentlyPlayedLoader extends MusicSearchLoader{
 
@@ -44,7 +45,8 @@ public class RecentlyPlayedLoader extends MusicSearchLoader{
   @Override
   protected MusicSearchResult doSearch(String playerId, String authToken) throws
     JSONException, ParseException, IOException,
-    AuthenticationException, PlayerInactiveException, NoLongerInPlayerException
+    AuthenticationException, PlayerInactiveException, NoLongerInPlayerException,
+    KickedException
   {
     List<LibraryEntry> list =
         ServerConnection.getRecentlyPlayedLibEntries(40, playerId, authToken);

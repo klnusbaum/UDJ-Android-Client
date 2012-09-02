@@ -34,6 +34,7 @@ import org.klnusbaum.udj.network.ServerConnection;
 import org.klnusbaum.udj.containers.LibraryEntry;
 import org.klnusbaum.udj.exceptions.NoLongerInPlayerException;
 import org.klnusbaum.udj.exceptions.PlayerInactiveException;
+import org.klnusbaum.udj.exceptions.KickedException;
 
 public class RegularSearchLoader extends MusicSearchLoader{
 
@@ -49,7 +50,7 @@ public class RegularSearchLoader extends MusicSearchLoader{
   @Override
   protected MusicSearchResult doSearch(String playerId, String authToken) throws
     JSONException, ParseException, IOException, AuthenticationException, PlayerInactiveException,
-    NoLongerInPlayerException
+    NoLongerInPlayerException, KickedException
   {
     if(query != null && query != ""){
         List<LibraryEntry> list = 

@@ -109,6 +109,9 @@ public class ArtistsDisplayFragment extends ListFragment
     else if(data.error == ArtistsLoader.ArtistsError.NO_LONGER_IN_PLAYER_ERROR){
       Utils.handleNoLongerInPlayer(getActivity(), getAccount());
     }
+    else if(data.error == ArtistsLoader.ArtistsError.KICKED_ERROR){
+      Utils.handleKickedFromPlayer(getActivity(), getAccount());
+    }
 
     if(isResumed()){
       setListShown(true);

@@ -86,6 +86,9 @@ public abstract class SearchFragment extends RefreshableListFragment
     else if(data.getError() == MusicSearchLoader.MusicSearchError.NO_LONGER_IN_PLAYER_ERROR){
       Utils.handleNoLongerInPlayer(getActivity(), account);
     }
+    else if(data.getError() == MusicSearchLoader.MusicSearchError.KICKED_ERROR){
+      Utils.handleKickedFromPlayer(getActivity(), account);
+    }
 
     if(isResumed()){
       setListShown(true);

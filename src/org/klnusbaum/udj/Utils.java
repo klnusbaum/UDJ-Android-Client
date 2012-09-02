@@ -74,6 +74,15 @@ public class Utils{
     context.sendBroadcast(noLongerInPlayerBroadcast);
   }
 
+  public static void handleKickedFromPlayer(Context context, Account account){
+    Log.d(TAG, "Handling no longer in player exception");
+    AccountManager am = AccountManager.get(context);
+    am.setUserData(account, Constants.PLAYER_STATE_DATA,
+      String.valueOf(Constants.KICKED_FROM_PLAYER));
+    Intent kickedFromPlayerBroadcast = new Intent(Constants.KICKED_FROM_PLAYER_ACTION);
+    context.sendBroadcast(kickedFromPlayerBroadcast);
+  }
+
   public static void leavePlayer(AccountManager am, Account account){
     am.setUserData(account, Constants.LAST_PLAYER_ID_DATA, 
       String.valueOf(Constants.NO_PLAYER_ID));

@@ -104,8 +104,10 @@
   <string name="menu_search">Search</string>
   <string name="menu_share">Share</string>
   <string name="player_full">Player is full. Contact owner.</string>
-  <string name="no_longer_in_player_title">Left Player.</string>
+  <string name="no_longer_in_player_title">Left Player</string>
   <string name="no_longer_in_player_message">You have left the player.</string>
+  <string name="kicked_from_player_title">Kicked</string>
+  <string name="kicked_from_player_message">You were kicked out of the player.</string>
 
 
 

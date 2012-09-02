@@ -65,6 +65,7 @@ import org.json.JSONException;
 import org.klnusbaum.udj.Constants;
 import org.klnusbaum.udj.containers.LibraryEntry;
 import org.klnusbaum.udj.containers.Player;
+import org.klnusbaum.udj.exceptions.KickedException;
 import org.klnusbaum.udj.exceptions.PlayerFullException;
 import org.klnusbaum.udj.exceptions.NoLongerInPlayerException;
 import org.klnusbaum.udj.exceptions.PlayerInactiveException;
@@ -234,7 +235,18 @@ public class ServerConnection{
     }
 
   }
-  
+
+  private static void kickedFromPlayerCheck(HttpResponse resp)
+    throws KickedException
+  {
+    if(resp.getStatusLine().getStatusCode() == HttpStatus.SC_UNAUTHORIZED
+      && resp.containsHeader(WWW_AUTH_HEADER)
+      && resp.getFirstHeader(WWW_AUTH_HEADER).getValue().equals("kicked"))
+    {
+      throw new KickedException();
+    }
+  }
+
 
   public static HttpResponse doGet(URI uri, String ticketHash)
     throws IOException
@@ -257,7 +269,8 @@ public class ServerConnection{
   }
 
   public static String doPlayerRelatedGet(URI uri, String ticketHash)
-    throws AuthenticationException, IOException, PlayerInactiveException, NoLongerInPlayerException
+    throws AuthenticationException, IOException, PlayerInactiveException, NoLongerInPlayerException,
+    KickedException
   {
     final HttpResponse resp = doGet(uri, ticketHash);
     Log.d(TAG, "Doing player related get");
@@ -265,6 +278,7 @@ public class ServerConnection{
     Log.d(TAG, "Player related get response: \"" + response +"\"");
     playerInactiveErrorCheck(resp);
     noLongerInPlayerErrorCheck(resp);
+    kickedFromPlayerCheck(resp);
     basicResponseErrorCheck(resp, response);
     return response;
   }
@@ -308,7 +322,7 @@ public class ServerConnection{
   public static String doPlayerRelatedPut( 
     URI uri, String ticketHash, String payload)
     throws AuthenticationException, IOException, PlayerInactiveException, 
-    NoLongerInPlayerException, ConflictException
+    NoLongerInPlayerException, ConflictException, KickedException
   {
     final HttpResponse resp = doPut(uri, ticketHash, payload);
     final String response = EntityUtils.toString(resp.getEntity());
@@ -316,6 +330,7 @@ public class ServerConnection{
     Log.d(TAG, "Player status code: \"" + resp.getStatusLine().getStatusCode());
     playerInactiveErrorCheck(resp);
     noLongerInPlayerErrorCheck(resp);
+    kickedFromPlayerCheck(resp);
     basicResponseErrorCheck(resp, response);
     conflictErrorCheck(resp);
     return response;
@@ -351,13 +366,15 @@ public class ServerConnection{
 
   public static String doPlayerRelatedPost(
     URI uri, String authToken, String payload, boolean isJSON)
-    throws AuthenticationException, IOException, PlayerInactiveException, NoLongerInPlayerException
+    throws AuthenticationException, IOException, PlayerInactiveException, NoLongerInPlayerException,
+    KickedException
   {
     final HttpResponse resp = doPost(uri, authToken, payload, isJSON);
     final String response = EntityUtils.toString(resp.getEntity());
     Log.d(TAG, "Player post response: " + resp.getStatusLine().getStatusCode() +
         "\"" + response +"\"");
     playerInactiveErrorCheck(resp);
+    kickedFromPlayerCheck(resp);
     basicResponseErrorCheck(resp, response);
     noLongerInPlayerErrorCheck(resp);
     return response;
@@ -384,7 +401,8 @@ public class ServerConnection{
   }
 
   public static void doPlayerRelatedDelete(URI uri, String ticketHash)
-    throws IOException, AuthenticationException, PlayerInactiveException, NoLongerInPlayerException
+    throws IOException, AuthenticationException, PlayerInactiveException, NoLongerInPlayerException,
+    KickedException
   {
     final HttpResponse resp = doDelete(uri, ticketHash);
     final String response = EntityUtils.toString(resp.getEntity());
@@ -392,6 +410,7 @@ public class ServerConnection{
         "\"" + response +"\"");
     playerInactiveErrorCheck(resp);
     noLongerInPlayerErrorCheck(resp);
+    kickedFromPlayerCheck(resp);
     basicResponseErrorCheck(resp, response);
   }
 
@@ -487,7 +506,7 @@ public class ServerConnection{
   public static JSONObject getActivePlaylist(String playerId, 
     String authToken)
     throws JSONException, ParseException, IOException, AuthenticationException,
-    PlayerInactiveException, NoLongerInPlayerException
+    PlayerInactiveException, NoLongerInPlayerException, KickedException
   {
     try{
       URI uri = new URI(
@@ -506,7 +525,7 @@ public class ServerConnection{
   public static List<LibraryEntry> availableMusicQuery(
     String query, String playerId, String authToken)
     throws JSONException, ParseException, IOException, AuthenticationException,
-    PlayerInactiveException, NoLongerInPlayerException
+    PlayerInactiveException, NoLongerInPlayerException, KickedException
   {
     try{
       URI uri = new URI(
@@ -524,7 +543,7 @@ public class ServerConnection{
 
   public static List<String> getArtists(String playerId, String authToken)
     throws JSONException, ParseException, IOException, AuthenticationException,
-    PlayerInactiveException, NoLongerInPlayerException
+    PlayerInactiveException, NoLongerInPlayerException, KickedException
   {
     try{
       URI uri = new URI(
@@ -543,7 +562,7 @@ public class ServerConnection{
   public static List<LibraryEntry> getSongsByArtists(
     String artistQuery, String playerId, String authToken)
     throws JSONException, ParseException, IOException, AuthenticationException,
-    PlayerInactiveException, NoLongerInPlayerException
+    PlayerInactiveException, NoLongerInPlayerException, KickedException
   {
     try{
       URI uri = new URI(
@@ -562,7 +581,7 @@ public class ServerConnection{
 
   public static List<LibraryEntry> getRandomMusic(int max, String playerId, String authToken)
     throws JSONException, ParseException, IOException, AuthenticationException,
-    PlayerInactiveException, NoLongerInPlayerException
+    PlayerInactiveException, NoLongerInPlayerException, KickedException
   {
     try{
       URI uri = new URI(
@@ -580,7 +599,7 @@ public class ServerConnection{
 
   public static List<LibraryEntry> getRecentlyPlayedLibEntries(int max, String playerId, String authToken)
     throws JSONException, ParseException, IOException, AuthenticationException,
-    PlayerInactiveException, NoLongerInPlayerException
+    PlayerInactiveException, NoLongerInPlayerException, KickedException
   {
     try{
       URI uri = new URI(
@@ -601,7 +620,7 @@ public class ServerConnection{
   public static void addSongToActivePlaylist(
     String playerId, String libId, String authToken)
     throws JSONException, ParseException, IOException, AuthenticationException,
-    PlayerInactiveException, NoLongerInPlayerException, ConflictException
+    PlayerInactiveException, NoLongerInPlayerException, ConflictException, KickedException
   {
     try{
       URI uri = new URI(
@@ -617,7 +636,8 @@ public class ServerConnection{
   }
 
   public static void removeSongFromActivePlaylist(String playerId, String libId, String authToken)
-    throws IOException, AuthenticationException, PlayerInactiveException, NoLongerInPlayerException
+    throws IOException, AuthenticationException, PlayerInactiveException, NoLongerInPlayerException,
+    KickedException
   {
 
     try{
@@ -634,7 +654,8 @@ public class ServerConnection{
   }
 
   public static void setCurrentSong(String playerId, String libId, String authToken)
-    throws IOException, AuthenticationException, PlayerInactiveException, NoLongerInPlayerException
+    throws IOException, AuthenticationException, PlayerInactiveException, NoLongerInPlayerException,
+    KickedException
   {
     try{
       URI uri = new URI(
@@ -651,7 +672,8 @@ public class ServerConnection{
 
   public static void setPlaybackState(String playerId, int desiredPlaybackState,
       String authToken)
-    throws IOException, AuthenticationException, PlayerInactiveException, NoLongerInPlayerException
+    throws IOException, AuthenticationException, PlayerInactiveException, NoLongerInPlayerException,
+    KickedException
   {
     try{
       URI uri = new URI(
@@ -675,7 +697,8 @@ public class ServerConnection{
 
   public static void setPlayerVolume(String playerId, int desiredVolume,
       String authToken)
-    throws IOException, AuthenticationException, PlayerInactiveException, NoLongerInPlayerException
+    throws IOException, AuthenticationException, PlayerInactiveException, NoLongerInPlayerException,
+    KickedException
   {
     try{
       URI uri = new URI(
@@ -694,7 +717,8 @@ public class ServerConnection{
 
   public static void voteOnSong(
     String playerId, String libId, int voteType, String authToken)
-    throws IOException, AuthenticationException, PlayerInactiveException, NoLongerInPlayerException
+    throws IOException, AuthenticationException, PlayerInactiveException, NoLongerInPlayerException,
+    KickedException
   {
     String voteString = null;
     if(voteType == 1){
