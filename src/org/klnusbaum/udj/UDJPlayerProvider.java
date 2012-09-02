@@ -38,7 +38,7 @@ public class UDJPlayerProvider extends ContentProvider{
   /** Name of the database */
   private static final String DATABASE_NAME = "player.db";
   /** Database version number */
-  private static final int DATABASE_VERSION = 2;
+  private static final int DATABASE_VERSION = 3;
 
   /** URI for the playlist */
   public static final Uri PLAYLIST_URI = 
@@ -145,7 +145,7 @@ public class UDJPlayerProvider extends ContentProvider{
   
   private static final String PLAYLIST_VIEW_CREATE = 
     "CREATE VIEW " + PLAYLIST_VIEW_NAME + " AS SELECT " + PLAYLIST_TABLE_NAME + ".*, " +
-    UPVOTES_VIEW_NAME + "." + UPCOUNT_COLUMN + ", " + DOWNVOTES_VIEW_NAME + "." + DOWNCOUNT_COLUMN + " " +
+    UPVOTES_VIEW_NAME + "." + UPCOUNT_COLUMN + " AS " + UPCOUNT_COLUMN + ", " + DOWNVOTES_VIEW_NAME + "." + DOWNCOUNT_COLUMN + " AS " + DOWNCOUNT_COLUMN + " " +
     "FROM " + PLAYLIST_TABLE_NAME + " LEFT JOIN " + UPVOTES_VIEW_NAME + " ON " + 
     PLAYLIST_TABLE_NAME + "." + LIB_ID_COLUMN + "=" + UPVOTES_VIEW_NAME + "." + LIB_ID_COLUMN + " " +
     " LEFT JOIN " + DOWNVOTES_VIEW_NAME + " ON " + 
@@ -182,19 +182,16 @@ public class UDJPlayerProvider extends ContentProvider{
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion){
-      if(oldVersion == 1 && newVersion == 2){
-        final String PLAYLIST_TEMP_TABLE = "PLAYLIST_TEMP";
-        db.execSQL("DROP VIEW " + PLAYLIST_VIEW_NAME + ";");
-        db.execSQL("DROP VIEW " + UPVOTES_VIEW_NAME + ";");
-        db.execSQL("DROP VIEW " + DOWNVOTES_VIEW_NAME + ";");
-        db.execSQL("DROP TABLE " + VOTES_TABLE_NAME + ";");
-        db.execSQL("DROP TABLE " + PLAYLIST_TABLE_NAME + ";");
-        db.execSQL(PLAYLIST_TABLE_CREATE);
-        db.execSQL(VOTES_TABLE_CREATE);
-        db.execSQL(UPVOTES_VIEW_CREATE);
-        db.execSQL(DOWNVOTES_VIEW_CREATE);
-        db.execSQL(PLAYLIST_VIEW_CREATE);
-      }
+      db.execSQL("DROP VIEW " + PLAYLIST_VIEW_NAME + ";");
+      db.execSQL("DROP VIEW " + UPVOTES_VIEW_NAME + ";");
+      db.execSQL("DROP VIEW " + DOWNVOTES_VIEW_NAME + ";");
+      db.execSQL("DROP TABLE " + VOTES_TABLE_NAME + ";");
+      db.execSQL("DROP TABLE " + PLAYLIST_TABLE_NAME + ";");
+      db.execSQL(PLAYLIST_TABLE_CREATE);
+      db.execSQL(VOTES_TABLE_CREATE);
+      db.execSQL(UPVOTES_VIEW_CREATE);
+      db.execSQL(DOWNVOTES_VIEW_CREATE);
+      db.execSQL(PLAYLIST_VIEW_CREATE);
     }
   }
 
@@ -261,7 +258,7 @@ public class UDJPlayerProvider extends ContentProvider{
       }
       String query = "select " + PLAYLIST_VIEW_NAME + ".*, " + DID_VOTE_COLUMN + " from " + PLAYLIST_VIEW_NAME + 
       		" left join (select " + VOTE_WEIGHT_COLUMN + " as " + DID_VOTE_COLUMN +", " + VOTE_LIB_ID_COLUMN +
-          		" from " + VOTES_TABLE_NAME + " where " + VOTER_ID_COLUMN + "=" + userId + ") as " +
+          		" from " + VOTES_TABLE_NAME + " where " + VOTER_ID_COLUMN + "='" + userId + "') as " +
           		" user_votes on user_votes." + VOTE_LIB_ID_COLUMN + "=" + PLAYLIST_VIEW_NAME + "." + LIB_ID_COLUMN ;
       toReturn = dbOpenHelper.getReadableDatabase().rawQuery(query, null);
     }
