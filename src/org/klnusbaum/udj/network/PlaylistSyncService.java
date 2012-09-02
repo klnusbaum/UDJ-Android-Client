@@ -48,7 +48,6 @@ import org.klnusbaum.udj.UDJPlayerProvider;
 import org.klnusbaum.udj.R;
 import org.klnusbaum.udj.exceptions.NoLongerInPlayerException;
 import org.klnusbaum.udj.exceptions.PlayerInactiveException;
-import org.klnusbaum.udj.exceptions.ConflictException;
 import org.klnusbaum.udj.exceptions.KickedException;
 import org.klnusbaum.udj.Utils;
 
@@ -306,15 +305,6 @@ public class PlaylistSyncService extends IntentService{
     }
     catch (NoLongerInPlayerException e) {
       Utils.handleNoLongerInPlayer(this, account);
-    }
-    catch (ConflictException e){
-      Intent voteIntent = new Intent(Intent.ACTION_INSERT,
-        UDJPlayerProvider.VOTES_URI, this,
-        PlaylistSyncService.class);
-      voteIntent.putExtra(Constants.ACCOUNT_EXTRA, account);
-      voteIntent.putExtra(Constants.VOTE_WEIGHT_EXTRA, 1);
-      voteIntent.putExtra(Constants.LIB_ID_EXTRA, libId);
-      startService(voteIntent);
     }
     catch(KickedException e){
       Utils.handleKickedFromPlayer(this, account);

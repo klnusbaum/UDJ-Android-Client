@@ -71,7 +71,6 @@ import org.klnusbaum.udj.exceptions.NoLongerInPlayerException;
 import org.klnusbaum.udj.exceptions.PlayerInactiveException;
 import org.klnusbaum.udj.exceptions.APIVersionException;
 import org.klnusbaum.udj.exceptions.PlayerPasswordException;
-import org.klnusbaum.udj.exceptions.ConflictException;
 import org.klnusbaum.udj.exceptions.BannedException;
 
 
@@ -184,12 +183,6 @@ public class ServerConnection{
       return new AuthResult(
         authResponse.getString("ticket_hash"),
         authResponse.getString("user_id"));
-    }
-  }
-
-  private static void conflictErrorCheck(HttpResponse resp) throws ConflictException{
-    if(resp.getStatusLine().getStatusCode() == HttpStatus.SC_CONFLICT){
-      throw new ConflictException();
     }
   }
 
@@ -324,7 +317,7 @@ public class ServerConnection{
   public static String doPlayerRelatedPut( 
     URI uri, String ticketHash, String payload)
     throws AuthenticationException, IOException, PlayerInactiveException, 
-    NoLongerInPlayerException, ConflictException, KickedException
+    NoLongerInPlayerException, KickedException
   {
     final HttpResponse resp = doPut(uri, ticketHash, payload);
     final String response = EntityUtils.toString(resp.getEntity());
@@ -334,7 +327,6 @@ public class ServerConnection{
     noLongerInPlayerErrorCheck(resp);
     kickedFromPlayerCheck(resp);
     basicResponseErrorCheck(resp, response);
-    conflictErrorCheck(resp);
     return response;
   }
 
@@ -631,7 +623,7 @@ public class ServerConnection{
   public static void addSongToActivePlaylist(
     String playerId, String libId, String authToken)
     throws JSONException, ParseException, IOException, AuthenticationException,
-    PlayerInactiveException, NoLongerInPlayerException, ConflictException, KickedException
+    PlayerInactiveException, NoLongerInPlayerException, KickedException
   {
     try{
       URI uri = new URI(
