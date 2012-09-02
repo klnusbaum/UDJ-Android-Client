@@ -25,7 +25,7 @@ import android.os.Bundle;
 /**
  * An Activity which displays the results of a library search.
  */
-public class RandomSearchActivity extends PlayerInactivityListenerActivity{
+public class RandomSearchActivity extends PlayerExceptionListenerActivity{
 
   private RandomSearchFragment searchFrag;
 

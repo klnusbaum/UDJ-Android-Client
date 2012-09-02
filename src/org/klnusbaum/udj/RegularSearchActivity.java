@@ -28,7 +28,7 @@ import android.app.SearchManager;
 /**
  * An Activity which displays the results of a library search.
  */
-public class RegularSearchActivity extends PlayerInactivityListenerActivity{
+public class RegularSearchActivity extends PlayerExceptionListenerActivity{
 
   private static final String TAG = "MusicActivity";
   private RegularSearchFragment searchFrag;

@@ -46,7 +46,7 @@ import org.apache.http.ParseException;
 import org.klnusbaum.udj.Constants;
 import org.klnusbaum.udj.UDJPlayerProvider;
 import org.klnusbaum.udj.R;
-import org.klnusbaum.udj.exceptions.PlayerAuthException;
+import org.klnusbaum.udj.exceptions.NoLongerInPlayerException;
 import org.klnusbaum.udj.exceptions.PlayerInactiveException;
 import org.klnusbaum.udj.exceptions.ConflictException;
 import org.klnusbaum.udj.Utils;
@@ -176,9 +176,8 @@ public class PlaylistSyncService extends IntentService{
       Log.e(TAG, "Player Inactive exception when retreiving playlist");
       Utils.handleInactivePlayer(this, account);
     }
-    catch (PlayerAuthException e) {
-      //TODO REAUTH AND THEN TRY GETTING PLAYLIST AGAIN
-      e.printStackTrace();
+    catch (NoLongerInPlayerException e) {
+      Utils.handleNoLongerInPlayer(this, account);
     }
     //TODO This point of the app seems very dangerous as there are so many
     // exceptions that could occuer. Need to pay special attention to this.
@@ -233,9 +232,8 @@ public class PlaylistSyncService extends IntentService{
     catch(PlayerInactiveException e){
       Log.e(TAG, "Event over exceptoin when setting song");
       Utils.handleInactivePlayer(this, account);
-    } catch (PlayerAuthException e) {
-      //TODO REAUTH AND THEN TRY ADD AGAIN
-      e.printStackTrace();
+    } catch (NoLongerInPlayerException e) {
+      Utils.handleNoLongerInPlayer(this, account);
     }
   }
 
@@ -299,9 +297,8 @@ public class PlaylistSyncService extends IntentService{
       Log.e(TAG, "Event over exceptoin when retreiving playlist");
       Utils.handleInactivePlayer(this, account);
     }
-    catch (PlayerAuthException e) {
-      //TODO REAUTH AND THEN TRY ADD AGAIN
-      e.printStackTrace();
+    catch (NoLongerInPlayerException e) {
+      Utils.handleNoLongerInPlayer(this, account);
     }
     catch (ConflictException e){
       Intent voteIntent = new Intent(Intent.ACTION_INSERT,
@@ -365,9 +362,8 @@ public class PlaylistSyncService extends IntentService{
     catch(PlayerInactiveException e){
       Log.e(TAG, "Event over exceptoin when removing from playlist");
       Utils.handleInactivePlayer(this, account);
-    } catch (PlayerAuthException e) {
-      // TODO REAUTH AND THEN TRY AGAIN
-      e.printStackTrace();
+    } catch (NoLongerInPlayerException e) {
+      Utils.handleNoLongerInPlayer(this, account);
     }
   }
 
@@ -409,9 +405,8 @@ public class PlaylistSyncService extends IntentService{
     catch(PlayerInactiveException e){
       Log.e(TAG, "Event over exception when retreiving playlist");
       Utils.handleInactivePlayer(this, account);
-    } catch (PlayerAuthException e) {
-      // TODO REAUTH AND THEN TRY AGAIN
-      e.printStackTrace();
+    } catch (NoLongerInPlayerException e) {
+      Utils.handleNoLongerInPlayer(this, account);
     }
   }
 
@@ -467,9 +462,8 @@ public class PlaylistSyncService extends IntentService{
       Utils.handleInactivePlayer(this, account);
       return;
     }
-    catch(PlayerAuthException e){
-      Log.e(TAG, "PlayerAuth exception in set volume" );
-      //TODO do something here?
+    catch(NoLongerInPlayerException e){
+      Utils.handleNoLongerInPlayer(this, account);
       return;
     }
   }
@@ -524,9 +518,8 @@ public class PlaylistSyncService extends IntentService{
       Utils.handleInactivePlayer(this, account);
       return;
     }
-    catch(PlayerAuthException e){
-      Log.e(TAG, "PlayerAuth exception in set playback" );
-      //TODO do something here?
+    catch(NoLongerInPlayerException e){
+      Utils.handleNoLongerInPlayer(this, account);
       return;
     }
   }

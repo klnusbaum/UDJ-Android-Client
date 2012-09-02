@@ -56,7 +56,7 @@ import com.actionbarsherlock.view.MenuItem;
 /**
  * The main activity display class.
  */
-public class PlayerActivity extends PlayerInactivityListenerActivity {
+public class PlayerActivity extends PlayerExceptionListenerActivity {
   private static final String TAG = "PlayerActivity";
   private static final String VOLUME_FRAGMENT_TAG = "VolumeFragment";
 

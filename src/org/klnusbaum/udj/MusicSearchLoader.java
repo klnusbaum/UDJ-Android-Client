@@ -36,7 +36,7 @@ import org.apache.http.auth.AuthenticationException;
 import org.apache.http.ParseException;
 
 import org.klnusbaum.udj.containers.LibraryEntry;
-import org.klnusbaum.udj.exceptions.PlayerAuthException;
+import org.klnusbaum.udj.exceptions.NoLongerInPlayerException;
 import org.klnusbaum.udj.exceptions.PlayerInactiveException;
 
 public abstract class MusicSearchLoader 
@@ -49,7 +49,7 @@ public abstract class MusicSearchLoader
     NO_SEARCH_ERROR,
     SERVER_ERROR,
     AUTHENTICATION_ERROR,
-    PLAYER_AUTH_ERROR
+    NO_LONGER_IN_PLAYER_ERROR
   };
   private static final String TAG = "MusicSearchLoader";
 
@@ -134,9 +134,9 @@ public abstract class MusicSearchLoader
     }
     catch(PlayerInactiveException e){
       return new MusicSearchResult(null, MusicSearchError.PLAYER_INACTIVE_ERROR);
-    } catch (PlayerAuthException e) {
-        return new MusicSearchResult(null, MusicSearchError.PLAYER_AUTH_ERROR);
-	}
+    } catch (NoLongerInPlayerException e) {
+        return new MusicSearchResult(null, MusicSearchError.NO_LONGER_IN_PLAYER_ERROR);
+	  }
   }
 
   @Override
@@ -146,5 +146,5 @@ public abstract class MusicSearchLoader
 
   protected abstract MusicSearchResult doSearch(String playerId, String authToken) throws
     JSONException, ParseException, IOException, AuthenticationException,
-    PlayerInactiveException, PlayerAuthException;
+    PlayerInactiveException, NoLongerInPlayerException;
 }

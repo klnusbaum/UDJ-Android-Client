@@ -32,7 +32,7 @@ import org.apache.http.ParseException;
 
 import org.klnusbaum.udj.network.ServerConnection;
 import org.klnusbaum.udj.containers.LibraryEntry;
-import org.klnusbaum.udj.exceptions.PlayerAuthException;
+import org.klnusbaum.udj.exceptions.NoLongerInPlayerException;
 import org.klnusbaum.udj.exceptions.PlayerInactiveException;
 
 public class RandomSearchLoader extends MusicSearchLoader{
@@ -45,7 +45,7 @@ public class RandomSearchLoader extends MusicSearchLoader{
   @Override
   protected MusicSearchResult doSearch(String playerId, String authToken) throws
     JSONException, ParseException, IOException,
-    AuthenticationException, PlayerInactiveException, PlayerAuthException
+    AuthenticationException, PlayerInactiveException, NoLongerInPlayerException
   {
     List<LibraryEntry> list =
         ServerConnection.getRandomMusic(40, playerId, authToken);

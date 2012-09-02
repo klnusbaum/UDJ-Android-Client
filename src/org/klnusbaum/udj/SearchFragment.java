@@ -83,8 +83,8 @@ public abstract class SearchFragment extends RefreshableListFragment
     {
       Utils.handleInactivePlayer(getActivity(), account);
     }
-    else if(data.getError() == MusicSearchLoader.MusicSearchError.PLAYER_AUTH_ERROR){
-    	//TODO REAUTH AND TRY AGAIN
+    else if(data.getError() == MusicSearchLoader.MusicSearchError.NO_LONGER_IN_PLAYER_ERROR){
+      Utils.handleNoLongerInPlayer(getActivity(), account);
     }
 
     if(isResumed()){

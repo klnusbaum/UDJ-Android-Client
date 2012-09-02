@@ -64,7 +64,16 @@ public class Utils{
     Intent playerInactiveBroadcast = new Intent(Constants.PLAYER_INACTIVE_ACTION);
     context.sendBroadcast(playerInactiveBroadcast);
   }
-  
+
+  public static void handleNoLongerInPlayer(Context context, Account account){
+    Log.d(TAG, "Handling no longer in player exception");
+    AccountManager am = AccountManager.get(context);
+    am.setUserData(account, Constants.PLAYER_STATE_DATA,
+      String.valueOf(Constants.NO_LONGER_IN_PLAYER));
+    Intent noLongerInPlayerBroadcast = new Intent(Constants.NO_LONGER_IN_PLAYER_ACTION);
+    context.sendBroadcast(noLongerInPlayerBroadcast);
+  }
+
   public static void leavePlayer(AccountManager am, Account account){
     am.setUserData(account, Constants.LAST_PLAYER_ID_DATA, 
       String.valueOf(Constants.NO_PLAYER_ID));

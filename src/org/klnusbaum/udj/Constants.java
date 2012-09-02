@@ -44,6 +44,7 @@ public class Constants{
   public static final int IN_PLAYER = 2;
   public static final int LEAVING_PLAYER = 3;
   public static final int PLAYER_ENDED = 4;
+  public static final int NO_LONGER_IN_PLAYER = 5;
 
   public static final String PLAYBACK_STATE_DATA = "org.klnusbaum.udj.PlaybackState";
   public static final int PLAYING_STATE = 0;
@@ -74,6 +75,8 @@ public class Constants{
   public static final String LEFT_PLAYER_ACTION = "org.klnusbaum.udj.LeftPlayer";
   public static final String PLAYER_INACTIVE_ACTION = 
     "org.klnusbaum.udj.PlayerInactive";
+  public static final String NO_LONGER_IN_PLAYER_ACTION = 
+    "org.klnusbaum.udj.NoLongerInPlayer";
   public static final String JOINED_PLAYER_ACTION = 
     "org.klnusbaum.udj.JoinedPlayer";
   public static final String PLAYER_JOIN_FAILED_ACTION = 

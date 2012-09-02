@@ -106,8 +106,8 @@ public class ArtistsDisplayFragment extends ListFragment
     else if(data.error == ArtistsLoader.ArtistsError.PLAYER_INACTIVE_ERROR){
       Utils.handleInactivePlayer(getActivity(), getAccount());
     }
-    else if(data.error == ArtistsLoader.ArtistsError.PLAYER_AUTH_ERROR){
-      //TODO REAUTH AND TRY AGAIN
+    else if(data.error == ArtistsLoader.ArtistsError.NO_LONGER_IN_PLAYER_ERROR){
+      Utils.handleNoLongerInPlayer(getActivity(), getAccount());
     }
 
     if(isResumed()){
