@@ -72,6 +72,8 @@ import org.klnusbaum.udj.exceptions.PlayerInactiveException;
 import org.klnusbaum.udj.exceptions.APIVersionException;
 import org.klnusbaum.udj.exceptions.PlayerPasswordException;
 import org.klnusbaum.udj.exceptions.ConflictException;
+import org.klnusbaum.udj.exceptions.BannedException;
+
 
 
 /**
@@ -455,7 +457,8 @@ public class ServerConnection{
 
   public static void joinPlayer(String playerId, String ticketHash)
     throws IOException, AuthenticationException, PlayerInactiveException, 
-    JSONException, ParseException, PlayerPasswordException, PlayerFullException
+    JSONException, ParseException, PlayerPasswordException, PlayerFullException,
+    BannedException
   {
     joinPlayer(playerId, "", ticketHash);
   }
@@ -463,7 +466,8 @@ public class ServerConnection{
 
   public static void joinPlayer(String playerId, String password, String ticketHash)
     throws IOException, AuthenticationException, PlayerInactiveException,
-    JSONException, ParseException, PlayerPasswordException, PlayerFullException
+    JSONException, ParseException, PlayerPasswordException, PlayerFullException,
+    BannedException
   {
     try{
       URI uri  = new URI(
@@ -495,6 +499,13 @@ public class ServerConnection{
         && resp.getFirstHeader(FORBIDDEN_REASON_HEADER).getValue().equals("player-full"))
       {
         throw new PlayerFullException();
+      }
+      if(
+        resp.getStatusLine().getStatusCode() == HttpStatus.SC_FORBIDDEN
+        && resp.containsHeader(FORBIDDEN_REASON_HEADER)
+        && resp.getFirstHeader(FORBIDDEN_REASON_HEADER).getValue().equals("banned"))
+      {
+        throw new BannedException();
       }
       basicResponseErrorCheck(resp, response);
     }

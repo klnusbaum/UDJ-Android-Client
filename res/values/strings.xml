@@ -108,6 +108,7 @@
   <string name="no_longer_in_player_message">You have left the player.</string>
   <string name="kicked_from_player_title">Kicked</string>
   <string name="kicked_from_player_message">You were kicked out of the player.</string>
+  <string name="banned_from_player">You\'ve been banned from that player.</string>
 
 
 

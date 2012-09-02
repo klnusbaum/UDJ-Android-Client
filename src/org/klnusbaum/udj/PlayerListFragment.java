@@ -535,6 +535,9 @@ public class PlayerListFragment extends RefreshableListFragment implements
       case PLAYER_FULL_ERROR:
         message = getString(R.string.player_full);
         break;
+      case BANNED_ERROR:
+        message = getString(R.string.banned_from_player);
+        break;
       default:
         message = getString(R.string.unknown_error_message);
       }

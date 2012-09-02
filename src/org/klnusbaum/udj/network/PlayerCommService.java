@@ -41,6 +41,7 @@ import org.klnusbaum.udj.UDJPlayerProvider;
 import org.klnusbaum.udj.exceptions.PlayerInactiveException;
 import org.klnusbaum.udj.exceptions.PlayerPasswordException;
 import org.klnusbaum.udj.exceptions.PlayerFullException;
+import org.klnusbaum.udj.exceptions.BannedException;
 
 
 /**
@@ -56,6 +57,7 @@ public class PlayerCommService extends IntentService{
     NO_NETWORK_ERROR,
     PLAYER_PASSWORD_ERROR,
     PLAYER_FULL_ERROR,
+    BANNED_ERROR,
     UNKNOWN_ERROR
   }
 
@@ -167,6 +169,11 @@ public class PlayerCommService extends IntentService{
       Log.e(TAG, "Player Password Exception");
       e.printStackTrace();
       doLoginFail(am, account, PlayerJoinError.PLAYER_FULL_ERROR);
+    }
+    catch(BannedException e){
+      Log.e(TAG, "Player Password Exception");
+      e.printStackTrace();
+      doLoginFail(am, account, PlayerJoinError.BANNED_ERROR);
     }
   }
 
