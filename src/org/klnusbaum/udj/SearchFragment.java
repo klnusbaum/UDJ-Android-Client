@@ -34,6 +34,7 @@ public abstract class SearchFragment extends RefreshableListFragment
   private MusicSearchAdapter searchAdapter;
   private Account account;
 
+
   @Override
   public void onActivityCreated(Bundle savedInstanceState){
     super.onActivityCreated(savedInstanceState);
@@ -45,6 +46,8 @@ public abstract class SearchFragment extends RefreshableListFragment
     setListAdapter(searchAdapter);
     setListShown(false);
   }
+
+  
 
   @Override
   public void onResume(){
@@ -75,7 +78,8 @@ public abstract class SearchFragment extends RefreshableListFragment
       searchAdapter = new MusicSearchAdapter(
         getActivity(),
         data.getResults(),
-        account);
+        account,
+        linksArtistNames());
       setListAdapter(searchAdapter);
     }
     else if(data.getError() ==
@@ -102,7 +106,9 @@ public abstract class SearchFragment extends RefreshableListFragment
     setListAdapter(null);
   }
 
-  protected abstract Loader<MusicSearchLoader.MusicSearchResult> getLoader(Account account);
+  public abstract Loader<MusicSearchLoader.MusicSearchResult> getLoader(Account account);
+
+  public abstract boolean linksArtistNames();
 
 
 }

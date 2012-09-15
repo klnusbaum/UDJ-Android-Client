@@ -29,4 +29,8 @@ public class ArtistSearchFragment extends SearchFragment{
     String artistQuery = getActivity().getIntent().getStringExtra(SearchManager.QUERY);
     return new ArtistSearchLoader(getActivity(), artistQuery, account);
   }
+
+  public boolean linksArtistNames(){
+    return false;
+  }
 }

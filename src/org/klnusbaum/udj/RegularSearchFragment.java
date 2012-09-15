@@ -40,4 +40,8 @@ public class RegularSearchFragment extends SearchFragment{
     String searchQuery = getActivity().getIntent().getStringExtra(SearchManager.QUERY);
     return new RegularSearchLoader(getActivity(), searchQuery, account);
   }
+
+  public boolean linksArtistNames(){
+    return true;
+  }
 }

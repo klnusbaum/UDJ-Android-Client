@@ -27,4 +27,8 @@ public class RandomSearchFragment extends SearchFragment{
   public Loader<MusicSearchLoader.MusicSearchResult> getLoader(Account account){
     return new RandomSearchLoader(getActivity(), account);
   }
+
+  public boolean linksArtistNames(){
+    return true;
+  }
 }
