@@ -78,8 +78,7 @@ public abstract class SearchFragment extends RefreshableListFragment
       searchAdapter = new MusicSearchAdapter(
         getActivity(),
         data.getResults(),
-        account,
-        linksArtistNames());
+        account);
       setListAdapter(searchAdapter);
     }
     else if(data.getError() ==
@@ -107,8 +106,5 @@ public abstract class SearchFragment extends RefreshableListFragment
   }
 
   public abstract Loader<MusicSearchLoader.MusicSearchResult> getLoader(Account account);
-
-  public abstract boolean linksArtistNames();
-
 
 }

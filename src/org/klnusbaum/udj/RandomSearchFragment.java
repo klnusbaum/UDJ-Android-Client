@@ -28,7 +28,4 @@ public class RandomSearchFragment extends SearchFragment{
     return new RandomSearchLoader(getActivity(), account);
   }
 
-  public boolean linksArtistNames(){
-    return true;
-  }
 }

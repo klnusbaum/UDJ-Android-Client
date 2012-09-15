@@ -50,6 +50,7 @@
     gravity="left"
     android:layout_toLeftOf="@+id/lib_add_button"
     android:layout_alignParentLeft="true"
+    android:textColor="@color/artist_link"
   />
 
   <ImageButton

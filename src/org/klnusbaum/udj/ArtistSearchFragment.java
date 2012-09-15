@@ -30,7 +30,4 @@ public class ArtistSearchFragment extends SearchFragment{
     return new ArtistSearchLoader(getActivity(), artistQuery, account);
   }
 
-  public boolean linksArtistNames(){
-    return false;
-  }
 }

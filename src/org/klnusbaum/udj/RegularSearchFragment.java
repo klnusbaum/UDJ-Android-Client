@@ -41,7 +41,4 @@ public class RegularSearchFragment extends SearchFragment{
     return new RegularSearchLoader(getActivity(), searchQuery, account);
   }
 
-  public boolean linksArtistNames(){
-    return true;
-  }
 }

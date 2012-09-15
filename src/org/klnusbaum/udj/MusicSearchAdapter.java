@@ -43,14 +43,12 @@ public class MusicSearchAdapter implements ListAdapter{
   private List<LibraryEntry> entries;
   private Context context;
   private Account account;
-  private boolean linkArtistNames;
   public static final int LIB_ENTRY_VIEW_TYPE = 0;
 
   public MusicSearchAdapter(Context context, Account account){
     this.entries = null;
     this.context = context;
     this.account = account;
-    this.linkArtistNames = true;
   }
 
   public MusicSearchAdapter(
@@ -62,22 +60,7 @@ public class MusicSearchAdapter implements ListAdapter{
     this.entries = entries;
     this.context = context;
     this.account = account;
-    this.linkArtistNames = true;
   }
-
-  public MusicSearchAdapter(
-    Context context,
-    List<LibraryEntry> entries,
-    Account account,
-    boolean linkArtistNames
-  )
-  {
-    this.entries = entries;
-    this.context = context;
-    this.account = account;
-    this.linkArtistNames = linkArtistNames;
-  }
-
 
   public boolean areAllItemsEnabled(){
     return true;
@@ -137,22 +120,16 @@ public class MusicSearchAdapter implements ListAdapter{
       (ImageButton)toReturn.findViewById(R.id.lib_add_button);
     songView.setText(libEntry.getTitle());
     final String artistContent = context.getString(R.string.by) + " " + libEntry.getArtist();
-    if(linkArtistNames){
-      artistView.setText(Html.fromHtml("<u>" + artistContent + "</u>"));
-      artistView.setTextColor(Color.rgb(51,181,229));
-      artistView.setOnClickListener(new View.OnClickListener(){
-        public void onClick(View v){
-          final String artist = libEntry.getArtist();
-          Intent artistIntent = new Intent(Intent.ACTION_SEARCH);
-          artistIntent.setClass(context, ArtistSearchActivity.class);
-          artistIntent.putExtra(SearchManager.QUERY, artist);
-          context.startActivity(artistIntent);
-        }
-      });
-    }
-    else{
-      artistView.setText(artistContent);
-    }
+    artistView.setText(Html.fromHtml("<u>" + artistContent + "</u>"));
+    artistView.setOnClickListener(new View.OnClickListener(){
+      public void onClick(View v){
+        final String artist = libEntry.getArtist();
+        Intent artistIntent = new Intent(Intent.ACTION_SEARCH);
+        artistIntent.setClass(context, ArtistSearchActivity.class);
+        artistIntent.putExtra(SearchManager.QUERY, artist);
+        context.startActivity(artistIntent);
+      }
+    });
 
 
 

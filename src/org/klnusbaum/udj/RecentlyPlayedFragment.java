@@ -28,8 +28,5 @@ public class RecentlyPlayedFragment extends SearchFragment{
     return new RecentlyPlayedLoader(getActivity(), account);
   }
 
-  public boolean linksArtistNames(){
-    return true;
-  }
 }
 
