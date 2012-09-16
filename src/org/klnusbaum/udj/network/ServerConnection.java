@@ -506,8 +506,7 @@ public class ServerConnection{
     }
   }
 
-  public static JSONObject getActivePlaylist(String playerId, 
-    String authToken)
+  public static JSONObject getActivePlaylist(String playerId, String authToken)
     throws JSONException, ParseException, IOException, AuthenticationException,
     PlayerInactiveException, NoLongerInPlayerException, KickedException
   {

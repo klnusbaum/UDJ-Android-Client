@@ -80,63 +80,49 @@
   </RelativeLayout>
 
   <RelativeLayout
-    android:id="@id/downvote_stuff"
+    android:id="@+id/nowplaying_stuff"
     android:layout_height="wrap_content"
     android:layout_width="wrap_content"
-    android:layout_toLeftOf="@+id/upvote_stuff"
+    android:layout_toRightOf="@id/playlistSongName"
+    android:layout_alignParentRight="true"
     android:layout_weight="1"
+    android:paddingRight="3dp"
+    android:paddingTop="4dp"
   >
-    <ImageButton
-      android:id="@+id/downvote_button"
+    <ImageView
+      android:id="@+id/nowplaying_icon"
       android:layout_height="wrap_content"
       android:layout_width="wrap_content"
       android:minHeight="40dp"
       android:minWidth="40dp"
-      android:src="@drawable/downarrow"
-      android:layout_centerHorizontal="true"
+      android:src="@drawable/ic_nowplaying"
       android:layout_weight="1"
     />
+
     <TextView
-      android:id="@+id/downcount"
+      android:id="@+id/nowplaying_downcount"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:textAppearance="?android:attr/textAppearanceSmall"
       android:lines="1"
       android:textColor="#CC0000"
-      android:layout_below="@id/downvote_button"
-      android:layout_centerHorizontal="true"
       android:layout_weight="1"
-    />
-  </RelativeLayout>
-
-  <RelativeLayout
-    android:id="@id/upvote_stuff"
-    android:layout_height="wrap_content"
-    android:layout_width="wrap_content"
-    android:layout_alignParentRight="true"
-    android:layout_weight="1"
-  >
-    <ImageButton
-      android:id="@+id/upvote_button"
-      android:layout_height="wrap_content"
-      android:layout_width="wrap_content"
-      android:minHeight="40dp"
-      android:minWidth="40dp"
-      android:src="@drawable/uparrow"
-      android:layout_centerHorizontal="true"
-      android:layout_weight="1"
+      android:layout_gravity="left"
+      android:layout_alignLeft="@id/nowplaying_icon"
+      android:layout_below="@id/nowplaying_icon"
     />
 
     <TextView
-      android:id="@+id/upcount"
+      android:id="@+id/nowplaying_upcount"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:textAppearance="?android:attr/textAppearanceSmall"
       android:lines="1"
       android:textColor="#669900"
-      android:layout_centerHorizontal="true"
-      android:layout_below="@id/upvote_button"
+      android:layout_below="@id/nowplaying_icon"
       android:layout_weight="1"
+      android:layout_alignRight="@id/nowplaying_icon"
     />
   </RelativeLayout>
+
 </RelativeLayout>

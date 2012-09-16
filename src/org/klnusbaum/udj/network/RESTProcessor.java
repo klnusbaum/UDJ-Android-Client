@@ -41,11 +41,47 @@ public class RESTProcessor{
 
   public static final String TAG = "RESTProcessor";
 
-  public static void setActivePlaylist(
+  private static void checkVolume(AccountManager am, Account account, int volume){
+    if(Utils.getPlayerVolume(am, account) != volume){
+      am.setUserData(account, Constants.PLAYER_VOLUME_DATA, String.valueOf(volume));
+      Intent playerVolumeChangedBroadcast = new Intent(Constants.BROADCAST_VOLUME_CHANGED);
+      playerVolumeChangedBroadcast.putExtra(Constants.PLAYER_VOLUME_EXTRA, volume);
+      sendBroadcast(playerVolumeChangedBroadcast);
+    }
+  }
+
+  private static void checkPlaybackState(AccountManager am, Account account, String playbackState){
+    int plState = Constants.PLAYING_STATE;
+    if(playbackState.equals("playing")){
+      plState = Constants.PLAYING_STATE;
+    }
+    else if(playbackState.equals("paused")){
+      plState = Constants.PAUSED_STATE;
+    }
+    if(Utils.getPlaybackState(am, account) != plState){
+      am.setUserData(account, Constants.PLAYBACK_STATE_DATA, String.valueOf(plState));
+      Intent playbackStateChangedBroadcast = new Intent(Constants.BROADCAST_PLAYBACK_CHANGED);
+      playbackStateChangedBroadcast.putExtra(Constants.PLAYBACK_STATE_EXTRA, plState);
+      sendBroadcast(playbackStateChangedBroadcast);
+    }
+  }
+
+  public static List<ActivePlaylistEntry> processActivePlaylist(
     JSONObject activePlaylist,
+    AccountManager am,
+    Account account,
     Context context)
     throws RemoteException, OperationApplicationException, JSONException
   {
+    checkPlaybackState(am, account, activePlaylist.getString("state"));
+    checkVolume(am, account, activePlaylist.getInt("volume"));
+    ActivePlaylistEntry currentSong = ActivePlaylistEntry.valueOf(activePlaylist.getJSONObject("current_song"));
+    currentSong.isCurrentSong = true;
+    List<ActivePlaylistEntry> playlist = ActivePlaylistEntry.fromJSONArray(
+      activePlaylist.getJSONArray("active_playlist"));
+    playlist.add(0, currentSong);
+    return playlist;
+    /*
     final ContentResolver resolver = context.getContentResolver();
     ArrayList<ContentProviderOperation> batchOps = new ArrayList<ContentProviderOperation>();
     JSONArray playlistEntries = activePlaylist.getJSONArray("active_playlist");
@@ -74,8 +110,10 @@ public class RESTProcessor{
     }
     resolver.notifyChange(UDJPlayerProvider.PLAYLIST_URI, null);
     resolver.notifyChange(UDJPlayerProvider.VOTES_URI, null);
+    */
   }
 
+/*
   private static void clearPlaylistAndVotesTable(ContentResolver cr) {
     cr.delete(UDJPlayerProvider.PLAYLIST_URI, null, null);
     cr.delete(UDJPlayerProvider.VOTES_URI, null, null);
@@ -122,5 +160,6 @@ public class RESTProcessor{
     }
     return toReturn;
   }
+  */
 
 }

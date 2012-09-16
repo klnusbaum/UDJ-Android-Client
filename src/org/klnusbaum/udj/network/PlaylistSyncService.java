@@ -88,11 +88,11 @@ public class PlaylistSyncService extends IntentService{
         int voteWeight = intent.getIntExtra(Constants.VOTE_WEIGHT_EXTRA,0); 
         voteOnSong(account, playerId, libId, voteWeight, true);
       }
-      updateActivePlaylist(account, playerId, true); 
+      //updateActivePlaylist(account, playerId, true); 
     }
-    else if(intent.getAction().equals(Intent.ACTION_VIEW)){
+    /*else if(intent.getAction().equals(Intent.ACTION_VIEW)){
       updateActivePlaylist(account, playerId, true); 
-    }
+    }*/
     else if(intent.getAction().equals(Intent.ACTION_DELETE)){
       Log.d(TAG, "Handling delete");
       if(intent.getData().equals(UDJPlayerProvider.PLAYLIST_URI)){
@@ -101,25 +101,25 @@ public class PlaylistSyncService extends IntentService{
         String libId = intent.getStringExtra(Constants.LIB_ID_EXTRA);
         removeSongFromPlaylist(account, playerId, libId, true, intent);
       }
-      updateActivePlaylist(account, playerId, true);
+      //updateActivePlaylist(account, playerId, true);
     }
     else if(intent.getAction().equals(Constants.ACTION_SET_CURRENT_SONG)){
       Log.d(TAG, "Handling setting current song");
       String libId = intent.getStringExtra(Constants.LIB_ID_EXTRA);
       setCurrentSong(account, playerId, libId, true, intent);
-      updateActivePlaylist(account, playerId, true);
+      //updateActivePlaylist(account, playerId, true);
     }
     else if(intent.getAction().equals(Constants.ACTION_SET_PLAYBACK)){
       setPlaybackState(intent, account, playerId, true);
-      updateActivePlaylist(account, playerId, true);
+      //updateActivePlaylist(account, playerId, true);
     }
     else if(intent.getAction().equals(Constants.ACTION_SET_VOLUME)){
       setPlayerVolume(intent, account, playerId, true);
-      updateActivePlaylist(account, playerId, true);
+      //updateActivePlaylist(account, playerId, true);
     }
   }
 
-  private void updateActivePlaylist(
+/*  private void updateActivePlaylist(
     Account account, String playerId, boolean attemptReauth)
   {
     Log.d(TAG, "updating active playlist");
@@ -142,9 +142,7 @@ public class PlaylistSyncService extends IntentService{
     try{
       JSONObject activePlaylist =
         ServerConnection.getActivePlaylist(playerId, authToken);
-      checkPlaybackState(am, account, activePlaylist.getString("state"));
-      checkVolume(am, account, activePlaylist.getInt("volume"));
-      RESTProcessor.setActivePlaylist(activePlaylist, this);
+      RESTProcessor.setActivePlaylist(activePlaylist, am, account, this);
     }
     catch(JSONException e){
       Log.e(TAG, "JSON exception when retreiving playist");
@@ -186,6 +184,7 @@ public class PlaylistSyncService extends IntentService{
     // exceptions that could occuer. Need to pay special attention to this.
 
   }
+  */
 
   private void setCurrentSong(
     Account account,
@@ -606,30 +605,7 @@ public class PlaylistSyncService extends IntentService{
     nm.notify(notificationId, notification);
   }
 
-  private void checkPlaybackState(AccountManager am, Account account, String playbackState){
-    int plState = Constants.PLAYING_STATE;
-    if(playbackState.equals("playing")){
-      plState = Constants.PLAYING_STATE;
-    }
-    else if(playbackState.equals("paused")){
-      plState = Constants.PAUSED_STATE;
-    }
-    if(Utils.getPlaybackState(am, account) != plState){
-      am.setUserData(account, Constants.PLAYBACK_STATE_DATA, String.valueOf(plState));
-      Intent playbackStateChangedBroadcast = new Intent(Constants.BROADCAST_PLAYBACK_CHANGED);
-      playbackStateChangedBroadcast.putExtra(Constants.PLAYBACK_STATE_EXTRA, plState);
-      sendBroadcast(playbackStateChangedBroadcast);
-    }
-  }
 
-  private void checkVolume(AccountManager am, Account account, int volume){
-    if(Utils.getPlayerVolume(am, account) != volume){
-      am.setUserData(account, Constants.PLAYER_VOLUME_DATA, String.valueOf(volume));
-      Intent playerVolumeChangedBroadcast = new Intent(Constants.BROADCAST_VOLUME_CHANGED);
-      playerVolumeChangedBroadcast.putExtra(Constants.PLAYER_VOLUME_EXTRA, volume);
-      sendBroadcast(playerVolumeChangedBroadcast);
-    }
-  }
 
 
 
