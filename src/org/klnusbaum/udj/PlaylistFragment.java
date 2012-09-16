@@ -20,17 +20,20 @@ package org.klnusbaum.udj;
 
 import org.klnusbaum.udj.PullToRefresh.RefreshableListFragment;
 import org.klnusbaum.udj.network.PlaylistSyncService;
+import org.klnusbaum.udj.containers.ActivePlaylistEntry;
+import org.klnusbaum.udj.containers.User;
 
+import android.widget.BaseAdapter;
 import android.widget.ImageButton;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
+//import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
-import android.support.v4.content.CursorLoader;
+//import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.CursorAdapter;
 import android.util.Log;
@@ -46,6 +49,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+
+import java.util.List;
 
 /**
  * Class used for displaying the contents of the Playlist.
@@ -97,8 +102,8 @@ public class PlaylistFragment extends RefreshableListFragment implements
   }
 
   @Override
-  public void onVisible(){
-    super.onVisible();
+  public void onResume(){
+    super.onResume();
     updatePlaylist();
   }
 
@@ -115,7 +120,7 @@ public class PlaylistFragment extends RefreshableListFragment implements
     MenuInflater inflater = getActivity().getMenuInflater();
 
     if(Utils.isCurrentPlayerOwner(am, account)){
-      setupOwnerContext(playlistEntry.isCurrentlyPlaying, menu, inflater);
+      setupOwnerContext(playlistEntry.isCurrentSong, menu, inflater);
     }
     else{
       setupRegularContext(menu, inflater);
@@ -176,14 +181,14 @@ public class PlaylistFragment extends RefreshableListFragment implements
 
   private void setCurrentSong(int position){
     ActivePlaylistEntry toSet = (ActivePlaylistEntry) playlistAdapter.getItem(position);
-    Log.d(TAG, "Setting song with id " + toSet.song.getID());
+    Log.d(TAG, "Setting song with id " + toSet.song.getLibId());
     Intent setSongIntent = new Intent(
       Constants.ACTION_SET_CURRENT_SONG,
       UDJPlayerProvider.PLAYLIST_URI,
       getActivity(),
       PlaylistSyncService.class);
     setSongIntent.putExtra(Constants.ACCOUNT_EXTRA, account);
-    setSongIntent.putExtra(Constants.LIB_ID_EXTRA, toSet.song.getID());
+    setSongIntent.putExtra(Constants.LIB_ID_EXTRA, toSet.song.getLibId());
     getActivity().startService(setSongIntent);
     Toast toast = Toast.makeText(getActivity(),
         getString(R.string.setting_song), Toast.LENGTH_SHORT);
@@ -192,14 +197,14 @@ public class PlaylistFragment extends RefreshableListFragment implements
 
   private void removeSong(int position) {
     ActivePlaylistEntry toRemove = (ActivePlaylistEntry) playlistAdapter.getItem(position);
-    Log.d(TAG, "Removing song with id " + toRemove.song.getID());
+    Log.d(TAG, "Removing song with id " + toRemove.song.getLibId());
     Intent removeSongIntent = new Intent(
       Intent.ACTION_DELETE,
       UDJPlayerProvider.PLAYLIST_URI,
       getActivity(),
       PlaylistSyncService.class);
     removeSongIntent.putExtra(Constants.ACCOUNT_EXTRA, account);
-    removeSongIntent.putExtra(Constants.LIB_ID_EXTRA, toRemove.song.getID());
+    removeSongIntent.putExtra(Constants.LIB_ID_EXTRA, toRemove.song.getLibId());
     getActivity().startService(removeSongIntent);
     Toast toast = Toast.makeText(getActivity(),
         getString(R.string.removing_song), Toast.LENGTH_SHORT);
@@ -279,7 +284,7 @@ public class PlaylistFragment extends RefreshableListFragment implements
 
     public Object getItem(int position){
       if(playlist != null){
-        return playlist.get(position)
+        return playlist.get(position);
       }
       return null;
     }
@@ -305,21 +310,20 @@ public class PlaylistFragment extends RefreshableListFragment implements
 
     public void updatePlaylist(List<ActivePlaylistEntry> newPlaylist){
       this.playlist = newPlaylist;
-      notifyDataSetInvalidated();
+      notifyDataSetChanged();
     }
-
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-      ActivePlaylistEntry currentEntry = playlist.get(position);
+      ActivePlaylistEntry currentEntry = (ActivePlaylistEntry)getItem(position);
       final String libId = currentEntry.song.getLibId();
-      View toReturn;
+      View view;
       switch(getItemViewType(position)){
         case CURRENT_SONG_VIEW_TYPE:
-          toReturn = getCurrentSongView(convertView, parent);
+          view = getCurrentSongView(convertView, parent);
           break;
         default:
-          toReturn = getRegularSongView(currentEntry, convertView, parent);
+          view = getRegularSongView(currentEntry, convertView, parent);
       }
 
       final TextView songName = (TextView) view.findViewById(R.id.playlistSongName);
@@ -331,7 +335,8 @@ public class PlaylistFragment extends RefreshableListFragment implements
 
       final TextView addByUser = (TextView) view.findViewById(R.id.playlistAddedBy);
       if (currentEntry.adder.equals(me)) {
-        addByUser.setText(context.getString(R.string.added_by) + " " + context.getString(R.string.you));
+        addByUser.setText(context.getString(R.string.added_by) 
+            + " " + context.getString(R.string.you));
       }
       else{
         addByUser.setText(context.getString(R.string.added_by) + " " + currentEntry.adder.username);
@@ -342,14 +347,14 @@ public class PlaylistFragment extends RefreshableListFragment implements
       upCount.setText(currentEntry.upvoters.size());
       downCount.setText(currentEntry.downvoters.size());
 
-      toReturn.setOnLongClickListener(new View.OnLongClickListener(){
+      view.setOnLongClickListener(new View.OnLongClickListener(){
         public boolean onLongClick(View v){
           plFrag.getListView().showContextMenuForChild(v);
           return true;
         }
       });
 
-      return toReturn;
+      return view;
 
     }
 
@@ -373,6 +378,8 @@ public class PlaylistFragment extends RefreshableListFragment implements
               .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
          view = inflater.inflate(R.layout.playlist_list_item, null);
       }
+      final String libId = currentEntry.song.getLibId();
+      final String title = currentEntry.song.getTitle();
       final ImageButton upButton = (ImageButton)view.findViewById(R.id.upvote_button);
       final ImageButton downButton = (ImageButton)view.findViewById(R.id.downvote_button);
       final Toast upVoteToast = Toast.makeText(context,

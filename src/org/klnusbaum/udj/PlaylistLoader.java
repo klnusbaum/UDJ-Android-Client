@@ -1,13 +1,3 @@
-package org.klnusbaum.udj;
-
-import android.support.v4.content.AsyncTaskLoader;
-
-import org.klnusbaum.udj.network.ServerConnection;
-import org.klnusbaum.udj.containers.ActivePlaylistEntry;
-import org.klnusbaum.udj.exceptions.KickedException;
-import org.klnusbaum.udj.exceptions.NoLongerInPlayerException;
-import org.klnusbaum.udj.exceptions.PlayerInactiveException;
-
 /**
  * Copyright 2011 Kurtis L. Nusbaum
  * 
@@ -27,14 +17,42 @@ import org.klnusbaum.udj.exceptions.PlayerInactiveException;
  * along with UDJ.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+package org.klnusbaum.udj;
+
+import android.support.v4.content.AsyncTaskLoader;
+import android.util.Log;
+import android.accounts.OperationCanceledException;
+import android.accounts.AuthenticatorException;
+import android.accounts.AccountManager;
+import android.accounts.Account;
+import android.content.Context;
+
+import org.klnusbaum.udj.network.ServerConnection;
+import org.klnusbaum.udj.network.RESTProcessor;
+import org.klnusbaum.udj.containers.ActivePlaylistEntry;
+import org.klnusbaum.udj.exceptions.KickedException;
+import org.klnusbaum.udj.exceptions.NoLongerInPlayerException;
+import org.klnusbaum.udj.exceptions.PlayerInactiveException;
+
+import org.json.JSONObject;
+import org.json.JSONException;
+
+import org.apache.http.ParseException;
+import org.apache.http.auth.AuthenticationException;
+
+import java.io.IOException;
+import java.util.List;
+
+
 public class PlaylistLoader extends AsyncTaskLoader<PlaylistLoader.PlaylistResult>{
-   public enum PlaylistLoadError{
-     NO_ERROR,
-     PLAYER_INACTIVE_ERROR,
-     SERVER_ERROR,
-     AUTHENTICATION_ERROR,
-     NO_LONGER_IN_PLAYER_ERROR,
-     KICKED_ERROR
+  private static final String TAG = "PlaylistLoader";
+  public enum PlaylistLoadError{
+    NO_ERROR,
+      PLAYER_INACTIVE_ERROR,
+      SERVER_ERROR,
+      AUTHENTICATION_ERROR,
+      NO_LONGER_IN_PLAYER_ERROR,
+      KICKED_ERROR
   }
 
   public static class PlaylistResult{
@@ -73,22 +91,20 @@ public class PlaylistLoader extends AsyncTaskLoader<PlaylistLoader.PlaylistResul
     }
     catch(IOException e){
       //TODO this might actually be an auth error
-      return new PlaylistResult(null, 
-        PlaylistLoadError.AUTHENTICATION_ERROR);
+      return new PlaylistResult(null, PlaylistLoadError.AUTHENTICATION_ERROR);
     }
     catch(AuthenticatorException e){
-      return new PlaylistLResult(null, 
-        PlaylistLoadError.AUTHENTICATION_ERROR);
+      return new PlaylistResult(null, PlaylistLoadError.AUTHENTICATION_ERROR);
     }
     catch(OperationCanceledException e){
-      return new PlaylistLResult(null, 
-        PlaylistLoadError.AUTHENTICATION_ERROR);
+      return new PlaylistResult(null, PlaylistLoadError.AUTHENTICATION_ERROR);
     }
 
     try{
       String playerId = am.getUserData(account, Constants.LAST_PLAYER_ID_DATA);
       JSONObject serverResult = ServerConnection.getActivePlaylist(playerId, authToken);
       List<ActivePlaylistEntry> toReturn = RESTProcessor.processActivePlaylist(serverResult, am, account, context);
+      return new PlaylistResult(toReturn);
     }
     catch(JSONException e){
       return new PlaylistResult(null, PlaylistLoadError.SERVER_ERROR);
@@ -103,7 +119,7 @@ public class PlaylistLoader extends AsyncTaskLoader<PlaylistLoader.PlaylistResul
       if(attemptReauth){
         Log.d(TAG, "soft auth failure");
         am.invalidateAuthToken(Constants.ACCOUNT_TYPE, authToken);
-        return attemptSearch(false);
+        return attemptLoad(false);
       }
       else{
         Log.d(TAG, "hard auth failure");

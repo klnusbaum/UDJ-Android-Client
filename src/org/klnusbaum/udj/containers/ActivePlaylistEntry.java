@@ -22,6 +22,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONException;
 
+import java.util.List;
 import java.util.ArrayList;
 
 /**
@@ -54,12 +55,14 @@ public class ActivePlaylistEntry{
     this.isCurrentSong = false;
   }
 
-  public static ActivePlaylistEntry valueOf(JSONObject jObj){
+  public static ActivePlaylistEntry valueOf(JSONObject jObj)
+    throws JSONException
+  {
     return new ActivePlaylistEntry(
       LibraryEntry.valueOf(jObj.getJSONObject(SONG_PARAM)),
       User.fromJSONArray(jObj.getJSONArray(UPVOTERS_PARAM)),
       User.fromJSONArray(jObj.getJSONArray(DOWNVOTERS_PARAM)),
-      User.fromJSONArray(jObj.getJSONObject(ADDER_PARAM)));
+      User.valueOf(jObj.getJSONObject(ADDER_PARAM)));
   }
 
   public static List<ActivePlaylistEntry> fromJSONArray(JSONArray array)

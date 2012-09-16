@@ -23,14 +23,18 @@ import java.util.ArrayList;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.ContentResolver;
-import android.content.ContentProviderOperation;
-import android.content.OperationApplicationException;
+//import android.content.ContentResolver;
+//import android.content.ContentProviderOperation;
+//import android.content.OperationApplicationException;
 import android.util.Log;
-import android.os.RemoteException;
+//import android.os.RemoteException;
+import android.accounts.Account;
+import android.accounts.AccountManager;
 
 import org.klnusbaum.udj.Constants;
-import org.klnusbaum.udj.UDJPlayerProvider;
+//import org.klnusbaum.udj.UDJPlayerProvider;
+import org.klnusbaum.udj.containers.ActivePlaylistEntry;
+import org.klnusbaum.udj.Utils;
 
 import org.json.JSONObject;
 import org.json.JSONArray;
@@ -41,16 +45,16 @@ public class RESTProcessor{
 
   public static final String TAG = "RESTProcessor";
 
-  private static void checkVolume(AccountManager am, Account account, int volume){
+  private static void checkVolume(Context context, AccountManager am, Account account, int volume){
     if(Utils.getPlayerVolume(am, account) != volume){
       am.setUserData(account, Constants.PLAYER_VOLUME_DATA, String.valueOf(volume));
       Intent playerVolumeChangedBroadcast = new Intent(Constants.BROADCAST_VOLUME_CHANGED);
       playerVolumeChangedBroadcast.putExtra(Constants.PLAYER_VOLUME_EXTRA, volume);
-      sendBroadcast(playerVolumeChangedBroadcast);
+      context.sendBroadcast(playerVolumeChangedBroadcast);
     }
   }
 
-  private static void checkPlaybackState(AccountManager am, Account account, String playbackState){
+  private static void checkPlaybackState(Context context, AccountManager am, Account account, String playbackState){
     int plState = Constants.PLAYING_STATE;
     if(playbackState.equals("playing")){
       plState = Constants.PLAYING_STATE;
@@ -62,7 +66,7 @@ public class RESTProcessor{
       am.setUserData(account, Constants.PLAYBACK_STATE_DATA, String.valueOf(plState));
       Intent playbackStateChangedBroadcast = new Intent(Constants.BROADCAST_PLAYBACK_CHANGED);
       playbackStateChangedBroadcast.putExtra(Constants.PLAYBACK_STATE_EXTRA, plState);
-      sendBroadcast(playbackStateChangedBroadcast);
+      context.sendBroadcast(playbackStateChangedBroadcast);
     }
   }
 
@@ -71,10 +75,10 @@ public class RESTProcessor{
     AccountManager am,
     Account account,
     Context context)
-    throws RemoteException, OperationApplicationException, JSONException
+    throws JSONException
   {
-    checkPlaybackState(am, account, activePlaylist.getString("state"));
-    checkVolume(am, account, activePlaylist.getInt("volume"));
+    checkPlaybackState(context, am, account, activePlaylist.getString("state"));
+    checkVolume(context, am, account, activePlaylist.getInt("volume"));
     ActivePlaylistEntry currentSong = ActivePlaylistEntry.valueOf(activePlaylist.getJSONObject("current_song"));
     currentSong.isCurrentSong = true;
     List<ActivePlaylistEntry> playlist = ActivePlaylistEntry.fromJSONArray(

@@ -22,6 +22,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONException;
 
+import java.util.List;
 import java.util.ArrayList;
 
 public class User{
@@ -53,7 +54,7 @@ public class User{
     return ID==((User)o).ID;
   }
 
-  public static LibraryEntry valueOf(JSONObject jObj)
+  public static User valueOf(JSONObject jObj)
     throws JSONException
   {
     return new User(
