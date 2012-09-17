@@ -36,6 +36,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import java.util.List;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class PlaylistAdapter extends BaseAdapter{
   private static final String PLAYLIST_ADAPTER_TAG = "PlaylistAdapter";
@@ -47,6 +49,8 @@ public class PlaylistAdapter extends BaseAdapter{
   private final PlaylistFragment plFrag;
   private Account account;
   private User me;
+  private ConcurrentMap<String, Long> idMap;
+  private long currentAvailableMapId;
 
   public PlaylistAdapter(
     Context context,
@@ -62,7 +66,16 @@ public class PlaylistAdapter extends BaseAdapter{
     this.plFrag = plFrag;
     this.account = account;
     this.me = new User(userId);
+    this.currentAvailableMapId = 0;
+    idMap = new ConcurrentHashMap<String, Long>();
+    if(playlist != null){
+      for(ActivePlaylistEntry ae: playlist){
+        idMap.put(ae.song.getLibId(), currentAvailableMapId);
+        currentAvailableMapId++;
+      }
+    }
   }
+
 
   public int getCount(){
     if(playlist != null){
@@ -79,7 +92,7 @@ public class PlaylistAdapter extends BaseAdapter{
   }
 
   public long getItemId(int position){
-    return position;
+    return idMap.get(playlist.get(position).song.getLibId());
   }
 
   public int getViewTypeCount(){
@@ -97,14 +110,37 @@ public class PlaylistAdapter extends BaseAdapter{
     return REGULAR_SONG_VIEW_TYPE;
   }
 
-  public void updatePlaylist(List<ActivePlaylistEntry> newPlaylist){
+  public synchronized void updatePlaylist(List<ActivePlaylistEntry> newPlaylist){
+    for(ActivePlaylistEntry ae: newPlaylist){
+      if (!idMap.keySet().contains(ae.song.getLibId())){
+        idMap.put(ae.song.getLibId(), currentAvailableMapId);
+        currentAvailableMapId++;
+      }
+    }
     this.playlist = newPlaylist;
+    /**
+     * This algorithm is n*m complexity, might be able to do better...
+     */
+    for(String s: idMap.keySet()){
+      if(!playlistContainsId(s)){
+        idMap.remove(s);
+      }
+    }
     notifyDataSetChanged();
+  }
+
+  private synchronized boolean playlistContainsId(String s){
+    for(ActivePlaylistEntry ae: playlist){
+      if(s.equals(ae.song.getLibId())){
+        return true;
+      }
+    }
+    return false;
   }
 
   @Override
   public View getView(int position, View convertView, ViewGroup parent) {
-    ActivePlaylistEntry currentEntry = (ActivePlaylistEntry)getItem(position);
+    final ActivePlaylistEntry currentEntry = (ActivePlaylistEntry)getItem(position);
     final String libId = currentEntry.song.getLibId();
     View view;
     switch(getItemViewType(position)){
@@ -159,7 +195,7 @@ public class PlaylistAdapter extends BaseAdapter{
 
 
   private View getRegularSongView(
-    ActivePlaylistEntry currentEntry, View convertView, ViewGroup parent)
+    final ActivePlaylistEntry currentEntry, View convertView, ViewGroup parent)
   {
     View view = convertView;
     if(convertView == null){
@@ -171,26 +207,28 @@ public class PlaylistAdapter extends BaseAdapter{
     final String title = currentEntry.song.getTitle();
     final ImageButton upButton = (ImageButton)view.findViewById(R.id.upvote_button);
     final ImageButton downButton = (ImageButton)view.findViewById(R.id.downvote_button);
-    final Toast upVoteToast = Toast.makeText(context,
-          context.getString(R.string.voting_up_message)+ " " + title, Toast.LENGTH_SHORT);
+
     upButton.setOnClickListener(new View.OnClickListener(){
       public void onClick(View v){
-        v.setEnabled(false);
+        currentEntry.downvoters.remove(me);
+        currentEntry.upvoters.add(me);
         upVoteSong(libId);
-        upVoteToast.show();
+        notifyDataSetChanged();
       }
     });
 
-    final Toast downVoteToast = Toast.makeText(context,
-          context.getString(R.string.voting_down_message)+ " " + title, Toast.LENGTH_SHORT);
     downButton.setOnClickListener(new View.OnClickListener(){
       public void onClick(View v){
-        v.setEnabled(false);
+        currentEntry.downvoters.add(me);
+        currentEntry.upvoters.remove(me);
         downVoteSong(libId);
-        downVoteToast.show();
+        notifyDataSetChanged();
       }
     });
 
+    /* Reset buttons from previous view*/
+    upButton.setEnabled(true);
+    downButton.setEnabled(true);
     if(currentEntry.upvoters.contains(me)){
       upButton.setEnabled(false);
     }

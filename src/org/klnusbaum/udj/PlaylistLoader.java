@@ -107,7 +107,6 @@ public class PlaylistLoader extends AsyncTaskLoader<PlaylistLoader.PlaylistResul
       return new PlaylistResult(toReturn);
     }
     catch(JSONException e){
-      Log.d(TAG, "Playlist json exception: " + e.getMessage());
       return new PlaylistResult(null, PlaylistLoadError.SERVER_ERROR);
     }
     catch(ParseException e){

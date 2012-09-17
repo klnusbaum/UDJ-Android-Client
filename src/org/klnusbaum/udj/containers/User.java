@@ -51,7 +51,7 @@ public class User{
   }
 
   public boolean equals(Object o){
-    return ID==((User)o).ID;
+    return ID.equals(((User)o).ID);
   }
 
   public static User valueOf(JSONObject jObj)

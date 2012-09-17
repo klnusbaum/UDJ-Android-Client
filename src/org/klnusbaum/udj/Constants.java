@@ -103,4 +103,6 @@ public class Constants{
   public static final String ACTION_SET_VOLUME = "org.klnusbaum.udj.SetVolume";
   public static final String BROADCAST_VOLUME_CHANGED = "org.klnusbaum.udj.VolumeChanged";
 
+  public static final String BROADCAST_VOTE_COMPLETED = "org.klnusbaum.udj.VoteCompleted";
+
 }

@@ -387,6 +387,8 @@ public class PlaylistSyncService extends IntentService{
 
     try{
       ServerConnection.voteOnSong(playerId, libId, voteWeight, authToken);
+      Intent voteCompleteBroadcast = new Intent(Constants.BROADCAST_VOTE_COMPLETED);
+      this.sendBroadcast(voteCompleteBroadcast);
     }
     catch(ParseException e){
       Log.e(TAG, "Parse exception when retreiving playist");

@@ -1,18 +1,18 @@
 /**
  * Copyright 2011 Kurtis L. Nusbaum
- * 
+ *
  * This file is part of UDJ.
- * 
+ *
  * UDJ is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * UDJ is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with UDJ.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -22,6 +22,8 @@ import org.klnusbaum.udj.PullToRefresh.RefreshableListFragment;
 import org.klnusbaum.udj.network.PlaylistSyncService;
 import org.klnusbaum.udj.containers.ActivePlaylistEntry;
 
+import android.content.IntentFilter;
+import android.content.BroadcastReceiver;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.content.Context;
@@ -47,6 +49,13 @@ import android.widget.Toast;
 public class PlaylistFragment extends RefreshableListFragment implements
     LoaderManager.LoaderCallbacks<PlaylistLoader.PlaylistResult>
 {
+
+  private BroadcastReceiver playlistUpdateReceiver = new BroadcastReceiver(){
+    public void onReceive(Context context, Intent intent){
+      updatePlaylist();
+    }
+  };
+
   private static final String TAG = "PlaylistFragment";
   private static final int PLAYLIST_LOADER_ID = 0;
   private Account account;
@@ -83,6 +92,19 @@ public class PlaylistFragment extends RefreshableListFragment implements
   public void onResume(){
     super.onResume();
     getLoaderManager().initLoader(PLAYLIST_LOADER_ID, null, this);
+    getActivity().registerReceiver(
+      playlistUpdateReceiver,
+      new IntentFilter(Constants.BROADCAST_VOTE_COMPLETED));
+  }
+
+  public void onPause(){
+    super.onPause();
+    try{
+      getActivity().unregisterReceiver(playlistUpdateReceiver);
+    }
+    catch(IllegalArgumentException e){
+
+    }
   }
 
 
@@ -203,11 +225,11 @@ public class PlaylistFragment extends RefreshableListFragment implements
     Loader<PlaylistLoader.PlaylistResult> loader,
     PlaylistLoader.PlaylistResult data)
   {
-    Log.d(TAG, "A loader returned");
     if (loader.getId() == PLAYLIST_LOADER_ID) {
       refreshDone();
       Log.d(TAG, "Playlist loader returned");
       if(data.error == PlaylistLoader.PlaylistLoadError.NO_ERROR){
+        Log.d(TAG, "Setting new playlist data");
         playlistAdapter.updatePlaylist(data.playlistEntries);
       }
       if (isResumed()) {
