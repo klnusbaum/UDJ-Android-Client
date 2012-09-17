@@ -21,42 +21,32 @@ package org.klnusbaum.udj;
 import org.klnusbaum.udj.PullToRefresh.RefreshableListFragment;
 import org.klnusbaum.udj.network.PlaylistSyncService;
 import org.klnusbaum.udj.containers.ActivePlaylistEntry;
-import org.klnusbaum.udj.containers.User;
 
-import android.widget.BaseAdapter;
-import android.widget.ImageButton;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.content.Context;
 import android.content.Intent;
-//import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
-//import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.CursorAdapter;
 import android.util.Log;
 import android.view.ContextMenu;
-import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ImageView;
-import android.widget.RelativeLayout;
 
-import java.util.List;
 
 /**
  * Class used for displaying the contents of the Playlist.
  */
 public class PlaylistFragment extends RefreshableListFragment implements
-    LoaderManager.LoaderCallbacks<PlaylistLoader.PlaylistResult> {
+    LoaderManager.LoaderCallbacks<PlaylistLoader.PlaylistResult>
+{
   private static final String TAG = "PlaylistFragment";
   private static final int PLAYLIST_LOADER_ID = 0;
   private Account account;
@@ -82,29 +72,17 @@ public class PlaylistFragment extends RefreshableListFragment implements
     playlistAdapter = new PlaylistAdapter(getActivity(), null, this, userId, account);
     setListAdapter(playlistAdapter);
     setListShown(false);
-    //getLoaderManager().initLoader(PLAYLIST_LOADER_ID, null, this);
     registerForContextMenu(getListView());
   }
 
   public void updatePlaylist() {
     getLoaderManager().restartLoader(PLAYLIST_LOADER_ID, null, this);
-    /*
-    int playerState = Utils.getPlayerState(getActivity(), account);
-    // TODO hanle if no player
-    if (playerState == Constants.IN_PLAYER) {
-      Intent getPlaylist = new Intent(Intent.ACTION_VIEW,
-          UDJPlayerProvider.PLAYLIST_URI, getActivity(),
-          PlaylistSyncService.class);
-      getPlaylist.putExtra(Constants.ACCOUNT_EXTRA, account);
-      getActivity().startService(getPlaylist);
-    }
-    */
   }
 
   @Override
   public void onResume(){
     super.onResume();
-    updatePlaylist();
+    getLoaderManager().initLoader(PLAYLIST_LOADER_ID, null, this);
   }
 
 
@@ -214,13 +192,7 @@ public class PlaylistFragment extends RefreshableListFragment implements
   public Loader<PlaylistLoader.PlaylistResult> onCreateLoader(int id, Bundle args) {
     switch (id) {
     case PLAYLIST_LOADER_ID:
-      /*
-      Uri playlistUri = UDJPlayerProvider.PLAYLIST_URI.buildUpon().appendQueryParameter(
-          UDJPlayerProvider.USER_ID_PARAM, userId).build();
-      return new CursorLoader(getActivity(),
-          playlistUri, null, null, null,
-          UDJPlayerProvider.PRIORITY_COLUMN);
-      */
+      Log.d(TAG, "Starting playlist loader");
       return new PlaylistLoader(getActivity(), account);
     default:
       return null;
@@ -231,8 +203,10 @@ public class PlaylistFragment extends RefreshableListFragment implements
     Loader<PlaylistLoader.PlaylistResult> loader,
     PlaylistLoader.PlaylistResult data)
   {
+    Log.d(TAG, "A loader returned");
     if (loader.getId() == PLAYLIST_LOADER_ID) {
       refreshDone();
+      Log.d(TAG, "Playlist loader returned");
       if(data.error == PlaylistLoader.PlaylistLoadError.NO_ERROR){
         playlistAdapter.updatePlaylist(data.playlistEntries);
       }
@@ -245,290 +219,6 @@ public class PlaylistFragment extends RefreshableListFragment implements
   }
 
   public void onLoaderReset(Loader<PlaylistLoader.PlaylistResult> loader) {
-
-  }
-
-  private static class PlaylistAdapter extends BaseAdapter{
-    private static final String PLAYLIST_ADAPTER_TAG = "PlaylistAdapter";
-    private static final int CURRENT_SONG_VIEW_TYPE = 0;
-    private static final int REGULAR_SONG_VIEW_TYPE = 1;
-    private List<ActivePlaylistEntry> playlist;
-    private String userId;
-    private Context context;
-    private final PlaylistFragment plFrag;
-    private Account account;
-    private User me;
-
-    public PlaylistAdapter(
-      Context context,
-      List<ActivePlaylistEntry> playlist,
-      PlaylistFragment plFrag,
-      String userId,
-      Account account)
-    {
-      super();
-      this.playlist = playlist;
-      this.userId = userId;
-      this.context = context;
-      this.plFrag = plFrag;
-      this.account = account;
-      this.me = new User(userId);
-    }
-
-    public int getCount(){
-      if(playlist != null){
-        return playlist.size();
-      }
-      return 0;
-    }
-
-    public Object getItem(int position){
-      if(playlist != null){
-        return playlist.get(position);
-      }
-      return null;
-    }
-
-    public long getItemId(int position){
-      return position;
-    }
-
-    public int getViewTypeCount(){
-      return 2;
-    }
-
-    public boolean isEmpty(){
-      return playlist == null || playlist.isEmpty();
-    }
-
-    public int getItemViewType(int position){
-      if(playlist != null && playlist.get(position).isCurrentSong){
-        return CURRENT_SONG_VIEW_TYPE;
-      }
-      return REGULAR_SONG_VIEW_TYPE;
-    }
-
-    public void updatePlaylist(List<ActivePlaylistEntry> newPlaylist){
-      this.playlist = newPlaylist;
-      notifyDataSetChanged();
-    }
-
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-      ActivePlaylistEntry currentEntry = (ActivePlaylistEntry)getItem(position);
-      final String libId = currentEntry.song.getLibId();
-      View view;
-      switch(getItemViewType(position)){
-        case CURRENT_SONG_VIEW_TYPE:
-          view = getCurrentSongView(convertView, parent);
-          break;
-        default:
-          view = getRegularSongView(currentEntry, convertView, parent);
-      }
-
-      final TextView songName = (TextView) view.findViewById(R.id.playlistSongName);
-      final String title = currentEntry.song.getTitle();
-      songName.setText(title);
-
-      final TextView artist = (TextView) view.findViewById(R.id.playlistArtistName);
-      artist.setText(context.getString(R.string.by) + " " + currentEntry.song.getArtist());
-
-      final TextView addByUser = (TextView) view.findViewById(R.id.playlistAddedBy);
-      if (currentEntry.adder.equals(me)) {
-        addByUser.setText(context.getString(R.string.added_by) 
-            + " " + context.getString(R.string.you));
-      }
-      else{
-        addByUser.setText(context.getString(R.string.added_by) + " " + currentEntry.adder.username);
-      }
-
-      final TextView upCount = (TextView) view.findViewById(R.id.upcount);
-      final TextView downCount = (TextView) view.findViewById(R.id.downcount);
-      upCount.setText(currentEntry.upvoters.size());
-      downCount.setText(currentEntry.downvoters.size());
-
-      view.setOnLongClickListener(new View.OnLongClickListener(){
-        public boolean onLongClick(View v){
-          plFrag.getListView().showContextMenuForChild(v);
-          return true;
-        }
-      });
-
-      return view;
-
-    }
-
-    private View getCurrentSongView(View convertView, ViewGroup parent){
-      View view = convertView;
-      if(convertView == null){
-         LayoutInflater inflater = (LayoutInflater) context
-              .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-         view = inflater.inflate(R.layout.playlist_currentsong_item, null);
-      }
-      return view;
-    }
-
-
-    private View getRegularSongView(
-      ActivePlaylistEntry currentEntry, View convertView, ViewGroup parent)
-    {
-      View view = convertView;
-      if(convertView == null){
-         LayoutInflater inflater = (LayoutInflater) context
-              .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-         view = inflater.inflate(R.layout.playlist_list_item, null);
-      }
-      final String libId = currentEntry.song.getLibId();
-      final String title = currentEntry.song.getTitle();
-      final ImageButton upButton = (ImageButton)view.findViewById(R.id.upvote_button);
-      final ImageButton downButton = (ImageButton)view.findViewById(R.id.downvote_button);
-      final Toast upVoteToast = Toast.makeText(context,
-            context.getString(R.string.voting_up_message)+ " " + title, Toast.LENGTH_SHORT);
-      upButton.setOnClickListener(new View.OnClickListener(){
-        public void onClick(View v){
-          v.setEnabled(false);
-          upVoteSong(libId);
-          upVoteToast.show();
-        }
-      });
-
-      final Toast downVoteToast = Toast.makeText(context,
-            context.getString(R.string.voting_down_message)+ " " + title, Toast.LENGTH_SHORT);
-      downButton.setOnClickListener(new View.OnClickListener(){
-        public void onClick(View v){
-          v.setEnabled(false);
-          downVoteSong(libId);
-          downVoteToast.show();
-        }
-      });
-
-      if(currentEntry.upvoters.contains(me)){
-        upButton.setEnabled(false);
-      }
-      else if(currentEntry.downvoters.contains(me)){
-        downButton.setEnabled(false);
-      }
-
-      return view;
-    }
-
-    /*
-
-      ActivePlaylistEntry currentEntry = playlist.get(position);
-      final String libId = currentEntry.song.getLibId();
-      final boolean isCurrentlyPlaying = currentEntry.isCurrentlyPlaying;
-
-      final View nowPlayingStuff = view.findViewById(R.id.nowplaying_stuff);
-      final View upvoteStuff = view.findViewById(R.id.upvote_stuff);
-      final View downvoteStuff = view.findViewById(R.id.downvote_stuff);
-      final View songInfo = view.findViewById(R.id.song_info);
-      final RelativeLayout.LayoutParams songInfoParams =
-        new RelativeLayout.LayoutParams((RelativeLayout.LayoutParams)songInfo.getLayoutParams());
-
-      if(isCurrentlyPlaying){
-        songInfoParams.addRule(0, R.id.nowplaying_stuff);
-        ((RelativeLayout)view).updateViewLayout(songInfo, songInfoParams);
-        nowPlayingStuff.setVisibility(View.VISIBLE);
-        downvoteStuff.setVisibility(View.GONE);
-        upvoteStuff.setVisibility(View.GONE);
-        final TextView upCount = (TextView) view.findViewById(R.id.nowplaying_upcount);
-        final TextView downCount = (TextView) view.findViewById(R.id.nowplaying_downcount);
-        upCount.setText(cursor.isNull(upcountIndex) ? "0" : cursor.getString(upcountIndex));
-        downCount.setText(cursor.isNull(downcountIndex) ? "0" : cursor.getString(downcountIndex));
-      }
-      else{
-        songInfoParams.addRule(0, R.id.downvote_stuff);
-        ((RelativeLayout)view).updateViewLayout(songInfo, songInfoParams);
-        nowPlayingStuff.setVisibility(View.GONE);
-        downvoteStuff.setVisibility(View.VISIBLE);
-        upvoteStuff.setVisibility(View.VISIBLE);
-        final TextView upCount = (TextView) view.findViewById(R.id.upcount);
-        final TextView downCount = (TextView) view.findViewById(R.id.downcount);
-        upCount.setText(cursor.isNull(upcountIndex) ? "0" : cursor.getString(upcountIndex));
-        downCount.setText(cursor.isNull(downcountIndex) ? "0" : cursor.getString(downcountIndex));
-      }
-
-      view.setOnLongClickListener(new View.OnLongClickListener(){
-        public boolean onLongClick(View v){
-          plFrag.getListView().showContextMenuForChild(v);
-          return true;
-        }
-      });
-
-      //Vote button reset
-      final ImageButton upButton = (ImageButton)view.findViewById(R.id.upvote_button);
-      final ImageButton downButton = (ImageButton)view.findViewById(R.id.downvote_button);
-      upButton.setVisibility(View.VISIBLE);
-      downButton.setVisibility(View.VISIBLE);
-      upButton.setEnabled(true);
-      downButton.setEnabled(true);
-
-      final TextView songName = (TextView) view.findViewById(R.id.playlistSongName);
-      final String title = currentEntry.song.getTitle();
-      songName.setText(title);
-
-      final TextView artist = (TextView) view.findViewById(R.id.playlistArtistName);
-      artist.setText(context.getString(R.string.by) + " " + currentEntry.song.getArtist());
-
-      final TextView addByUser = (TextView) view.findViewById(R.id.playlistAddedBy);
-      if (currentEntry.adder.equals(me)) {
-        addByUser.setText(context.getString(R.string.added_by) + " " + context.getString(R.string.you));
-      }
-      else{
-        addByUser.setText(context.getString(R.string.added_by) + " " + currentEntry.adder.username);
-      }
-
-      final Toast upVoteToast = Toast.makeText(context,
-            context.getString(R.string.voting_up_message)+ " " + title, Toast.LENGTH_SHORT);
-      upButton.setOnClickListener(new View.OnClickListener(){
-        public void onClick(View v){
-          v.setEnabled(false);
-          upVoteSong(libId);
-          upVoteToast.show();
-        }
-      });
-
-      final Toast downVoteToast = Toast.makeText(context,
-            context.getString(R.string.voting_down_message)+ " " + title, Toast.LENGTH_SHORT);
-      downButton.setOnClickListener(new View.OnClickListener(){
-        public void onClick(View v){
-          v.setEnabled(false);
-          downVoteSong(libId);
-          downVoteToast.show();
-        }
-      });
-
-      if(isCurrentlyPlaying){
-        upButton.setEnabled(false);
-        downButton.setEnabled(false);
-      }
-      else if(currentEntry.upvoters.contains(me)){
-        upButton.setEnabled(false);
-      }
-      else if(currentEntry.downvoters.contains(me)){
-        downButton.setEnabled(false);
-      }
-    }
-    */
-
-    private void upVoteSong(String libId) {
-      voteOnSong(libId, 1);
-    }
-
-    private void downVoteSong(String libId) {
-      voteOnSong(libId, -1);
-    }
-
-    private void voteOnSong(String libId, int voteType) {
-      Intent voteIntent = new Intent(Intent.ACTION_INSERT,
-          UDJPlayerProvider.VOTES_URI, context,
-          PlaylistSyncService.class);
-      voteIntent.putExtra(Constants.ACCOUNT_EXTRA, account);
-      voteIntent.putExtra(Constants.VOTE_WEIGHT_EXTRA, voteType);
-      voteIntent.putExtra(Constants.LIB_ID_EXTRA, libId);
-      context.startService(voteIntent);
-    }
-
 
   }
 

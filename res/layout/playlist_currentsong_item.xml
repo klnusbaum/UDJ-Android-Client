@@ -100,7 +100,7 @@
     />
 
     <TextView
-      android:id="@+id/nowplaying_downcount"
+      android:id="@+id/downcount"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:textAppearance="?android:attr/textAppearanceSmall"
@@ -113,7 +113,7 @@
     />
 
     <TextView
-      android:id="@+id/nowplaying_upcount"
+      android:id="@+id/upcount"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:textAppearance="?android:attr/textAppearanceSmall"

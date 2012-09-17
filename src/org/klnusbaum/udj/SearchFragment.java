@@ -63,8 +63,7 @@ public abstract class SearchFragment extends RefreshableListFragment
     }
     return null;
   }
-
-  @Override
+@Override
 	protected void doRefreshWork() {
 	  getLoaderManager().restartLoader(LIB_SEARCH_LOADER_TAG, null, this);
   }

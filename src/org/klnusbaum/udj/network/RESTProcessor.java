@@ -79,6 +79,7 @@ public class RESTProcessor{
   {
     checkPlaybackState(context, am, account, activePlaylist.getString("state"));
     checkVolume(context, am, account, activePlaylist.getInt("volume"));
+    Log.d(TAG, "Current song object: " + activePlaylist.getJSONObject("current_song"));
     ActivePlaylistEntry currentSong = ActivePlaylistEntry.valueOf(activePlaylist.getJSONObject("current_song"));
     currentSong.isCurrentSong = true;
     List<ActivePlaylistEntry> playlist = ActivePlaylistEntry.fromJSONArray(

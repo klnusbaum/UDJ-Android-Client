@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class User{
-  public static final String ID_PARAM = "song";
+  public static final String ID_PARAM = "id";
   public static final String USERNAME_PARAM = "username";
   public static final String FIRST_NAME_PARAM = "first_name";
   public static final String LAST_NAME_PARAM = "last_name";
