@@ -476,12 +476,18 @@ public class PlayerListFragment extends RefreshableListFragment implements
 
   private void dismissProgress(){
     ProgressFragment pd = (ProgressFragment)getActivity().getSupportFragmentManager().findFragmentByTag(PROG_DIALOG_TAG);
-    pd.dismiss();
+    //Sometimes the progress dialog is already dimissed. Need to check if it's null
+    if(pd != null){
+      pd.dismiss();
+    }
   }
 
   public static class ProgressFragment extends DialogFragment{
 
+
     public Dialog onCreateDialog(Bundle icicle){
+      //Stop gap for now. This should be cancelable
+      setCancelable(false);
       final ProgressDialog dialog = new ProgressDialog(getActivity());
       dialog.setMessage(getActivity().getString(R.string.joining_player));
       dialog.setIndeterminate(true);

@@ -190,9 +190,7 @@ public class PlaylistFragment extends RefreshableListFragment implements
     setSongIntent.putExtra(Constants.ACCOUNT_EXTRA, account);
     setSongIntent.putExtra(Constants.LIB_ID_EXTRA, toSet.song.getLibId());
     getActivity().startService(setSongIntent);
-    Toast toast = Toast.makeText(getActivity(),
-        getString(R.string.setting_song), Toast.LENGTH_SHORT);
-    toast.show();
+    playlistAdapter.setNewCurrentSong(toSet);
   }
 
   private void removeSong(int position) {
@@ -206,9 +204,7 @@ public class PlaylistFragment extends RefreshableListFragment implements
     removeSongIntent.putExtra(Constants.ACCOUNT_EXTRA, account);
     removeSongIntent.putExtra(Constants.LIB_ID_EXTRA, toRemove.song.getLibId());
     getActivity().startService(removeSongIntent);
-    Toast toast = Toast.makeText(getActivity(),
-        getString(R.string.removing_song), Toast.LENGTH_SHORT);
-    toast.show();
+    playlistAdapter.removeLibEntry(toRemove);
   }
 
   public Loader<PlaylistLoader.PlaylistResult> onCreateLoader(int id, Bundle args) {

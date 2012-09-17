@@ -55,6 +55,11 @@ public class ActivePlaylistEntry{
     this.isCurrentSong = false;
   }
 
+  public boolean equals(Object o){
+    ActivePlaylistEntry casted = (ActivePlaylistEntry)o;
+    return casted != null && this.song.getLibId().equals(casted.song.getLibId());
+  }
+
   public static ActivePlaylistEntry valueOf(JSONObject jObj)
     throws JSONException
   {

@@ -95,6 +95,23 @@ public class PlaylistAdapter extends BaseAdapter{
     return idMap.get(playlist.get(position).song.getLibId());
   }
 
+  public synchronized void removeLibEntry(ActivePlaylistEntry toRemove){
+    playlist.remove(toRemove);
+    idMap.remove(toRemove.song.getLibId());
+    notifyDataSetChanged();
+  }
+
+  public synchronized void setNewCurrentSong(ActivePlaylistEntry toSet){
+    if(playlist.get(0).isCurrentSong){
+      playlist.remove(0);
+    }
+
+    playlist.remove(toSet);
+    toSet.isCurrentSong = true;
+    playlist.add(0,toSet);
+    notifyDataSetChanged();
+  }
+
   public int getViewTypeCount(){
     return 2;
   }

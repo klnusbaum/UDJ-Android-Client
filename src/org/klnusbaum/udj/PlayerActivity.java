@@ -52,6 +52,7 @@ import com.viewpagerindicator.TitlePageIndicator;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.SubMenu;
 import com.actionbarsherlock.view.MenuItem;
+import com.actionbarsherlock.view.Window;
 
 /**
  * The main activity display class.
@@ -73,7 +74,9 @@ public class PlayerActivity extends PlayerExceptionListenerActivity {
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+
     setContentView(R.layout.player);
+    setSupportProgressBarIndeterminateVisibility(false);
 
     pagerAdapter = new PlayerPagerAdapter(getSupportFragmentManager(), account);
     pager = (ViewPager)findViewById(R.id.player_pager);
