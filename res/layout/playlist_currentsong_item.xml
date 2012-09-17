@@ -33,7 +33,7 @@
     android:layout_alignParentLeft="true"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:layout_toLeftOf="@+id/downvote_stuff"
+    android:layout_toLeftOf="@+id/nowplaying_stuff"
     android:layout_weight="1"
   >
 
