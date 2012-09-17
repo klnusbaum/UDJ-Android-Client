@@ -92,9 +92,11 @@ public class PlaylistFragment extends RefreshableListFragment implements
   public void onResume(){
     super.onResume();
     getLoaderManager().initLoader(PLAYLIST_LOADER_ID, null, this);
-    getActivity().registerReceiver(
-      playlistUpdateReceiver,
-      new IntentFilter(Constants.BROADCAST_VOTE_COMPLETED));
+    IntentFilter updateFilters = new IntentFilter();
+    updateFilters.addAction(Constants.BROADCAST_VOTE_COMPLETED);
+    updateFilters.addAction(Constants.BROADCAST_SET_CURRENT_COMPLETE);
+    updateFilters.addAction(Constants.BROADCAST_REMOVE_SONG_COMPLETE);
+    getActivity().registerReceiver(playlistUpdateReceiver, updateFilters);
   }
 
   public void onPause(){

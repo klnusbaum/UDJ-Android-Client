@@ -104,5 +104,7 @@ public class Constants{
   public static final String BROADCAST_VOLUME_CHANGED = "org.klnusbaum.udj.VolumeChanged";
 
   public static final String BROADCAST_VOTE_COMPLETED = "org.klnusbaum.udj.VoteCompleted";
+  public static final String BROADCAST_SET_CURRENT_COMPLETE = "org.klnusbaum.udj.SetCurrentComplete";
+  public static final String BROADCAST_REMOVE_SONG_COMPLETE = "org.klnusbaum.udj.RemoveSongComplete";
 
 }

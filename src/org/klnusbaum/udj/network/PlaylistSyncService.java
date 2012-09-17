@@ -214,6 +214,8 @@ public class PlaylistSyncService extends IntentService{
 
     try{
       ServerConnection.setCurrentSong(playerId, libId, authToken);
+      Intent setCurrentComplete = new Intent(Constants.BROADCAST_SET_CURRENT_COMPLETE);
+      this.sendBroadcast(setCurrentComplete);
     }
     catch(IOException e){
       alertSetSongException(account, originalIntent);
@@ -337,6 +339,8 @@ public class PlaylistSyncService extends IntentService{
     try{
       Log.d(TAG, "Actually removing song");
       ServerConnection.removeSongFromActivePlaylist(playerId, libId, authToken);
+      Intent removeSongComplete = new Intent(Constants.BROADCAST_REMOVE_SONG_COMPLETE);
+      this.sendBroadcast(removeSongComplete);
     }
     catch(ParseException e){
       alertRemoveSongException(account, originalIntent);
