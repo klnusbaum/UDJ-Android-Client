@@ -45,15 +45,9 @@ public abstract class SearchFragment extends RefreshableListFragment
     searchAdapter = new MusicSearchAdapter(getActivity(), account);
     setListAdapter(searchAdapter);
     setListShown(false);
-  }
-
-  
-
-  @Override
-  public void onResume(){
-    super.onResume();
     getLoaderManager().initLoader(LIB_SEARCH_LOADER_TAG, null, this);
   }
+
 
   public Loader<MusicSearchLoader.MusicSearchResult> onCreateLoader(
     int id, Bundle args)
@@ -63,22 +57,19 @@ public abstract class SearchFragment extends RefreshableListFragment
     }
     return null;
   }
-@Override
-	protected void doRefreshWork() {
-	  getLoaderManager().restartLoader(LIB_SEARCH_LOADER_TAG, null, this);
+
+  @Override
+  protected void doRefreshWork() {
+    getLoaderManager().restartLoader(LIB_SEARCH_LOADER_TAG, null, this);
   }
-  
+
   public void onLoadFinished(
     Loader<MusicSearchLoader.MusicSearchResult> loader,
     MusicSearchLoader.MusicSearchResult data)
   {
-	 refreshDone();
+    refreshDone();
     if(data.getError() == MusicSearchLoader.MusicSearchError.NO_ERROR){
-      searchAdapter = new MusicSearchAdapter(
-        getActivity(),
-        data.getResults(),
-        account);
-      setListAdapter(searchAdapter);
+      searchAdapter.setData(data.getResults());
     }
     else if(data.getError() ==
       MusicSearchLoader.MusicSearchError.PLAYER_INACTIVE_ERROR)

@@ -227,8 +227,16 @@ public class PlaylistFragment extends RefreshableListFragment implements
       refreshDone();
       Log.d(TAG, "Playlist loader returned");
       if(data.error == PlaylistLoader.PlaylistLoadError.NO_ERROR){
-        Log.d(TAG, "Setting new playlist data");
         playlistAdapter.updatePlaylist(data.playlistEntries);
+      }
+      else if(data.error == PlaylistLoader.PlaylistLoadError.PLAYER_INACTIVE_ERROR){
+        Utils.handleInactivePlayer(getActivity(), account);
+      }
+      else if(data.error == PlaylistLoader.PlaylistLoadError.NO_LONGER_IN_PLAYER_ERROR){
+        Utils.handleNoLongerInPlayer(getActivity(), account);
+      }
+      else if(data.error == PlaylistLoader.PlaylistLoadError.KICKED_ERROR){
+        Utils.handleKickedFromPlayer(getActivity(), account);
       }
       if (isResumed()) {
         setListShown(true);

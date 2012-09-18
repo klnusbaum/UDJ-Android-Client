@@ -37,6 +37,7 @@ public class LibraryEntry{
   private String artist;
   private String album;
   private int duration;
+  private boolean isAdded;
 
   public LibraryEntry(
     String libId,
@@ -50,6 +51,15 @@ public class LibraryEntry{
     this.artist = artist;
     this.album = album;
     this.duration = duration;
+    this.isAdded = false;
+  }
+
+  public boolean getIsAdded(){
+    return isAdded;
+  }
+
+  public boolean setIsAdded(boolean isAdded){
+    return this.isAdded = isAdded;
   }
 
   public String getLibId(){

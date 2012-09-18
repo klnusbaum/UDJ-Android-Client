@@ -48,11 +48,11 @@ public class PlaylistLoader extends AsyncTaskLoader<PlaylistLoader.PlaylistResul
   private static final String TAG = "PlaylistLoader";
   public enum PlaylistLoadError{
     NO_ERROR,
-      PLAYER_INACTIVE_ERROR,
-      SERVER_ERROR,
-      AUTHENTICATION_ERROR,
-      NO_LONGER_IN_PLAYER_ERROR,
-      KICKED_ERROR
+    PLAYER_INACTIVE_ERROR,
+    SERVER_ERROR,
+    AUTHENTICATION_ERROR,
+    NO_LONGER_IN_PLAYER_ERROR,
+    KICKED_ERROR
   }
 
   public static class PlaylistResult{

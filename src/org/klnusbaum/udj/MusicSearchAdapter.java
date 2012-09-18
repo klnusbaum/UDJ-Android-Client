@@ -1,24 +1,24 @@
 /**
  * Copyright 2011 Kurtis L. Nusbaum
- * 
+ *
  * This file is part of UDJ.
- * 
+ *
  * UDJ is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * UDJ is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with UDJ.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.klnusbaum.udj;
 
-import android.widget.ListAdapter;
+import android.widget.BaseAdapter;
 import android.view.View;
 import android.view.ViewGroup;
 import android.content.Context;
@@ -38,7 +38,7 @@ import java.util.List;
 import org.klnusbaum.udj.containers.LibraryEntry;
 import org.klnusbaum.udj.network.PlaylistSyncService;
 
-public class MusicSearchAdapter implements ListAdapter{
+public class MusicSearchAdapter extends BaseAdapter{
 
   private List<LibraryEntry> entries;
   private Context context;
@@ -77,6 +77,18 @@ public class MusicSearchAdapter implements ListAdapter{
     return 0;
   }
 
+  @Override
+  public boolean hasStableIds(){
+    return false;
+  }
+
+  public void setData(List<LibraryEntry> newData){
+    if(!newData.equals(entries)){
+      entries = newData;
+      notifyDataSetChanged();
+    }
+  }
+
   public Object getItem(int position){
     if(entries != null){
       return entries.get(position);
@@ -107,16 +119,16 @@ public class MusicSearchAdapter implements ListAdapter{
     final LibraryEntry libEntry = getLibraryEntry(position);
     View toReturn = convertView;
     if(toReturn == null){
-      //toReturn = View.inflate(context, R.layout.library_list_item, null);
       LayoutInflater inflater = (LayoutInflater)context.getSystemService(
         Context.LAYOUT_INFLATER_SERVICE);
       toReturn = inflater.inflate(R.layout.library_list_item, null);
     }
 
+
     TextView songView = (TextView)toReturn.findViewById(R.id.librarySongName);
-    TextView artistView = 
+    TextView artistView =
       (TextView)toReturn.findViewById(R.id.libraryArtistName);
-    ImageButton addButton = 
+    ImageButton addButton =
       (ImageButton)toReturn.findViewById(R.id.lib_add_button);
     songView.setText(libEntry.getTitle());
     final String artistContent = context.getString(R.string.by) + " " + libEntry.getArtist();
@@ -131,7 +143,11 @@ public class MusicSearchAdapter implements ListAdapter{
       }
     });
 
-
+    //Reset addbutton
+    addButton.setEnabled(true);
+    if(libEntry.getIsAdded()){
+      addButton.setEnabled(false);
+    }
 
     addButton.setOnClickListener(
       new View.OnClickListener(){
@@ -144,22 +160,15 @@ public class MusicSearchAdapter implements ListAdapter{
           addSongIntent.putExtra(Constants.ACCOUNT_EXTRA, account);
           addSongIntent.putExtra(Constants.LIB_ID_EXTRA, libEntry.getLibId());
           context.startService(addSongIntent);
-          Toast toast = Toast.makeText(
-            context,
-            context.getString(R.string.adding_song) + " " + libEntry.getTitle(),
-            Toast.LENGTH_SHORT);
-          toast.show();
+          libEntry.setIsAdded(true);
+          notifyDataSetChanged();
         }
       });
     return toReturn;
   }
 
   public int getViewTypeCount(){
-    return 1; 
-  }
-
-  public boolean hasStableIds(){
-    return true;
+    return 1;
   }
 
   public boolean isEmpty(){
@@ -168,15 +177,4 @@ public class MusicSearchAdapter implements ListAdapter{
     }
     return true;
   }
-
-  public void registerDataSetObserver(DataSetObserver observer){
-    //Unimplemented because this data can't change
-    //If new results need to be displayed a new adpater should be created.
-  }
-
-  public void unregisterDataSetObserver(DataSetObserver observer){
-    //Unimplemented because data represented by this adpater shouldn't change.
-    //If new results need to be displayed a new adpater should be created.
-  }
-
 }
