@@ -24,6 +24,7 @@ import android.accounts.Account;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.util.Log;
 
 public abstract class SearchFragment extends RefreshableListFragment
   implements LoaderManager.LoaderCallbacks<MusicSearchLoader.MusicSearchResult>
@@ -67,6 +68,7 @@ public abstract class SearchFragment extends RefreshableListFragment
     Loader<MusicSearchLoader.MusicSearchResult> loader,
     MusicSearchLoader.MusicSearchResult data)
   {
+    Log.d("SearchFragment", "In loader finished");
     refreshDone();
     if(data.getError() == MusicSearchLoader.MusicSearchError.NO_ERROR){
       searchAdapter.setData(data.getResults());

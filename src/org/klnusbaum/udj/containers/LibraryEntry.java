@@ -82,6 +82,11 @@ public class LibraryEntry{
     return duration;
   }
 
+  public boolean equals(Object o){
+    LibraryEntry casted = (LibraryEntry)o;
+    return casted != null && casted.getLibId().equals(getLibId());
+  }
+
   public static LibraryEntry valueOf(JSONObject jObj)
     throws JSONException 
   {
