@@ -154,7 +154,7 @@ public class MusicSearchAdapter extends BaseAdapter{
         public void onClick(View v){
           Intent addSongIntent = new Intent(
             Intent.ACTION_INSERT,
-            UDJPlayerProvider.PLAYLIST_URI,
+            Constants.PLAYLIST_URI,
             context,
             PlaylistSyncService.class);
           addSongIntent.putExtra(Constants.ACCOUNT_EXTRA, account);

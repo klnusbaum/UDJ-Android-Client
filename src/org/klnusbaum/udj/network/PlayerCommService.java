@@ -37,7 +37,6 @@ import org.apache.http.auth.AuthenticationException;
 
 import org.klnusbaum.udj.Constants;
 import org.klnusbaum.udj.Utils;
-import org.klnusbaum.udj.UDJPlayerProvider;
 import org.klnusbaum.udj.exceptions.PlayerInactiveException;
 import org.klnusbaum.udj.exceptions.PlayerPasswordException;
 import org.klnusbaum.udj.exceptions.PlayerFullException;
@@ -179,8 +178,6 @@ public class PlayerCommService extends IntentService{
 
   private void setLoggedInToPlayer(Intent joinPlayerIntent, AccountManager am, Account account, String playerId){
     setPlayerData(joinPlayerIntent, am, account);
-    ContentResolver cr = getContentResolver();
-    UDJPlayerProvider.playerCleanup(cr);
     am.setUserData(
         account, Constants.LAST_PLAYER_ID_DATA, playerId);
     am.setUserData(

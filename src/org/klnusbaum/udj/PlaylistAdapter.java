@@ -266,7 +266,7 @@ public class PlaylistAdapter extends BaseAdapter{
 
   private void voteOnSong(String libId, int voteType) {
     Intent voteIntent = new Intent(Intent.ACTION_INSERT,
-        UDJPlayerProvider.VOTES_URI, context,
+        Constants.VOTES_URI, context,
         PlaylistSyncService.class);
     voteIntent.putExtra(Constants.ACCOUNT_EXTRA, account);
     voteIntent.putExtra(Constants.VOTE_WEIGHT_EXTRA, voteType);

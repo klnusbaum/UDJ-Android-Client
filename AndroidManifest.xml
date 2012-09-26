@@ -20,7 +20,7 @@
 <manifest
       xmlns:android="http://schemas.android.com/apk/res/android"
       package="org.klnusbaum.udj"
-      android:versionCode="14"
+      android:versionCode="16"
       android:versionName="1.7.2">
 
     <uses-sdk android:minSdkVersion="7" android:targetSdkVersion="15"/>

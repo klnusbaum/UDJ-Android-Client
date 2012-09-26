@@ -89,6 +89,10 @@ public class Constants{
   /** URI constants */
   public static final Uri PLAYER_URI = new Uri.Builder().
     authority(Constants.AUTHORITY).appendPath("player").build();
+  public static final Uri PLAYLIST_URI = new Uri.Builder().
+    authority(Constants.AUTHORITY).appendPath("playlist").build();
+  public static final Uri VOTES_URI = new Uri.Builder().
+    authority(Constants.AUTHORITY).appendPath("playlist").appendPath("votes").build();
 
   /** Error constants */
   public static final int AUTH_API_VERSION_ERROR = 1;

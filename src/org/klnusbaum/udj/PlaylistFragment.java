@@ -186,7 +186,7 @@ public class PlaylistFragment extends RefreshableListFragment implements
     Log.d(TAG, "Setting song with id " + toSet.song.getLibId());
     Intent setSongIntent = new Intent(
       Constants.ACTION_SET_CURRENT_SONG,
-      UDJPlayerProvider.PLAYLIST_URI,
+      Constants.PLAYLIST_URI,
       getActivity(),
       PlaylistSyncService.class);
     setSongIntent.putExtra(Constants.ACCOUNT_EXTRA, account);
@@ -200,7 +200,7 @@ public class PlaylistFragment extends RefreshableListFragment implements
     Log.d(TAG, "Removing song with id " + toRemove.song.getLibId());
     Intent removeSongIntent = new Intent(
       Intent.ACTION_DELETE,
-      UDJPlayerProvider.PLAYLIST_URI,
+      Constants.PLAYLIST_URI,
       getActivity(),
       PlaylistSyncService.class);
     removeSongIntent.putExtra(Constants.ACCOUNT_EXTRA, account);

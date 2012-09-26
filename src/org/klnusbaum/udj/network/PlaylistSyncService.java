@@ -44,7 +44,6 @@ import org.apache.http.auth.AuthenticationException;
 import org.apache.http.ParseException;
 
 import org.klnusbaum.udj.Constants;
-import org.klnusbaum.udj.UDJPlayerProvider;
 import org.klnusbaum.udj.R;
 import org.klnusbaum.udj.exceptions.NoLongerInPlayerException;
 import org.klnusbaum.udj.exceptions.PlayerInactiveException;
@@ -77,11 +76,11 @@ public class PlaylistSyncService extends IntentService{
       account, Constants.LAST_PLAYER_ID_DATA);
     //TODO handle error if playerId is bad
     if(intent.getAction().equals(Intent.ACTION_INSERT)){
-      if(intent.getData().equals(UDJPlayerProvider.PLAYLIST_URI)){
+      if(intent.getData().equals(Constants.PLAYLIST_URI)){
         String libId = intent.getStringExtra(Constants.LIB_ID_EXTRA);
         addSongToPlaylist(account, playerId, libId, true, intent);
       }
-      else if(intent.getData().equals(UDJPlayerProvider.VOTES_URI)){
+      else if(intent.getData().equals(Constants.VOTES_URI)){
         //TODO handle if lib id is bad
         String libId = intent.getStringExtra(Constants.LIB_ID_EXTRA);
         //TODO handle if votetype is bad
@@ -95,7 +94,7 @@ public class PlaylistSyncService extends IntentService{
     }*/
     else if(intent.getAction().equals(Intent.ACTION_DELETE)){
       Log.d(TAG, "Handling delete");
-      if(intent.getData().equals(UDJPlayerProvider.PLAYLIST_URI)){
+      if(intent.getData().equals(Constants.PLAYLIST_URI)){
         Log.d(TAG, "In plalist syncservice, about to insert song into remove requests");
         //TODO handle if Playlist id is bad.
         String libId = intent.getStringExtra(Constants.LIB_ID_EXTRA);

@@ -264,7 +264,8 @@ public class PlayerListFragment extends RefreshableListFragment implements
         startActivity(startPlayerActivity);
         return;
       }
-      else if(playerAdapter == null || playerAdapter.getCount() ==0){
+
+      if(playerAdapter == null || playerAdapter.getCount() ==0){
         refreshList();
       }
     }
@@ -414,6 +415,7 @@ public class PlayerListFragment extends RefreshableListFragment implements
   public void onLoadFinished(Loader<PlayersLoader.PlayersLoaderResult> loader, 
     PlayersLoader.PlayersLoaderResult data)
   {
+    Log.d(TAG, "Got player search results");
     refreshDone();
     switch(data.getError()){
     case NO_ERROR:
