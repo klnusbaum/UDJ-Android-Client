@@ -186,9 +186,11 @@ public class PlayerListFragment extends RefreshableListFragment implements
       }
     }
     setEmptyText(getActivity().getString(R.string.no_player_items));
+    
     playerAdapter = new PlayerListAdapter(getActivity());
     setListAdapter(playerAdapter);
     setListShown(false);
+
   }
 
   public void onStart(){

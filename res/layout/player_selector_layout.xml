@@ -17,19 +17,33 @@
   You should have received a copy of the GNU General Public License
   along with UDJ.  If not, see <http://www.gnu.org/licenses/>.
 -->
-<LinearLayout 
+
+<LinearLayout
   xmlns:android="http://schemas.android.com/apk/res/android"
-  xmlns:app="http://schemas.android.com/apk/res/org.klnusbaum.udj"
-  android:orientation="vertical"
   android:layout_width="fill_parent"
-  android:layout_height="fill_parent">
-  <com.viewpagerindicator.TitlePageIndicator
-    android:id="@+id/titles"
-    app:footerColor="#0099CC"
+  android:layout_height="fill_parent"
+  android:orientation="vertical"
+>
+  <TextView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/search_description_text"
+    android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:layout_width="fill_parent" />
-  <android.support.v4.view.ViewPager
+    android:textAppearance="?android:attr/textAppearanceLarge"
+    android:textStyle="bold"
+    android:singleLine="true"
+    android:padding="4dp"
+    android:gravity="center"
+    android:text="@string/location_based_search"
+  />
+  <View 
+    android:id="@+id/header_seperator"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:id="@+id/player_pager"/>
+    android:layout_height="1dp"
+    android:background="?android:attr/listDivider" />
+  <LinearLayout
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:id="@+id/list_container"
+  />
 </LinearLayout>

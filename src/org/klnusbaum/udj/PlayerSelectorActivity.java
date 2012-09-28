@@ -41,8 +41,13 @@ public class PlayerSelectorActivity extends SherlockFragmentActivity{
   @Override
   public void onCreate(Bundle savedInstanceState){
     super.onCreate(savedInstanceState);
+    //setContentView(R.layout.player_selector_layout);
 
     FragmentManager fm = getSupportFragmentManager();
+    /*if(fm.findFragmentById(R.id.list_container) == null){
+      PlayerListFragment list = new PlayerListFragment();
+      fm.beginTransaction().add(R.id.list_container, list).commit();
+    }*/
     if(fm.findFragmentById(android.R.id.content) == null){
       PlayerListFragment list = new PlayerListFragment();
       fm.beginTransaction().add(android.R.id.content, list).commit();
@@ -54,6 +59,7 @@ public class PlayerSelectorActivity extends SherlockFragmentActivity{
       ((PlayerListFragment)getSupportFragmentManager().findFragmentById(android.R.id.content));
   }
 
+  /*
   public boolean onCreateOptionsMenu(Menu menu){
     menu.add("Search")
       .setIcon(R.drawable.ab_search_dark)
@@ -80,7 +86,7 @@ public class PlayerSelectorActivity extends SherlockFragmentActivity{
       super.onNewIntent(intent);
     }
   }
-
+  */
 
   public void refreshList(){
     getPlayerList().refreshList();
