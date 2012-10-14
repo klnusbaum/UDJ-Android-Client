@@ -18,13 +18,13 @@
  */
 package org.klnusbaum.udj;
 
-import java.util.List;
 
-import org.klnusbaum.udj.PullToRefresh.RefreshableListFragment;
 import org.klnusbaum.udj.auth.AuthActivity;
 import org.klnusbaum.udj.containers.Player;
 import org.klnusbaum.udj.network.PlayerCommService;
 import org.klnusbaum.udj.network.PlayerCommService.PlayerJoinError;
+
+import java.util.List;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
@@ -52,10 +52,16 @@ import android.widget.Button;
 import android.view.ViewGroup;
 import android.view.LayoutInflater;
 
+import com.handmark.pulltorefresh.extras.listfragment.PullToRefreshListFragment;
+import com.handmark.pulltorefresh.library.PullToRefreshBase;
+import com.handmark.pulltorefresh.library.PullToRefreshBase.OnRefreshListener;
+import com.handmark.pulltorefresh.library.PullToRefreshListView;
 
-public class PlayerListFragment extends RefreshableListFragment implements 
+
+public class PlayerListFragment extends PullToRefreshListFragment implements 
   LoaderManager.LoaderCallbacks<PlayersLoader.PlayersLoaderResult>,
-  LocationListener
+  LocationListener,
+  OnRefreshListener<ListView>
 {
 
 
@@ -74,14 +80,11 @@ public class PlayerListFragment extends RefreshableListFragment implements
     "org.klnusbaum.udj.LastSearchType";
   private static final int ACCOUNT_CREATION_REQUEST_CODE = 0;
 
+
+
   private interface PlayerSearch{
     public abstract Bundle getLoaderArgs();
     public abstract int getSearchType();
-  }
-
-  @Override
-  protected void doRefreshWork() {
-    refreshList();
   }
 
   public static class LocationPlayerSearch implements PlayerSearch{
@@ -186,9 +189,11 @@ public class PlayerListFragment extends RefreshableListFragment implements
       }
     }
     setEmptyText(getActivity().getString(R.string.no_player_items));
-    
+
+    getPullToRefreshListView().setOnRefreshListener(this);
+
     playerAdapter = new PlayerListAdapter(getActivity());
-    setListAdapter(playerAdapter);
+    getPullToRefreshListView().getRefreshableView().setAdapter(playerAdapter);
     setListShown(false);
 
   }
@@ -418,7 +423,7 @@ public class PlayerListFragment extends RefreshableListFragment implements
     PlayersLoader.PlayersLoaderResult data)
   {
     Log.d(TAG, "Got player search results");
-    refreshDone();
+    getPullToRefreshListView().onRefreshComplete();
     switch(data.getError()){
     case NO_ERROR:
       playerAdapter =
@@ -453,6 +458,11 @@ public class PlayerListFragment extends RefreshableListFragment implements
 
   public void refreshList(){
     getLoaderManager().restartLoader(0, lastSearch.getLoaderArgs(), this);
+  }
+
+  @Override
+  public void onRefresh(PullToRefreshBase<ListView> listView){
+    refreshList();
   }
 
   private void showProgress(){

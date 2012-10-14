@@ -18,16 +18,22 @@
  */
 package org.klnusbaum.udj;
 
-import org.klnusbaum.udj.PullToRefresh.RefreshableListFragment;
 
 import android.accounts.Account;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.widget.ListView;
 import android.util.Log;
 
-public abstract class SearchFragment extends RefreshableListFragment
-  implements LoaderManager.LoaderCallbacks<MusicSearchLoader.MusicSearchResult>
+import com.handmark.pulltorefresh.extras.listfragment.PullToRefreshListFragment;
+import com.handmark.pulltorefresh.library.PullToRefreshBase;
+import com.handmark.pulltorefresh.library.PullToRefreshBase.OnRefreshListener;
+import com.handmark.pulltorefresh.library.PullToRefreshListView;
+
+public abstract class SearchFragment extends PullToRefreshListFragment
+  implements LoaderManager.LoaderCallbacks<MusicSearchLoader.MusicSearchResult>,
+    OnRefreshListener<ListView>
 {
   public static final int LIB_SEARCH_LOADER_TAG = 0;
 
@@ -60,7 +66,7 @@ public abstract class SearchFragment extends RefreshableListFragment
   }
 
   @Override
-  protected void doRefreshWork() {
+  public void onRefresh(PullToRefreshBase<ListView> listView){
     getLoaderManager().restartLoader(LIB_SEARCH_LOADER_TAG, null, this);
   }
 
@@ -69,7 +75,7 @@ public abstract class SearchFragment extends RefreshableListFragment
     MusicSearchLoader.MusicSearchResult data)
   {
     Log.d("SearchFragment", "In loader finished");
-    refreshDone();
+    getPullToRefreshListView().onRefreshComplete();
     if(data.getError() == MusicSearchLoader.MusicSearchError.NO_ERROR){
       searchAdapter.setData(data.getResults());
     }

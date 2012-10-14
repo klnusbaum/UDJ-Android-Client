@@ -18,9 +18,9 @@
  */
 package org.klnusbaum.udj;
 
-import org.klnusbaum.udj.PullToRefresh.RefreshableListFragment;
 import org.klnusbaum.udj.network.PlaylistSyncService;
 import org.klnusbaum.udj.containers.ActivePlaylistEntry;
+
 
 import android.content.IntentFilter;
 import android.content.BroadcastReceiver;
@@ -42,12 +42,18 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.handmark.pulltorefresh.extras.listfragment.PullToRefreshListFragment;
+import com.handmark.pulltorefresh.library.PullToRefreshBase;
+import com.handmark.pulltorefresh.library.PullToRefreshBase.OnRefreshListener;
+import com.handmark.pulltorefresh.library.PullToRefreshListView;
+
 
 /**
  * Class used for displaying the contents of the Playlist.
  */
-public class PlaylistFragment extends RefreshableListFragment implements
-    LoaderManager.LoaderCallbacks<PlaylistLoader.PlaylistResult>
+public class PlaylistFragment extends PullToRefreshListFragment implements
+    LoaderManager.LoaderCallbacks<PlaylistLoader.PlaylistResult>,
+    OnRefreshListener<ListView>
 {
 
   private BroadcastReceiver playlistUpdateReceiver = new BroadcastReceiver(){
@@ -67,7 +73,7 @@ public class PlaylistFragment extends RefreshableListFragment implements
   PlaylistAdapter playlistAdapter;
 
   @Override
-  protected void doRefreshWork() {
+  public void onRefresh(PullToRefreshBase<ListView> listView){
     updatePlaylist();
   }
 
@@ -78,8 +84,9 @@ public class PlaylistFragment extends RefreshableListFragment implements
     am = AccountManager.get(getActivity());
     userId = am.getUserData(account, Constants.USER_ID_DATA);
     setEmptyText(getActivity().getString(R.string.no_playlist_items));
+    getPullToRefreshListView().setOnRefreshListener(this);
     playlistAdapter = new PlaylistAdapter(getActivity(), null, this, userId, account);
-    setListAdapter(playlistAdapter);
+    getPullToRefreshListView().getRefreshableView().setAdapter(playlistAdapter);
     setListShown(false);
     registerForContextMenu(getListView());
   }
@@ -224,7 +231,7 @@ public class PlaylistFragment extends RefreshableListFragment implements
     PlaylistLoader.PlaylistResult data)
   {
     if (loader.getId() == PLAYLIST_LOADER_ID) {
-      refreshDone();
+      getPullToRefreshListView().onRefreshComplete();
       Log.d(TAG, "Playlist loader returned");
       if(data.error == PlaylistLoader.PlaylistLoadError.NO_ERROR){
         playlistAdapter.updatePlaylist(data.playlistEntries);
