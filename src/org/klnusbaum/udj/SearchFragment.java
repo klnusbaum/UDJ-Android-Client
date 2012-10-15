@@ -80,7 +80,7 @@ public abstract class SearchFragment extends PullToRefreshListFragment
     Log.d("SearchFragment", "In loader finished");
     getPullToRefreshListView().onRefreshComplete();
     if(data.getError() == MusicSearchLoader.MusicSearchError.NO_ERROR){
-      searchAdapter.setData(data.getResults());
+      searchAdapter.updateList(data.getResults());
     }
     else if(data.getError() ==
       MusicSearchLoader.MusicSearchError.PLAYER_INACTIVE_ERROR)

@@ -25,19 +25,19 @@ import org.json.JSONException;
 import java.util.ArrayList;
 
 
-public class LibraryEntry{
+public class LibraryEntry implements StringIdable{
   public static final String ID_PARAM = "id";
   public static final String TITLE_PARAM = "title";
   public static final String ARTIST_PARAM = "artist";
   public static final String ALBUM_PARAM = "album";
   public static final String DURATION_PARAM = "duration";
 
-  private String libId;
-  private String title;
-  private String artist;
-  private String album;
-  private int duration;
-  private boolean isAdded;
+  public String libId;
+  public String title;
+  public String artist;
+  public String album;
+  public int duration;
+  public boolean isAdded;
 
   public LibraryEntry(
     String libId,
@@ -62,7 +62,7 @@ public class LibraryEntry{
     return this.isAdded = isAdded;
   }
 
-  public String getLibId(){
+  public String getId(){
     return libId;
   }
 
@@ -84,7 +84,7 @@ public class LibraryEntry{
 
   public boolean equals(Object o){
     LibraryEntry casted = (LibraryEntry)o;
-    return casted != null && casted.getLibId().equals(getLibId());
+    return casted != null && casted.getId().equals(getId());
   }
 
   public static LibraryEntry valueOf(JSONObject jObj)

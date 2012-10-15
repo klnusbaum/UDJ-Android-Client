@@ -30,17 +30,17 @@ import java.util.ArrayList;
  * We dont need it at the moment, it's non-trivial to program, and GergorianCalendars
  * take up extra memory.
  */
-public class ActivePlaylistEntry{
+public class ActivePlaylistEntry implements StringIdable{
   public static final String SONG_PARAM = "song";
   public static final String UPVOTERS_PARAM = "upvoters";
   public static final String DOWNVOTERS_PARAM = "downvoters";
   public static final String ADDER_PARAM = "adder";
 
-  public LibraryEntry song;
-  public List<User> upvoters;
-  public List<User> downvoters;
-  public User adder;
-  public boolean isCurrentSong;
+  private LibraryEntry song;
+  private List<User> upvoters;
+  private List<User> downvoters;
+  private User adder;
+  private boolean currentSong;
 
   public ActivePlaylistEntry(
     LibraryEntry song,
@@ -52,12 +52,57 @@ public class ActivePlaylistEntry{
     this.upvoters = upvoters;
     this.downvoters = downvoters;
     this.adder = adder;
-    this.isCurrentSong = false;
+    this.currentSong = false;
+  }
+
+  public String getId(){
+    return song.getId();
+  }
+
+  public LibraryEntry getSong(){
+    return song;
+  }
+
+  public List<User> getUpvoters(){
+    return upvoters;
+  }
+
+  public List<User> getDownvoters(){
+    return downvoters;
+  }
+
+  public void removeFromDownvoters(User toRemove){
+    downvoters.remove(toRemove);
+  }
+
+  public void removeFromUpvoters(User toRemove){
+    upvoters.remove(toRemove);
+  }
+
+  public void addToDownvoters(User toAdd){
+    downvoters.add(toAdd);
+  }
+
+  public void addToUpvoters(User toAdd){
+    upvoters.add(toAdd);
+  }
+
+
+  public User getAdder(){
+    return adder;
+  }
+
+  public boolean isCurrentSong(){
+    return currentSong;
+  }
+
+  public void setCurrentSong(boolean currentSong){
+    this.currentSong = currentSong;
   }
 
   public boolean equals(Object o){
     ActivePlaylistEntry casted = (ActivePlaylistEntry)o;
-    return casted != null && this.song.getLibId().equals(casted.song.getLibId());
+    return casted != null && this.getSong().getId().equals(casted.getSong().getId());
   }
 
   public static ActivePlaylistEntry valueOf(JSONObject jObj)

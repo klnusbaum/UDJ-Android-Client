@@ -32,7 +32,7 @@
     <string name="no_library_songs">No Results To Display</string>
     <string name="quit_title">Quit?</string>
     <string name="quit_message">Are you sure you want to leave the party?</string>
-    <string name="no_player_items">No players nearby</string>
+    <string name="no_player_items">No players found</string>
     <string name="players_load_error">Error loading players</string>
     <string name="login_error">Login Error</string>
     <string name="login_error_message">Try reentering your username and password</string>

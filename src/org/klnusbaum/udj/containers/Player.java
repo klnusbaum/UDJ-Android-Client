@@ -66,7 +66,7 @@ public class Player{
     this.hasPassword = hasPassword;
   }
 
-  public String getPlayerId(){
+  public String getId(){
     return playerId;
   }
 
@@ -113,7 +113,7 @@ public class Player{
     throws JSONException
   {
     JSONObject toReturn = new JSONObject();
-    toReturn.put(ID_PARAM, player.getPlayerId());
+    toReturn.put(ID_PARAM, player.getId());
     toReturn.put(NAME_PARAM, player.getName());
     toReturn.put(OWNER_NAME_PARAM, player.getOwnerName());
     toReturn.put(OWNER_ID_PARAM, player.getOwnerId());
@@ -145,7 +145,7 @@ public class Player{
 
   public Bundle bundleUp(){
     Bundle toReturn = new Bundle();
-    toReturn.putString(ID_PARAM, getPlayerId());
+    toReturn.putString(ID_PARAM, getId());
     toReturn.putString(NAME_PARAM, getName());
     toReturn.putString(OWNER_NAME_PARAM, getOwnerName());
     toReturn.putString(OWNER_ID_PARAM, getOwnerId());

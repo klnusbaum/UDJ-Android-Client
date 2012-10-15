@@ -27,7 +27,6 @@ import android.accounts.AccountManager;
 import android.view.LayoutInflater;
 import android.content.Context;
 import android.content.Intent;
-import android.widget.BaseAdapter;
 import android.widget.ImageButton;
 import android.widget.Toast;
 import android.widget.TextView;
@@ -39,18 +38,15 @@ import java.util.List;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class PlaylistAdapter extends BaseAdapter{
+public class PlaylistAdapter extends StringIdableAdapter{
   private static final String PLAYLIST_ADAPTER_TAG = "PlaylistAdapter";
   private static final int CURRENT_SONG_VIEW_TYPE = 0;
   private static final int REGULAR_SONG_VIEW_TYPE = 1;
-  private List<ActivePlaylistEntry> playlist;
   private String userId;
   private Context context;
   private final PlaylistFragment plFrag;
   private Account account;
   private User me;
-  private ConcurrentMap<String, Long> idMap;
-  private long currentAvailableMapId;
 
   public PlaylistAdapter(
     Context context,
@@ -59,106 +55,47 @@ public class PlaylistAdapter extends BaseAdapter{
     String userId,
     Account account)
   {
-    super();
-    this.playlist = playlist;
+    super(playlist);
     this.userId = userId;
     this.context = context;
     this.plFrag = plFrag;
     this.account = account;
     this.me = new User(userId);
-    this.currentAvailableMapId = 0;
-    idMap = new ConcurrentHashMap<String, Long>();
-    if(playlist != null){
-      for(ActivePlaylistEntry ae: playlist){
-        idMap.put(ae.song.getLibId(), currentAvailableMapId);
-        currentAvailableMapId++;
-      }
-    }
   }
 
-
-  public int getCount(){
-    if(playlist != null){
-      return playlist.size();
-    }
-    return 0;
-  }
-
-  public Object getItem(int position){
-    if(playlist != null){
-      return playlist.get(position);
+  public ActivePlaylistEntry getPlaylistEntry(int position){
+    if(!isEmpty()){
+      return (ActivePlaylistEntry)getItem(position);
     }
     return null;
   }
 
-  public long getItemId(int position){
-    return idMap.get(playlist.get(position).song.getLibId());
-  }
-
-  public synchronized void removeLibEntry(ActivePlaylistEntry toRemove){
-    playlist.remove(toRemove);
-    idMap.remove(toRemove.song.getLibId());
-    notifyDataSetChanged();
-  }
-
   public synchronized void setNewCurrentSong(ActivePlaylistEntry toSet){
-    if(playlist.get(0).isCurrentSong){
-      playlist.remove(0);
+    if(getPlaylistEntry(0).isCurrentSong()){
+      removeItem(0);
     }
-
-    playlist.remove(toSet);
-    toSet.isCurrentSong = true;
-    playlist.add(0,toSet);
-    notifyDataSetChanged();
+    removeItem(toSet);
+    toSet.setCurrentSong(true);
+    addItem(0,toSet);
   }
 
   public int getViewTypeCount(){
     return 2;
   }
 
-  public boolean isEmpty(){
-    return playlist == null || playlist.isEmpty();
-  }
-
   public int getItemViewType(int position){
-    if(playlist != null && playlist.get(position).isCurrentSong){
+    if(!isEmpty() && ((ActivePlaylistEntry)getItem(position)).isCurrentSong()){
       return CURRENT_SONG_VIEW_TYPE;
     }
     return REGULAR_SONG_VIEW_TYPE;
   }
 
-  public synchronized void updatePlaylist(List<ActivePlaylistEntry> newPlaylist){
-    for(ActivePlaylistEntry ae: newPlaylist){
-      if (!idMap.keySet().contains(ae.song.getLibId())){
-        idMap.put(ae.song.getLibId(), currentAvailableMapId);
-        currentAvailableMapId++;
-      }
-    }
-    this.playlist = newPlaylist;
-    /**
-     * This algorithm is n*m complexity, might be able to do better...
-     */
-    for(String s: idMap.keySet()){
-      if(!playlistContainsId(s)){
-        idMap.remove(s);
-      }
-    }
-    notifyDataSetChanged();
-  }
 
-  private synchronized boolean playlistContainsId(String s){
-    for(ActivePlaylistEntry ae: playlist){
-      if(s.equals(ae.song.getLibId())){
-        return true;
-      }
-    }
-    return false;
-  }
 
   @Override
   public View getView(int position, View convertView, ViewGroup parent) {
-    final ActivePlaylistEntry currentEntry = (ActivePlaylistEntry)getItem(position);
-    final String libId = currentEntry.song.getLibId();
+    final ActivePlaylistEntry currentEntry = getPlaylistEntry(position);
+    final String libId = currentEntry.getSong().getId();
     View view;
     switch(getItemViewType(position)){
       case CURRENT_SONG_VIEW_TYPE:
@@ -169,25 +106,25 @@ public class PlaylistAdapter extends BaseAdapter{
     }
 
     final TextView songName = (TextView) view.findViewById(R.id.playlistSongName);
-    final String title = currentEntry.song.getTitle();
+    final String title = currentEntry.getSong().getTitle();
     songName.setText(title);
 
     final TextView artist = (TextView) view.findViewById(R.id.playlistArtistName);
-    artist.setText(context.getString(R.string.by) + " " + currentEntry.song.getArtist());
+    artist.setText(context.getString(R.string.by) + " " + currentEntry.getSong().getArtist());
 
     final TextView addByUser = (TextView) view.findViewById(R.id.playlistAddedBy);
-    if (currentEntry.adder.equals(me)) {
+    if (currentEntry.getAdder().equals(me)) {
       addByUser.setText(context.getString(R.string.added_by) 
           + " " + context.getString(R.string.you));
     }
     else{
-      addByUser.setText(context.getString(R.string.added_by) + " " + currentEntry.adder.username);
+      addByUser.setText(context.getString(R.string.added_by) + " " + currentEntry.getAdder().getUsername());
     }
 
     final TextView upCount = (TextView) view.findViewById(R.id.upcount);
     final TextView downCount = (TextView) view.findViewById(R.id.downcount);
-    upCount.setText(String.valueOf(currentEntry.upvoters.size()));
-    downCount.setText(String.valueOf(currentEntry.downvoters.size()));
+    upCount.setText(String.valueOf(currentEntry.getUpvoters().size()));
+    downCount.setText(String.valueOf(currentEntry.getDownvoters().size()));
 
     view.setOnLongClickListener(new View.OnLongClickListener(){
       public boolean onLongClick(View v){
@@ -220,15 +157,15 @@ public class PlaylistAdapter extends BaseAdapter{
             .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
        view = inflater.inflate(R.layout.playlist_list_item, null);
     }
-    final String libId = currentEntry.song.getLibId();
-    final String title = currentEntry.song.getTitle();
+    final String libId = currentEntry.getSong().getId();
+    final String title = currentEntry.getSong().getTitle();
     final ImageButton upButton = (ImageButton)view.findViewById(R.id.upvote_button);
     final ImageButton downButton = (ImageButton)view.findViewById(R.id.downvote_button);
 
     upButton.setOnClickListener(new View.OnClickListener(){
       public void onClick(View v){
-        currentEntry.downvoters.remove(me);
-        currentEntry.upvoters.add(me);
+        currentEntry.removeFromDownvoters(me);
+        currentEntry.addToUpvoters(me);
         upVoteSong(libId);
         notifyDataSetChanged();
       }
@@ -236,8 +173,8 @@ public class PlaylistAdapter extends BaseAdapter{
 
     downButton.setOnClickListener(new View.OnClickListener(){
       public void onClick(View v){
-        currentEntry.downvoters.add(me);
-        currentEntry.upvoters.remove(me);
+        currentEntry.addToDownvoters(me);
+        currentEntry.removeFromUpvoters(me);
         downVoteSong(libId);
         notifyDataSetChanged();
       }
@@ -246,10 +183,10 @@ public class PlaylistAdapter extends BaseAdapter{
     /* Reset buttons from previous view*/
     upButton.setEnabled(true);
     downButton.setEnabled(true);
-    if(currentEntry.upvoters.contains(me)){
+    if(currentEntry.getUpvoters().contains(me)){
       upButton.setEnabled(false);
     }
-    else if(currentEntry.downvoters.contains(me)){
+    else if(currentEntry.getDownvoters().contains(me)){
       downButton.setEnabled(false);
     }
 

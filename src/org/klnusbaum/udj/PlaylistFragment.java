@@ -125,7 +125,8 @@ public class PlaylistFragment extends PullToRefreshListFragment implements
   public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo){
 
     AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
-    ActivePlaylistEntry playlistEntry = (ActivePlaylistEntry) playlistAdapter.getItem(info.position);
+    ActivePlaylistEntry playlistEntry = 
+      (ActivePlaylistEntry) getPullToRefreshListView().getRefreshableView().getItemAtPosition(info.position);
     MenuInflater inflater = getActivity().getMenuInflater();
 
     if(Utils.isCurrentPlayerOwner(am, account)){

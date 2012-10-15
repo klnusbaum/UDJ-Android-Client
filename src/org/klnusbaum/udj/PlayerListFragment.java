@@ -64,76 +64,20 @@ public class PlayerListFragment extends PullToRefreshListFragment implements
   LocationListener,
   OnRefreshListener<ListView>
 {
-
+  public enum SearchType{
+    LOCATION_SEARCH,
+    NAME_SEARCH
+  }
 
   private static final String TAG = "PlayerListFragment";
   private static final String PROG_DIALOG_TAG = "prog_dialog";
   private static final String PLAYER_JOIN_FAIL_TAG = "prog_dialog";
   private static final String PASSWORD_TAG = "password_dialog";
-  private static final String LOCATION_EXTRA = "location";
-  private static final String PLAYER_SEARCH_QUERY = 
+  public static final String PLAYER_SEARCH_QUERY = 
     "org.klnusbaum.udj.PlayerSearchQuery";
-  private static final String PLAYER_SEARCH_TYPE_EXTRA = 
+  public static final String PLAYER_SEARCH_TYPE_EXTRA = 
     "org.klnusbaum.udj.PlayerSearchType";
-  private static final String LOCATION_STATE_EXTRA = 
-    "org.klnusbaum.udj.LastKnownLocation";
-  private static final String LAST_SEARCH_TYPE_EXTRA = 
-    "org.klnusbaum.udj.LastSearchType";
   private static final int ACCOUNT_CREATION_REQUEST_CODE = 0;
-
-
-
-  private interface PlayerSearch{
-    public abstract Bundle getLoaderArgs();
-    public abstract int getSearchType();
-  }
-
-  public static class LocationPlayerSearch implements PlayerSearch{
-    Location givenLocation;
-    public static final int SEARCH_TYPE = 0; 
-
-    public LocationPlayerSearch(Location givenLocation){
-      this.givenLocation = givenLocation;
-    }
-
-    public void setLocation(Location newLocation){
-      givenLocation = newLocation; 
-    }
-
-    public Bundle getLoaderArgs(){
-      Bundle loaderArgs = new Bundle(); 
-      loaderArgs.putInt(PLAYER_SEARCH_TYPE_EXTRA, SEARCH_TYPE);
-      loaderArgs.putParcelable(LOCATION_EXTRA, givenLocation);
-      return loaderArgs;
-    }
-
-    public int getSearchType(){
-      return SEARCH_TYPE;
-    }
-  }
-
-  public static class NamePlayerSearch implements PlayerSearch{
-    String query;
-    private static final int SEARCH_TYPE = 1; 
-    public NamePlayerSearch(String query){
-      this.query = query;
-    }
-
-    public Bundle getLoaderArgs(){
-      Bundle loaderArgs = new Bundle();
-      loaderArgs.putInt(PLAYER_SEARCH_TYPE_EXTRA, SEARCH_TYPE);
-      loaderArgs.putString(PLAYER_SEARCH_QUERY, query);
-      return loaderArgs;
-    }
-
-    public int getSearchType(){
-      return SEARCH_TYPE;
-    }
-
-    public String getQuery(){
-      return query;
-    }
-  }
 
 
 
@@ -141,8 +85,9 @@ public class PlayerListFragment extends PullToRefreshListFragment implements
   private LocationManager lm;
   private Location lastKnown = null;
   private Account account = null;
-  private PlayerSearch lastSearch = null;
   private AccountManager am;
+  private SearchType searchType;
+  private String nameQuery;
 
   private BroadcastReceiver playerJoinedReceiver = new BroadcastReceiver(){
     public void onReceive(Context context, Intent intent){
@@ -182,16 +127,14 @@ public class PlayerListFragment extends PullToRefreshListFragment implements
       account=udjAccounts[0];
       //TODO implement if there are more than 1 account
     }
-    if(icicle != null){
-      if(icicle.containsKey(LOCATION_STATE_EXTRA)){
-        lastKnown = (Location)icicle.getParcelable(LOCATION_STATE_EXTRA);
-      }
-      if(icicle.containsKey(LAST_SEARCH_TYPE_EXTRA)){
-        restoreLastSearch(icicle);
-      }
-    }
-    setEmptyText(getActivity().getString(R.string.no_player_items));
 
+    searchType = (SearchType)getArguments().getSerializable(PLAYER_SEARCH_TYPE_EXTRA);
+    if(searchType == SearchType.NAME_SEARCH){
+      nameQuery = getArguments().getString(PLAYER_SEARCH_QUERY);
+    }
+
+
+    setEmptyText(getActivity().getString(R.string.no_player_items));
 
     getPullToRefreshListView().setOnRefreshListener(this);
 
@@ -203,23 +146,23 @@ public class PlayerListFragment extends PullToRefreshListFragment implements
 
   public void onStart(){
     super.onStart();
-    lm = (LocationManager)getActivity().getSystemService(
-      Context.LOCATION_SERVICE);
-    List<String> providers = lm.getProviders(false);
-    if(providers.contains(LocationManager.GPS_PROVIDER)){
-      lm.requestLocationUpdates(LocationManager.GPS_PROVIDER,0, 50, this);
-      if(lastKnown == null){
-        lastKnown = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+
+    if(searchType == SearchType.LOCATION_SEARCH){
+      lm = (LocationManager)getActivity().getSystemService(
+        Context.LOCATION_SERVICE);
+      List<String> providers = lm.getProviders(false);
+      if(providers.contains(LocationManager.GPS_PROVIDER)){
+        lm.requestLocationUpdates(LocationManager.GPS_PROVIDER,0, 50, this);
+        if(lastKnown == null){
+          lastKnown = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        }
       }
-    }
-    if(providers.contains(LocationManager.NETWORK_PROVIDER)){
-      lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,0, 50, this);
-      if(lastKnown == null){
-        lastKnown = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+      if(providers.contains(LocationManager.NETWORK_PROVIDER)){
+        lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,0, 50, this);
+        if(lastKnown == null){
+          lastKnown = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+        }
       }
-    }
-    if(lastSearch == null){
-      lastSearch = new LocationPlayerSearch(lastKnown);
     }
   }
 
@@ -298,42 +241,13 @@ public class PlayerListFragment extends PullToRefreshListFragment implements
 
   public void onStop(){
     super.onStop();
-    lm.removeUpdates(this); 
-  }
-
-  public void onSaveInstanceState(Bundle outState){
-    super.onSaveInstanceState(outState);
-    outState.putParcelable(LOCATION_STATE_EXTRA, lastKnown);
-    outState.putInt(PLAYER_SEARCH_TYPE_EXTRA, lastSearch.getSearchType());
-    if(lastSearch.getSearchType() == NamePlayerSearch.SEARCH_TYPE){
-      outState.putString(
-        PLAYER_SEARCH_QUERY, ((NamePlayerSearch)lastSearch).getQuery());
+    if(searchType == SearchType.LOCATION_SEARCH){
+      lm.removeUpdates(this);
     }
-  }
-
-  private void restoreLastSearch(Bundle icicle){
-    int searchType = icicle.getInt(LAST_SEARCH_TYPE_EXTRA, -1);
-    switch(searchType){
-    case LocationPlayerSearch.SEARCH_TYPE:
-      lastSearch = new LocationPlayerSearch(lastKnown);
-      break;
-    case NamePlayerSearch.SEARCH_TYPE:
-      lastSearch = new NamePlayerSearch(
-        icicle.getString(PLAYER_SEARCH_QUERY));
-      break;
-    } 
-  }
-
-  public void setPlayerSearch(PlayerSearch newSearch){
-    lastSearch = newSearch;
-    refreshList();
   }
 
   public void onLocationChanged(Location location){
     lastKnown = location;
-    if(lastSearch.getSearchType() == LocationPlayerSearch.SEARCH_TYPE){
-      ((LocationPlayerSearch)lastSearch).setLocation(lastKnown);
-    }
   }
 
   public void onProviderDisabled(String provider){}
@@ -377,7 +291,7 @@ public class PlayerListFragment extends PullToRefreshListFragment implements
       PlayerCommService.class);
     joinPlayerIntent.putExtra(
       Constants.PLAYER_ID_EXTRA,
-      toJoin.getPlayerId());
+      toJoin.getId());
     joinPlayerIntent.putExtra(
       Constants.PLAYER_NAME_EXTRA,
       toJoin.getName());
@@ -403,19 +317,17 @@ public class PlayerListFragment extends PullToRefreshListFragment implements
   public Loader<PlayersLoader.PlayersLoaderResult> onCreateLoader(
     int id, Bundle args)
   {
-    int playerSearchType = args.getInt(PLAYER_SEARCH_TYPE_EXTRA, 
-      -1);
-    if(playerSearchType == LocationPlayerSearch.SEARCH_TYPE){
+    if(searchType == SearchType.LOCATION_SEARCH){
       return new PlayersLoader(
         getActivity(), 
         account,
-        (Location)args.getParcelable(LOCATION_EXTRA));
+        lastKnown);
     }
-    else if(playerSearchType == NamePlayerSearch.SEARCH_TYPE){
+    else if(searchType == SearchType.NAME_SEARCH){
       return new PlayersLoader(
         getActivity(), 
         account,
-        args.getString(PLAYER_SEARCH_QUERY));
+        nameQuery);
     }
     else{
       return null;
@@ -429,9 +341,7 @@ public class PlayerListFragment extends PullToRefreshListFragment implements
     getPullToRefreshListView().onRefreshComplete();
     switch(data.getError()){
     case NO_ERROR:
-      playerAdapter =
-        new PlayerListAdapter(getActivity(), data.getPlayers());
-      setListAdapter(playerAdapter);
+      playerAdapter.updateList(data.getPlayers());
       break;
     case NO_LOCATION:
       setEmptyText(getString(R.string.no_location_error));
@@ -456,11 +366,10 @@ public class PlayerListFragment extends PullToRefreshListFragment implements
   }
 
   public void onLoaderReset(Loader<PlayersLoader.PlayersLoaderResult> loader){
-    setListAdapter(null);
   }
 
   public void refreshList(){
-    getLoaderManager().restartLoader(0, lastSearch.getLoaderArgs(), this);
+    getLoaderManager().restartLoader(0, null, this);
   }
 
   @Override

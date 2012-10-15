@@ -25,16 +25,16 @@ import org.json.JSONException;
 import java.util.List;
 import java.util.ArrayList;
 
-public class User{
+public class User implements StringIdable{
   public static final String ID_PARAM = "id";
   public static final String USERNAME_PARAM = "username";
   public static final String FIRST_NAME_PARAM = "first_name";
   public static final String LAST_NAME_PARAM = "last_name";
 
-  public String ID;
-  public String username;
-  public String firstName;
-  public String lastName;
+  private String ID;
+  private String username;
+  private String firstName;
+  private String lastName;
 
   public User(String ID){
     this.ID = ID;
@@ -48,6 +48,22 @@ public class User{
     this.username = username;
     this.firstName = firstName;
     this.lastName = lastName;
+  }
+
+  public String getId(){
+    return this.ID;
+  }
+
+  public String getUsername(){
+    return username;
+  }
+
+  public String getFirstName(){
+    return firstName;
+  }
+
+  public String getLastName(){
+    return lastName;
   }
 
   public boolean equals(Object o){

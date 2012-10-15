@@ -38,15 +38,14 @@ import java.util.List;
 import org.klnusbaum.udj.containers.LibraryEntry;
 import org.klnusbaum.udj.network.PlaylistSyncService;
 
-public class MusicSearchAdapter extends BaseAdapter{
+public class MusicSearchAdapter extends StringIdableAdapter{
 
-  private List<LibraryEntry> entries;
   private Context context;
   private Account account;
   public static final int LIB_ENTRY_VIEW_TYPE = 0;
 
   public MusicSearchAdapter(Context context, Account account){
-    this.entries = null;
+    super(null);
     this.context = context;
     this.account = account;
   }
@@ -57,57 +56,16 @@ public class MusicSearchAdapter extends BaseAdapter{
     Account account
   )
   {
-    this.entries = entries;
+    super(entries);
     this.context = context;
     this.account = account;
   }
 
-  public boolean areAllItemsEnabled(){
-    return true;
-  }
-
-  public boolean isEnabled(int position){
-    return true;
-  }
-
-  public int getCount(){
-    if(entries != null){
-      return entries.size();
-    }
-    return 0;
-  }
-
-  @Override
-  public boolean hasStableIds(){
-    return false;
-  }
-
-  public void setData(List<LibraryEntry> newData){
-    if(!newData.equals(entries)){
-      entries = newData;
-      notifyDataSetChanged();
-    }
-  }
-
-  public Object getItem(int position){
-    if(entries != null){
-      return entries.get(position);
-    }
-    return null;
-  }
-
   public LibraryEntry getLibraryEntry(int position){
-    if(entries != null){
-      return entries.get(position);
+    if(!isEmpty()){
+      return (LibraryEntry)getItem(position);
     }
     return null;
-  }
-
-  public long getItemId(int position){
-    if(entries != null){
-      return position;
-    }
-    return -1; 
   }
 
   public int getItemViewType(int position){
@@ -158,7 +116,7 @@ public class MusicSearchAdapter extends BaseAdapter{
             context,
             PlaylistSyncService.class);
           addSongIntent.putExtra(Constants.ACCOUNT_EXTRA, account);
-          addSongIntent.putExtra(Constants.LIB_ID_EXTRA, libEntry.getLibId());
+          addSongIntent.putExtra(Constants.LIB_ID_EXTRA, libEntry.getId());
           context.startService(addSongIntent);
           libEntry.setIsAdded(true);
           notifyDataSetChanged();
@@ -171,10 +129,4 @@ public class MusicSearchAdapter extends BaseAdapter{
     return 1;
   }
 
-  public boolean isEmpty(){
-    if(entries != null){
-      return entries.isEmpty();
-    }
-    return true;
-  }
 }

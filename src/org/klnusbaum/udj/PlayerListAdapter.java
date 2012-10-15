@@ -29,18 +29,19 @@ import android.widget.ImageView;
 import android.util.Log;
 
 import java.util.List;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.klnusbaum.udj.containers.Player;
 
-public class PlayerListAdapter implements ListAdapter{
+public class PlayerListAdapter extends StringIdableAdapter{
 
   public static final String TAG = "PlayerListAdapter";
-  private List<Player> players;
   private Context context;
   public static final int PLAYER_ENTRY_VIEW_TYPE = 0;
 
   public PlayerListAdapter(Context context){
-    this.players = null;
+    super(null);
     this.context = context;
   }
 
@@ -49,44 +50,15 @@ public class PlayerListAdapter implements ListAdapter{
     List<Player> players
   )
   {
-    this.players = players;
+    super(players);
     this.context = context;
   }
 
-  public boolean areAllItemsEnabled(){
-    return true;
-  }
-
-  public boolean isEnabled(int position){
-    return true;
-  }
-
-  public int getCount(){
-    if(players != null){
-      return players.size();
-    }
-    return 0;
-  }
-
-  public Object getItem(int position){
-    if(players != null){
-      return players.get(position);
-    }
-    return null;
-  }
-
   public Player getPlayer(int position){
-    if(players != null){
-      return players.get(position);
+    if(!isEmpty()){
+      return (Player)getItem(position);
     }
     return null;
-  }
-
-  public long getItemId(int position){
-    if(players != null){
-      return position;
-    }
-    return -1;
   }
 
   public int getItemViewType(int position){
@@ -119,27 +91,6 @@ public class PlayerListAdapter implements ListAdapter{
 
   public int getViewTypeCount(){
     return 1; 
-  }
-
-  public boolean hasStableIds(){
-    return true;
-  }
-
-  public boolean isEmpty(){
-    if(players != null){
-      return players.isEmpty();
-    }
-    return true;
-  }
-
-  public void registerDataSetObserver(DataSetObserver observer){
-    //Unimplemented because this data can't change
-    //If new results need to be displayed a new adpater should be created.
-  }
-
-  public void unregisterDataSetObserver(DataSetObserver observer){
-    //Unimplemented because data represented by this adpater shouldn't change.
-    //If new results need to be displayed a new adpater should be created.
   }
 
 }

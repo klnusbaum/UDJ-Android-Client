@@ -59,15 +59,6 @@ public class PlayerSelectorActivity extends SherlockFragmentActivity{
     TitlePageIndicator titleIndicator = (TitlePageIndicator)findViewById(R.id.titles);
     titleIndicator.setViewPager(pager);
 
-
-
-    /*
-    FragmentManager fm = getSupportFragmentManager();
-    if(fm.findFragmentById(android.R.id.content) == null){
-      PlayerListFragment list = new PlayerListFragment();
-      fm.beginTransaction().add(android.R.id.content, list).commit();
-    }
-    */
   }
 
   /*
@@ -111,12 +102,18 @@ public class PlayerSelectorActivity extends SherlockFragmentActivity{
     }
 
     public Fragment getItem(int position){
+      Fragment toReturn = null;
       switch(position){
         case 0:
-          return new PlayerListFragment();
-        default:
-          return null;
+          toReturn =  new PlayerListFragment();
+          Bundle args = new Bundle();
+          args.putSerializable(PlayerListFragment.PLAYER_SEARCH_TYPE_EXTRA,
+              PlayerListFragment.SearchType.LOCATION_SEARCH);
+          toReturn.setArguments(args);
+          break;
       }
+
+      return toReturn;
     }
 
     public String getPageTitle(int position){
