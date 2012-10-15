@@ -18,13 +18,18 @@
  */
 package org.klnusbaum.udj;
 
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.SearchViewCompat;
+import android.support.v4.view.ViewPager;
 
 import android.os.Bundle;
 import android.content.Intent;
 import android.app.SearchManager;
+
+import com.viewpagerindicator.TitlePageIndicator;
 
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
@@ -37,26 +42,32 @@ import com.actionbarsherlock.app.SherlockFragmentActivity;
  */
 public class PlayerSelectorActivity extends SherlockFragmentActivity{
 
+  private PlayerListPagerAdapter pagerAdapter;
+  private ViewPager pager;
 
   @Override
   public void onCreate(Bundle savedInstanceState){
     super.onCreate(savedInstanceState);
-    //setContentView(R.layout.player_selector_layout);
 
+    setContentView(R.layout.player_selector);
+    setSupportProgressBarIndeterminateVisibility(false);
+
+    pagerAdapter = new PlayerListPagerAdapter(getSupportFragmentManager());
+    pager = (ViewPager)findViewById(R.id.player_selector_pager);
+    pager.setAdapter(pagerAdapter);
+
+    TitlePageIndicator titleIndicator = (TitlePageIndicator)findViewById(R.id.titles);
+    titleIndicator.setViewPager(pager);
+
+
+
+    /*
     FragmentManager fm = getSupportFragmentManager();
-    /*if(fm.findFragmentById(R.id.list_container) == null){
-      PlayerListFragment list = new PlayerListFragment();
-      fm.beginTransaction().add(R.id.list_container, list).commit();
-    }*/
     if(fm.findFragmentById(android.R.id.content) == null){
       PlayerListFragment list = new PlayerListFragment();
       fm.beginTransaction().add(android.R.id.content, list).commit();
     }
-  }
-
-  private PlayerListFragment getPlayerList(){
-    return
-      ((PlayerListFragment)getSupportFragmentManager().findFragmentById(android.R.id.content));
+    */
   }
 
   /*
@@ -88,8 +99,35 @@ public class PlayerSelectorActivity extends SherlockFragmentActivity{
   }
   */
 
-  public void refreshList(){
-    getPlayerList().refreshList();
+  public static class PlayerListPagerAdapter extends FragmentPagerAdapter{
+
+    PlayerListPagerAdapter(FragmentManager fm){
+      super(fm);
+    }
+
+    @Override
+    public int getCount(){
+      return 1;
+    }
+
+    public Fragment getItem(int position){
+      switch(position){
+        case 0:
+          return new PlayerListFragment();
+        default:
+          return null;
+      }
+    }
+
+    public String getPageTitle(int position){
+      switch(position){
+        case 0:
+          return "Nearby";
+        default:
+          return "Unknown";
+      }
+    }
   }
+
 
 }

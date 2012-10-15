@@ -51,6 +51,7 @@ import android.widget.EditText;
 import android.widget.Button;
 import android.view.ViewGroup;
 import android.view.LayoutInflater;
+import android.widget.TextView;
 
 import com.handmark.pulltorefresh.extras.listfragment.PullToRefreshListFragment;
 import com.handmark.pulltorefresh.library.PullToRefreshBase;
@@ -130,7 +131,7 @@ public class PlayerListFragment extends PullToRefreshListFragment implements
     }
 
     public String getQuery(){
-      return query; 
+      return query;
     }
   }
 
@@ -153,6 +154,7 @@ public class PlayerListFragment extends PullToRefreshListFragment implements
         startActivity(playerActivityIntent); 
       }
       else if(intent.getAction().equals(Constants.PLAYER_JOIN_FAILED_ACTION)){
+        refreshList();
         handlePlayerJoinFail();
       }
     }
@@ -189,6 +191,7 @@ public class PlayerListFragment extends PullToRefreshListFragment implements
       }
     }
     setEmptyText(getActivity().getString(R.string.no_player_items));
+
 
     getPullToRefreshListView().setOnRefreshListener(this);
 
@@ -339,7 +342,7 @@ public class PlayerListFragment extends PullToRefreshListFragment implements
 
   @Override
   public void onListItemClick(ListView l, View v, int position, long id){
-    Player toJoin = (Player)playerAdapter.getItem(position);
+    Player toJoin = (Player)l.getItemAtPosition(position);
     if(toJoin.getHasPassword()){
       getPasswordForPlayer(toJoin);
     }
@@ -543,7 +546,6 @@ public class PlayerListFragment extends PullToRefreshListFragment implements
         message = getString(R.string.auth_join_fail_message); 
         break;
       case PLAYER_INACTIVE_ERROR:
-        ((PlayerSelectorActivity)getActivity()).refreshList();
         message = getString(R.string.player_inactive_join_fail_message); 
         break;
       case NO_NETWORK_ERROR:

@@ -33,9 +33,10 @@ import com.handmark.pulltorefresh.library.PullToRefreshListView;
 
 public abstract class SearchFragment extends PullToRefreshListFragment
   implements LoaderManager.LoaderCallbacks<MusicSearchLoader.MusicSearchResult>,
-    OnRefreshListener<ListView>
+  OnRefreshListener<ListView>
 {
   public static final int LIB_SEARCH_LOADER_TAG = 0;
+  public static final String TAG ="SearchFragment";
 
   /** Adapter used to help display the contents of the library. */
   private MusicSearchAdapter searchAdapter;
@@ -50,7 +51,8 @@ public abstract class SearchFragment extends PullToRefreshListFragment
     setEmptyText(getActivity().getString(R.string.no_library_songs));
 
     searchAdapter = new MusicSearchAdapter(getActivity(), account);
-    setListAdapter(searchAdapter);
+    getPullToRefreshListView().getRefreshableView().setAdapter(searchAdapter);
+    getPullToRefreshListView().setOnRefreshListener(this);
     setListShown(false);
     getLoaderManager().initLoader(LIB_SEARCH_LOADER_TAG, null, this);
   }
@@ -67,6 +69,7 @@ public abstract class SearchFragment extends PullToRefreshListFragment
 
   @Override
   public void onRefresh(PullToRefreshBase<ListView> listView){
+    Log.i(TAG, "In on refresh for SearchFragment");
     getLoaderManager().restartLoader(LIB_SEARCH_LOADER_TAG, null, this);
   }
 
