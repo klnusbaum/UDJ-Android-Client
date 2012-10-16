@@ -38,7 +38,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class PlaylistAdapter extends StringIdableAdapter{
+public class PlaylistAdapter extends StringIdableAdapter<ActivePlaylistEntry>{
   private static final String PLAYLIST_ADAPTER_TAG = "PlaylistAdapter";
   private static final int CURRENT_SONG_VIEW_TYPE = 0;
   private static final int REGULAR_SONG_VIEW_TYPE = 1;

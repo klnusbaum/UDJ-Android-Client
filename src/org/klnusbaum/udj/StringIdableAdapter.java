@@ -81,9 +81,9 @@ public abstract class StringIdableAdapter<T extends StringIdable> extends BaseAd
   }
 
   public synchronized void updateList(List<T> newItems){
-    for(StringIdable st: newItems){
-      if (!idMap.keySet().contains(st.getId())){
-        idMap.put(st.getId(), currentAvailableMapId);
+    for(T item: newItems){
+      if (!idMap.keySet().contains(item.getId())){
+        idMap.put(item.getId(), currentAvailableMapId);
         currentAvailableMapId++;
       }
     }

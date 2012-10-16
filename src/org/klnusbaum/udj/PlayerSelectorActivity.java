@@ -44,15 +44,27 @@ public class PlayerSelectorActivity extends SherlockFragmentActivity{
 
   private PlayerListPagerAdapter pagerAdapter;
   private ViewPager pager;
+  private PlayerListFragment.SearchType searchType;
 
   @Override
   public void onCreate(Bundle savedInstanceState){
     super.onCreate(savedInstanceState);
 
+    if(Intent.ACTION_SEARCH.equals(getIntent().getAction())){
+      searchType = PlayerListFragment.SearchType.NAME_SEARCH;
+    }
+    else{
+      searchType = PlayerListFragment.SearchType.LOCATION_SEARCH;
+    }
+
+
     setContentView(R.layout.player_selector);
     setSupportProgressBarIndeterminateVisibility(false);
 
-    pagerAdapter = new PlayerListPagerAdapter(getSupportFragmentManager());
+    pagerAdapter = new PlayerListPagerAdapter(getSupportFragmentManager(), searchType);
+    if(searchType == PlayerListFragment.SearchType.NAME_SEARCH){
+      pagerAdapter.setSearchQuery(getIntent().getStringExtra(SearchManager.QUERY));
+    }
     pager = (ViewPager)findViewById(R.id.player_selector_pager);
     pager.setAdapter(pagerAdapter);
 
@@ -61,12 +73,14 @@ public class PlayerSelectorActivity extends SherlockFragmentActivity{
 
   }
 
-  /*
   public boolean onCreateOptionsMenu(Menu menu){
-    menu.add("Search")
-      .setIcon(R.drawable.ab_search_dark)
-      .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-    return true;
+    if(searchType != PlayerListFragment.SearchType.NAME_SEARCH){
+      menu.add("Search")
+        .setIcon(R.drawable.ab_search_dark)
+        .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+      return true;
+    }
+    return super.onCreateOptionsMenu(menu);
   }
 
   public boolean onOptionsItemSelected(MenuItem item) {
@@ -77,23 +91,33 @@ public class PlayerSelectorActivity extends SherlockFragmentActivity{
     return false;
   }
 
-
   protected void onNewIntent(Intent intent){
     if(Intent.ACTION_SEARCH.equals(intent.getAction())){
-      PlayerListFragment list = getPlayerList();
-      list.setPlayerSearch(new PlayerListFragment.NamePlayerSearch(
-        intent.getStringExtra(SearchManager.QUERY)));
+      String searchQuery = intent.getStringExtra(SearchManager.QUERY);
+      searchQuery = searchQuery.trim();
+      intent.putExtra(SearchManager.QUERY, searchQuery);
+      intent.setClass(this, PlayerSelectorActivity.class);
+      startActivityForResult(intent, 0);
     }
     else{
       super.onNewIntent(intent);
     }
   }
-  */
+
 
   public static class PlayerListPagerAdapter extends FragmentPagerAdapter{
 
-    PlayerListPagerAdapter(FragmentManager fm){
+    private PlayerListFragment.SearchType searchType;
+    private String searchQuery;
+
+    PlayerListPagerAdapter(FragmentManager fm, PlayerListFragment.SearchType searchType){
       super(fm);
+      this.searchType = searchType;
+      searchQuery = "";
+    }
+
+    public void setSearchQuery(String searchQuery){
+      this.searchQuery = searchQuery;
     }
 
     @Override
@@ -108,7 +132,10 @@ public class PlayerSelectorActivity extends SherlockFragmentActivity{
           toReturn =  new PlayerListFragment();
           Bundle args = new Bundle();
           args.putSerializable(PlayerListFragment.PLAYER_SEARCH_TYPE_EXTRA,
-              PlayerListFragment.SearchType.LOCATION_SEARCH);
+            searchType);
+          if(searchType == PlayerListFragment.SearchType.NAME_SEARCH){
+            args.putString(PlayerListFragment.PLAYER_SEARCH_QUERY, searchQuery);
+          }
           toReturn.setArguments(args);
           break;
       }
@@ -119,7 +146,12 @@ public class PlayerSelectorActivity extends SherlockFragmentActivity{
     public String getPageTitle(int position){
       switch(position){
         case 0:
-          return "Nearby";
+          if(searchType == PlayerListFragment.SearchType.LOCATION_SEARCH){
+            return "Nearby";
+          }
+          else if(searchType == PlayerListFragment.SearchType.NAME_SEARCH){
+            return searchQuery;
+          }
         default:
           return "Unknown";
       }

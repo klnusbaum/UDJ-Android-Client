@@ -38,7 +38,7 @@ import java.util.List;
 import org.klnusbaum.udj.containers.LibraryEntry;
 import org.klnusbaum.udj.network.PlaylistSyncService;
 
-public class MusicSearchAdapter extends StringIdableAdapter{
+public class MusicSearchAdapter extends StringIdableAdapter<LibraryEntry>{
 
   private Context context;
   private Account account;

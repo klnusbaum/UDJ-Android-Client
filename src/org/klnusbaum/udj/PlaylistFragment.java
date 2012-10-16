@@ -130,13 +130,13 @@ public class PlaylistFragment extends PullToRefreshListFragment implements
     MenuInflater inflater = getActivity().getMenuInflater();
 
     if(Utils.isCurrentPlayerOwner(am, account)){
-      setupOwnerContext(playlistEntry.isCurrentSong, menu, inflater);
+      setupOwnerContext(playlistEntry.isCurrentSong(), menu, inflater);
     }
     else{
       setupRegularContext(menu, inflater);
     }
 
-    menu.setHeaderTitle(playlistEntry.song.getTitle());
+    menu.setHeaderTitle(playlistEntry.getSong().getTitle());
   }
 
   private void setupOwnerContext(
@@ -174,9 +174,14 @@ public class PlaylistFragment extends PullToRefreshListFragment implements
     }
   }
 
+  private ActivePlaylistEntry getItemAtPosition(int position){
+    return (ActivePlaylistEntry)
+      getPullToRefreshListView().getRefreshableView().getItemAtPosition(position);
+  }
+
   private void shareSong(int position) {
-    ActivePlaylistEntry toShare = (ActivePlaylistEntry) playlistAdapter.getItem(position);
-    String songTitle = toShare.song.getTitle();
+    ActivePlaylistEntry toShare = getItemAtPosition(position);
+    String songTitle = toShare.getSong().getTitle();
     String playerName = am.getUserData(account, Constants.PLAYER_NAME_DATA);
     Intent shareIntent = new Intent(Intent.ACTION_SEND);
     shareIntent.setType("text/plain");
@@ -190,31 +195,31 @@ public class PlaylistFragment extends PullToRefreshListFragment implements
   }
 
   private void setCurrentSong(int position){
-    ActivePlaylistEntry toSet = (ActivePlaylistEntry) playlistAdapter.getItem(position);
-    Log.d(TAG, "Setting song with id " + toSet.song.getLibId());
+    ActivePlaylistEntry toSet = getItemAtPosition(position);
+    Log.d(TAG, "Setting song with id " + toSet.getSong().getId());
     Intent setSongIntent = new Intent(
       Constants.ACTION_SET_CURRENT_SONG,
       Constants.PLAYLIST_URI,
       getActivity(),
       PlaylistSyncService.class);
     setSongIntent.putExtra(Constants.ACCOUNT_EXTRA, account);
-    setSongIntent.putExtra(Constants.LIB_ID_EXTRA, toSet.song.getLibId());
+    setSongIntent.putExtra(Constants.LIB_ID_EXTRA, toSet.getSong().getId());
     getActivity().startService(setSongIntent);
     playlistAdapter.setNewCurrentSong(toSet);
   }
 
   private void removeSong(int position) {
-    ActivePlaylistEntry toRemove = (ActivePlaylistEntry) playlistAdapter.getItem(position);
-    Log.d(TAG, "Removing song with id " + toRemove.song.getLibId());
+    ActivePlaylistEntry toRemove = getItemAtPosition(position);
+    Log.d(TAG, "Removing song with id " + toRemove.getSong().getId());
     Intent removeSongIntent = new Intent(
       Intent.ACTION_DELETE,
       Constants.PLAYLIST_URI,
       getActivity(),
       PlaylistSyncService.class);
     removeSongIntent.putExtra(Constants.ACCOUNT_EXTRA, account);
-    removeSongIntent.putExtra(Constants.LIB_ID_EXTRA, toRemove.song.getLibId());
+    removeSongIntent.putExtra(Constants.LIB_ID_EXTRA, toRemove.getSong().getId());
     getActivity().startService(removeSongIntent);
-    playlistAdapter.removeLibEntry(toRemove);
+    playlistAdapter.removeItem(toRemove);
   }
 
   public Loader<PlaylistLoader.PlaylistResult> onCreateLoader(int id, Bundle args) {
@@ -235,7 +240,7 @@ public class PlaylistFragment extends PullToRefreshListFragment implements
       getPullToRefreshListView().onRefreshComplete();
       Log.d(TAG, "Playlist loader returned");
       if(data.error == PlaylistLoader.PlaylistLoadError.NO_ERROR){
-        playlistAdapter.updatePlaylist(data.playlistEntries);
+        playlistAdapter.updateList(data.playlistEntries);
       }
       else if(data.error == PlaylistLoader.PlaylistLoadError.PLAYER_INACTIVE_ERROR){
         Utils.handleInactivePlayer(getActivity(), account);

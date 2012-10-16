@@ -81,7 +81,7 @@ public class RESTProcessor{
     checkVolume(context, am, account, activePlaylist.getInt("volume"));
     ActivePlaylistEntry currentSong = 
       ActivePlaylistEntry.valueOf(activePlaylist.getJSONObject("current_song"));
-    currentSong.isCurrentSong = true;
+    currentSong.setCurrentSong(true);
     List<ActivePlaylistEntry> playlist = ActivePlaylistEntry.fromJSONArray(
       activePlaylist.getJSONArray("active_playlist"));
     playlist.add(0, currentSong);

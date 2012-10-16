@@ -28,7 +28,7 @@ import java.util.List;
 
 import android.os.Bundle;
 
-public class Player{
+public class Player implements StringIdable{
   public static final String ID_PARAM ="id";
   public static final String NAME_PARAM="name";
   public static final String OWNER_NAME_PARAM="username";

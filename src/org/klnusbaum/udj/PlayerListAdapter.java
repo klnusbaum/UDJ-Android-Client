@@ -34,7 +34,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.klnusbaum.udj.containers.Player;
 
-public class PlayerListAdapter extends StringIdableAdapter{
+public class PlayerListAdapter extends StringIdableAdapter<Player>{
 
   public static final String TAG = "PlayerListAdapter";
   private Context context;
