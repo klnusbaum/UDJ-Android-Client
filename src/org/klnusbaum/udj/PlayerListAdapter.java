@@ -70,7 +70,6 @@ public class PlayerListAdapter extends StringIdableAdapter<Player>{
     Player player = getPlayer(position);
     View toReturn = convertView;
     if(toReturn == null){
-      //toReturn = View.inflate(context, R.layout.library_list_item, null);
       LayoutInflater inflater = (LayoutInflater)context.getSystemService(
         Context.LAYOUT_INFLATER_SERVICE);
       toReturn = inflater.inflate(R.layout.player_list_item, null);
@@ -81,10 +80,12 @@ public class PlayerListAdapter extends StringIdableAdapter<Player>{
       (TextView)toReturn.findViewById(R.id.player_host_name);
     playerName.setText(player.getName());
     hostName.setText(player.getOwnerName());
+    ImageView lock = (ImageView)toReturn.findViewById(R.id.lock_icon);
     if(player.getHasPassword()){
-      Log.d(TAG, "Unhidding lock");
-      ImageView lock = (ImageView)toReturn.findViewById(R.id.lock_icon);
-      lock.setVisibility(0);
+      lock.setVisibility(View.VISIBLE);
+    }
+    else{
+      lock.setVisibility(View.INVISIBLE);
     }
     return toReturn;
   }
