@@ -258,9 +258,11 @@ public class PlayerListFragment extends PullToRefreshListFragment implements
   public void onListItemClick(ListView l, View v, int position, long id){
     Player toJoin = (Player)l.getItemAtPosition(position);
     if(toJoin.getHasPassword()){
+      Log.d(TAG, "Joining password player with id: " + toJoin.getId());
       getPasswordForPlayer(toJoin);
     }
     else{
+      Log.d(TAG, "Joining regular player with id: " + toJoin.getId());
       joinPlayer(toJoin);
     }
   }
@@ -278,7 +280,7 @@ public class PlayerListFragment extends PullToRefreshListFragment implements
   }
 
   public void joinPlayer(Player toJoin, String password){
-    Log.d(TAG, "Joining Player");
+    Log.d(TAG, "Joining Player with id: " + toJoin.getId());
     am.setUserData(
       account,
       Constants.PLAYER_STATE_DATA,
@@ -297,10 +299,10 @@ public class PlayerListFragment extends PullToRefreshListFragment implements
       toJoin.getName());
     joinPlayerIntent.putExtra(
       Constants.PLAYER_OWNER_EXTRA,
-      toJoin.getOwnerName());
+      toJoin.getOwner().getUsername());
     joinPlayerIntent.putExtra(
       Constants.PLAYER_OWNER_ID_EXTRA,
-      toJoin.getOwnerId());
+      toJoin.getOwner().getId());
     joinPlayerIntent.putExtra(
       Constants.PLAYER_LAT_EXTRA,
       toJoin.getLatitude());
@@ -495,6 +497,7 @@ public class PlayerListFragment extends PullToRefreshListFragment implements
     public void onCreate(Bundle icicle){
       super.onCreate(icicle);
       toJoin = Player.unbundle(getArguments());
+      Log.d(TAG, "Player id in PasswordFragment: " + toJoin.getId());
     }
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle icicle){

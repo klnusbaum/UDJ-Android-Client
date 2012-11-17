@@ -25,6 +25,8 @@ import org.json.JSONException;
 import java.util.List;
 import java.util.ArrayList;
 
+import android.os.Bundle;
+
 public class User implements StringIdable{
   public static final String ID_PARAM = "id";
   public static final String USERNAME_PARAM = "username";
@@ -88,6 +90,24 @@ public class User implements StringIdable{
       toReturn.add(valueOf(array.getJSONObject(i)));
     }
     return toReturn;
+  }
+
+  public Bundle bundleUp(){
+    Bundle toReturn = new Bundle();
+    toReturn.putString(ID_PARAM, getId());
+    toReturn.putString(USERNAME_PARAM, getUsername());
+    toReturn.putString(FIRST_NAME_PARAM, getFirstName());
+    toReturn.putString(LAST_NAME_PARAM, getLastName());
+    return toReturn;
+  }
+
+  public static User unbundle(Bundle toUnbundle){
+    return new User(
+      toUnbundle.getString(ID_PARAM),
+      toUnbundle.getString(USERNAME_PARAM),
+      toUnbundle.getString(FIRST_NAME_PARAM),
+      toUnbundle.getString(LAST_NAME_PARAM)
+    );
   }
 
 

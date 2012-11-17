@@ -31,8 +31,6 @@ import android.os.Bundle;
 public class Player implements StringIdable{
   public static final String ID_PARAM ="id";
   public static final String NAME_PARAM="name";
-  public static final String OWNER_NAME_PARAM="username";
-  public static final String OWNER_ID_PARAM="id";
   public static final String LOCATION_PARAM="location";
   public static final String LATITUDE_PARAM="latitude";
   public static final String LONGITUDE_PARAM="longitude";
@@ -41,8 +39,7 @@ public class Player implements StringIdable{
 
   private String playerId;
   private String name;
-  private String ownerName;
-  private String ownerId;
+  private User owner;
   private double latitude;
   private double longitude;
   private boolean hasPassword;
@@ -51,16 +48,14 @@ public class Player implements StringIdable{
   public Player(
     String playerId, 
     String name, 
-    String ownerName,
-    String ownerId, 
+    User owner,
     double latitude, 
     double longitude,
     boolean hasPassword)
   {
     this.playerId = playerId;
     this.name = name;
-    this.ownerName = ownerName;
-    this.ownerId = ownerId;
+    this.owner = owner;
     this.latitude = latitude;
     this.longitude = longitude;
     this.hasPassword = hasPassword;
@@ -74,18 +69,14 @@ public class Player implements StringIdable{
     return name;
   }
 
-  public String getOwnerName(){
-    return ownerName;
-  }
-
-  public String getOwnerId(){
-    return ownerId;
+  public User getOwner(){
+    return owner;
   }
 
   public double getLatitude(){
     return latitude;
   }
-  
+
   public double getLongitude(){
     return longitude;
   }
@@ -102,35 +93,10 @@ public class Player implements StringIdable{
     return new Player(
       jObj.getString(ID_PARAM),
       jObj.getString(NAME_PARAM),
-      ownerObject.getString(OWNER_NAME_PARAM),
-      ownerObject.getString(OWNER_ID_PARAM),
+      User.valueOf(ownerObject),
       locationObject != null ? locationObject.optDouble(LATITUDE_PARAM, -100.0) :  -100.0,
       locationObject != null ? locationObject.optDouble(LONGITUDE_PARAM, -100.0) : -100.0,
       jObj.getBoolean(HAS_PASSWORD_PARAM));
-  }
-
-  public static JSONObject getJSONObject(Player player)
-    throws JSONException
-  {
-    JSONObject toReturn = new JSONObject();
-    toReturn.put(ID_PARAM, player.getId());
-    toReturn.put(NAME_PARAM, player.getName());
-    toReturn.put(OWNER_NAME_PARAM, player.getOwnerName());
-    toReturn.put(OWNER_ID_PARAM, player.getOwnerId());
-    toReturn.put(LATITUDE_PARAM, player.getLatitude());
-    toReturn.put(LONGITUDE_PARAM, player.getLongitude());
-    toReturn.put(HAS_PASSWORD_PARAM, player.getHasPassword());
-    return toReturn;
-  }
-
-  public static JSONArray getJSONArray(List<Player> players)
-    throws JSONException
-  {
-    JSONArray toReturn = new JSONArray();
-    for(Player player: players){
-      toReturn.put(getJSONObject(player));
-    }
-    return toReturn;
   }
 
   public static ArrayList<Player> fromJSONArray(JSONArray array)
@@ -147,8 +113,7 @@ public class Player implements StringIdable{
     Bundle toReturn = new Bundle();
     toReturn.putString(ID_PARAM, getId());
     toReturn.putString(NAME_PARAM, getName());
-    toReturn.putString(OWNER_NAME_PARAM, getOwnerName());
-    toReturn.putString(OWNER_ID_PARAM, getOwnerId());
+    toReturn.putBundle(OWNER_PARAM, getOwner().bundleUp());
     toReturn.putDouble(LATITUDE_PARAM, getLatitude());
     toReturn.putDouble(LONGITUDE_PARAM, getLongitude());
     toReturn.putBoolean(HAS_PASSWORD_PARAM, getHasPassword());
@@ -159,8 +124,7 @@ public class Player implements StringIdable{
     return new Player(
       toUnbundle.getString(ID_PARAM),
       toUnbundle.getString(NAME_PARAM),
-      toUnbundle.getString(OWNER_NAME_PARAM),
-      toUnbundle.getString(OWNER_ID_PARAM),
+      User.unbundle(toUnbundle.getBundle(OWNER_PARAM)),
       toUnbundle.getDouble(LATITUDE_PARAM),
       toUnbundle.getDouble(LONGITUDE_PARAM),
       toUnbundle.getBoolean(HAS_PASSWORD_PARAM));

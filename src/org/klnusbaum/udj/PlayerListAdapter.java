@@ -46,7 +46,7 @@ public class PlayerListAdapter extends StringIdableAdapter<Player>{
   }
 
   public PlayerListAdapter(
-    Context context, 
+    Context context,
     List<Player> players
   )
   {
@@ -76,10 +76,10 @@ public class PlayerListAdapter extends StringIdableAdapter<Player>{
     }
 
     TextView playerName = (TextView)toReturn.findViewById(R.id.player_item_name);
-    TextView hostName = 
+    TextView hostName =
       (TextView)toReturn.findViewById(R.id.player_host_name);
     playerName.setText(player.getName());
-    hostName.setText(player.getOwnerName());
+    hostName.setText(player.getOwner().getUsername());
     ImageView lock = (ImageView)toReturn.findViewById(R.id.lock_icon);
     if(player.getHasPassword()){
       lock.setVisibility(View.VISIBLE);
