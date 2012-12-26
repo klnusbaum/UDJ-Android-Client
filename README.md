@@ -8,7 +8,7 @@ UDJ (so you can do something like creating your own client), see the [UDJ Server
 
 ## Requirements
 The UDJ android app has a min-sdk version of 8. You'll also need to have/reference the
-[ActionBarSherlock][abs] and [ViewPageIndicator][vpi] library projects. You will also need to have
+[ActionBarSherlock][abs], [ViewPageIndicator][vpi], and the [Android-PullToRefresh][aptr] library projects. You will also need to have
 the [Android Support Pacakge][asp] installed.
 
 
@@ -32,3 +32,4 @@ If you have any questions or comments, please join us in the
 [abs]:http://actionbarsherlock.com/
 [vpi]:http://viewpagerindicator.com/
 [asp]:http://developer.android.com/sdk/compatibility-library.html
+[aptr]:https://github.com/chrisbanes/Android-PullToRefresh
