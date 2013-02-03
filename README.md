@@ -26,9 +26,9 @@ If you have any questions or comments, please join us in the
 \#udj irc channel in irc.freenode.net
 
 [home]:https://www.udjplayer.com
-[server]:https://github.com/klnusbaum/UDJ-Server
+[server]:https://github.com/udj/UDJ-Server
 [kln]:https://github.com/klnusbaum/
-[gpl]:https://github.com/klnusbaum/UDJ-Android-Client/blob/master/LICENSE
+[gpl]:https://github.com/udj/UDJ-Android-Client/blob/master/LICENSE
 [abs]:http://actionbarsherlock.com/
 [vpi]:http://viewpagerindicator.com/
 [asp]:http://developer.android.com/sdk/compatibility-library.html
